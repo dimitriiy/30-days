@@ -1,3 +1,8 @@
+:root{
+  --red:#b22323;
+  --green:rgb(23, 95, 44);
+}
+
 .card {
   height: 320px;
   perspective: 1200px;
@@ -56,7 +61,7 @@
   position: absolute;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
-  background-color: #b22323;
+  background-color: var(--red);
   border-radius: 0.5rem;
   box-shadow:
     rgba(0, 0, 0, 0.106) 0px 0px 0px 1px,
@@ -70,11 +75,11 @@
   transform-origin: center center;
   perspective: 320px;
 }
-.card--done {
+.card--past {
   overflow: hidden;
 }
 .card--done .card__front{
-  background: rgb(23, 95, 44);
+  background: var(--green)
 }
 
 .card.card--active:hover .card__front:not(.flipped) {
@@ -573,8 +578,65 @@ body .fire .logs:before {
 .user-btn {
   background:#111827!important;
 }
-/*//mobile*/
 
+
+.zoom-btn {
+  background:gold;
+  color:#fff;
+  border-radius: 50%;
+  position: fixed;
+  bottom: 50px;
+  right: 50px;
+  width: 50px;
+  height: 50px;
+  box-shadow: 1px 1px 1px 1px #ffffff3d;
+  font-size: 24px;
+}
+
+.table-cards {
+  width: 100%;
+  display: flex;
+  flex-wrap:wrap;
+  gap:5px;
+  position: relative;
+}
+
+.table-cards__item{
+  width: 50px;
+  height: 70px;
+  background: var(--red);
+  border-radius: 10px;
+  position: relative;
+}
+.table-cards__day {
+  position: absolute;
+  color:#fff;
+  right: 5px;
+  font-weight: bold;
+  bottom: 5px;
+}
+
+.table-cards__item--done {
+  background: var(--green);
+}
+
+.table-cards__item-pic {
+  display: flex;
+  padding: 5px;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  height: 100%;
+  width: 100%;
+}
+.table-cards__item-pic i {
+  font-size: 20px;
+}
+.table-cards__item-pic img {
+  width: 50%;
+}
+
+/*//mobile*/
 @media screen and (max-width: 900px) {
   :root {
     --fire-size:40vh;
@@ -582,5 +644,9 @@ body .fire .logs:before {
   .modal--noty h1 {
     color:#dc2626;
     font-size: 25px;
+  }
+  .zoom-btn{
+    right: 20px;
+    bottom: 20px;
   }
 }

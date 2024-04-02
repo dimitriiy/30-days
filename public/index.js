@@ -76,6 +76,16 @@ async function auth() {
     $('#sticky').on($.modal.AFTER_CLOSE, () => res());
   });
 }
+
+function showTableCardView() {
+  $('#table-cards-modal .content').html(generateTableCards({ users: Object.values(store.users), tasks: store.tasks }));
+
+  $('#table-cards-modal').modal({
+    fadeDuration: 300,
+    fadeDelay: 0.5,
+  });
+}
+
 async function app() {
   await Promise.all([store.loadUsers(), store.loadTasks()]);
   await showLoader();
@@ -95,8 +105,7 @@ async function app() {
   console.log(Auth.getCurrentUser());
 
   updateUserView(Auth.getCurrentUser().name);
-  const cards = Array.from({ length: 31 }, (_, i) => i)
-    .slice(1)
+  const cards = generateMonth()
     .map((i) => createCard({ day: i, users: Object.values(store.users), tasks: store.tasks }))
     .join('');
 
@@ -133,6 +142,8 @@ async function app() {
       $.modal.close();
     }, 2000);
   });
+
+  $('.zoom-btn').click(showTableCardView);
 }
 
 $(document).ready(function () {
