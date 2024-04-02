@@ -33,7 +33,7 @@ class APIClass {
 
   async updateTask(data) {
     try {
-      const response = await fetch('task', {
+      const response = await fetch('tasks', {
         body: JSON.stringify(data),
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },

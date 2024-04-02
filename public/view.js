@@ -41,14 +41,19 @@ const createActionButtons = ({ users, tasks, day }) => {
   return actionsBtn.join('');
 };
 
-const ICON_STATUS = {
-  done: '<i class="fa-regular fa-circle-check"></i>',
-  fail: '<i class="fa-regular fa-circle-xmark"></i></span>',
-  base: `<img
+const getIconByStatus = (type, day) => {
+  const icons = {
+    done: '<i class="fa-regular fa-circle-check"></i>',
+    fail: '<i class="fa-regular fa-circle-xmark"></i></span>',
+    base: `<img
         width="150"
         height="150"
-        src="abs-six-pack-icon.svg"
+        src="img/abs_six_pack${day < 6 ? '_start' : ' (' + (30 - day) + ')'}.svg"
+
       />`,
+  };
+
+  return icons[type];
 };
 const createCard = ({ day, users, tasks }) => {
   const tday = new Date().getDay();
@@ -60,12 +65,12 @@ const createCard = ({ day, users, tasks }) => {
   const isPastDay = day < tday;
 
   const pic = {
-    done: `<span style="color:#fff; font-size: 140px">${ICON_STATUS.done}</i></span>`,
-    fail: `<span style="color:#fff; font-size: 140px">${ICON_STATUS.fail}</span>`,
+    done: `<span style="color:#fff; font-size: 140px">${getIconByStatus('done')}</i></span>`,
+    fail: `<span style="color:#fff; font-size: 140px">${getIconByStatus('fail')}</span>`,
     base: `<img
         width="150"
         height="150"
-        src="abs-six-pack-icon.svg"
+        src="img/abs_six_pack${day < 6 ? '_start' : ' (' + (30 - day) + ')'}.svg"
       />`,
   };
   const picType = isPastDay ? (isDone ? 'done' : 'fail') : 'base';
@@ -73,7 +78,7 @@ const createCard = ({ day, users, tasks }) => {
 
   const timer = isToday ? `<div class="today-timer"></div>` : '';
   return `
-<div class="card ${isToday ? 'card--active' : ''} ${isPastDay ? 'card--past' : ''} ${isDone ? 'card--done' : ''}">
+<div class="card ${isToday ? 'card--active' : ''} ${isPastDay ? 'card--past' : ''} ${isPastDay && isDone ? 'card--done' : ''}">
   <div class="card__body">
      ${today}
      
@@ -118,7 +123,7 @@ function createMinCard({ day, users, tasks }) {
   return `<div class="table-cards__item ${isDone && isPastDay ? 'table-cards__item--done' : ''} ${isToday ? 'table-cards__item--today animate__animated animate__pulse animate__infinite infinite' : ''}">   
 
         ${todayBadge}
-    <span class="table-cards__item-pic">${ICON_STATUS[picType]}</span>
+    <span class="table-cards__item-pic">${getIconByStatus(picType, day)}</span>
 <span class="table-cards__day">${day}</span></div>`;
 }
 function generateTableCards({ users, tasks }) {

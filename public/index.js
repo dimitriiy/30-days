@@ -102,6 +102,16 @@ function startDayTimer() {
   }, 1000);
 }
 
+function scrollToToday() {
+  const scrollToEl = $('.card--active');
+
+  $('html').animate(
+    {
+      scrollTop: scrollToEl.offset().top - 100,
+    },
+    800 //speed
+  );
+}
 async function app() {
   await Promise.all([store.loadUsers(), store.loadTasks()]);
   await showLoader();
@@ -118,7 +128,6 @@ async function app() {
     await auth();
   }
   Auth.setUser(JSON.parse(localStorage.getItem(USER_KEY)));
-  console.log(Auth.getCurrentUser());
 
   updateUserView(Auth.getCurrentUser().name);
   const cards = generateMonth()
@@ -161,7 +170,20 @@ async function app() {
 
   $('.zoom-btn').click(showTableCardView);
 
+  $('.logo-auth ').click(function (e) {
+    e.preventDefault();
+    $('#sticky').modal({
+      escapeClose: false,
+      clickClose: false,
+      showClose: false,
+      fadeDuration: 300,
+      fadeDelay: 0.5,
+    });
+    auth();
+  });
   startDayTimer();
+
+  isMobile() && scrollToToday();
 }
 
 $(document).ready(function () {

@@ -1,0 +1,55 @@
+{
+  "users": [
+    {
+      "name": "Дима",
+      "id": "1"
+    },
+    {
+      "name": "Юля",
+      "id": "2"
+    }
+  ],
+  "notifications": {
+    "morning": {},
+    "evening": {}
+  },
+  "telegram": {
+    "users": [
+      {
+        "id": 284171312,
+        "first_name": "dimitriy",
+        "username": "ddimedrol"
+      },
+      {
+        "id": 432200795,
+        "first_name": "Iulia",
+        "username": "iuliagrekova"
+      }
+    ]
+  },
+  "tasks": {
+    "1": [
+      "1",
+      "2"
+    ],
+    "2": [
+      "2",
+      "1"
+    ],
+    "3": [
+      "2",
+      "1"
+    ],
+    "4": [
+      "2",
+      "1"
+    ],
+    "5": [
+      "2",
+      "1"
+    ],
+    "6": [
+      "1"
+    ]
+  }
+}

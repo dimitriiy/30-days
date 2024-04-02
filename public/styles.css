@@ -8,8 +8,11 @@
   perspective: 1200px;
   transform-style: preserve-3d;
   position: relative;
-  cursor: pointer;
   opacity: 0;
+}
+
+.card:not(.card--done) {
+  cursor: pointer;
 }
 
 .card__body {
@@ -581,7 +584,7 @@ body .fire .logs:before {
 
 
 .zoom-btn {
-  background:gold;
+  background:var(--red);
   color:#fff;
   border-radius: 50%;
   position: fixed;
@@ -589,13 +592,14 @@ body .fire .logs:before {
   right: 50px;
   width: 50px;
   height: 50px;
-  font-size: 24px;
+  font-size: 20px;
 }
 
 .table-cards {
   width: 100%;
-  display: flex;
-  flex-wrap:wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(46px, 1fr));
+
   gap:5px;
   position: relative;
 }
@@ -633,7 +637,7 @@ body .fire .logs:before {
   font-size: 20px;
 }
 .table-cards__item-pic img {
-  width: 50%;
+  width:78%;
 }
 
 #table-cards-modal {
@@ -649,12 +653,30 @@ body .fire .logs:before {
 }
 .table-cards__item--today {
   box-shadow: 1px 1px 1px 1px #0000004d;
+  z-index: 1111;
 }
 .today-timer {
   position: absolute;
   top: 20px;
   text-shadow: 1px 1px 2px #09090b;
 }
+
+.fire-pic{
+  display: inline-block;
+  width: 80px;
+  vertical-align: top;
+  margin-left: -23px;
+}
+
+.logo{
+  font-weight: bold;
+  font-size: 26px;
+}
+.logo__highlight {
+  color:var(--red);
+}
+
+
 
 
 /*//mobile*/
@@ -674,5 +696,10 @@ body .fire .logs:before {
   .zoom-btn{
     right: 10px;
     bottom: 20px;
+  }
+  .fire-pic{
+    width: 50px;
+    vertical-align: bottom;
+    margin-left: -11px;
   }
 }
