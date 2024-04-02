@@ -650,6 +650,13 @@ body .fire .logs:before {
 .table-cards__item--today {
   box-shadow: 1px 1px 1px 1px #0000004d;
 }
+.today-timer {
+  position: absolute;
+  top: 20px;
+  text-shadow: 1px 1px 2px #09090b;
+}
+
+
 /*//mobile*/
 @media screen and (max-width: 425px) {
   #table-cards-modal {

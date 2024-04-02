@@ -86,6 +86,22 @@ function showTableCardView() {
   });
 }
 
+function startDayTimer() {
+  setInterval(() => {
+    const now = new Date();
+    const h = 23 - now.getHours();
+    const m = 59 - now.getMinutes();
+    const s = 59 - now.getSeconds();
+
+    let hh = h < 10 ? '0' + h : h;
+    let mm = m < 10 ? '0' + m : m;
+    let ss = s < 10 ? '0' + s : s;
+
+    const value = `${hh}:${mm}:${ss}`;
+    $('.today-timer').text(value);
+  }, 1000);
+}
+
 async function app() {
   await Promise.all([store.loadUsers(), store.loadTasks()]);
   await showLoader();
@@ -144,6 +160,8 @@ async function app() {
   });
 
   $('.zoom-btn').click(showTableCardView);
+
+  startDayTimer();
 }
 
 $(document).ready(function () {

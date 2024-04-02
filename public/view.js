@@ -71,14 +71,18 @@ const createCard = ({ day, users, tasks }) => {
   const picType = isPastDay ? (isDone ? 'done' : 'fail') : 'base';
   const mainPic = pic[picType];
 
+  const timer = isToday ? `<div class="today-timer"></div>` : '';
   return `
 <div class="card ${isToday ? 'card--active' : ''} ${isPastDay ? 'card--past' : ''} ${isDone ? 'card--done' : ''}">
   <div class="card__body">
      ${today}
+     
+
     <div 
     tabindex="0"
      class="card__front "
     >
+         ${timer}
     <div class="card__content">
  
       
