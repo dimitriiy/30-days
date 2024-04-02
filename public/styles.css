@@ -1,0 +1,586 @@
+.card {
+  height: 320px;
+  perspective: 1200px;
+  transform-style: preserve-3d;
+  position: relative;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.card__body {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  backface-visibility: hidden;
+  position: absolute;
+  transform: none;
+}
+
+.ui-widget-overlay.ui-front {
+  background-color: black;
+  background-image: none;
+  opacity: 0.9;
+  z-index: 1040;
+}
+
+.btns-container {
+  display: flex;
+  justify-content: space-around;
+}
+
+#name {
+  font-size: 20px;
+}
+
+.card__back {
+  transform: rotateY(180deg);
+  background-color: #ebf4ff;
+}
+
+.card__back.flipped {
+  transform: perspective(1000px) rotateY(0deg);
+}
+
+.card__front {
+  transform: rotateY(0deg);
+}
+
+.card__front.flipped {
+  transform: perspective(1000px) rotateY(180deg);
+}
+.card__front,
+.card__back {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.9s ease;
+  position: absolute;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  background-color: #b22323;
+  border-radius: 0.5rem;
+  box-shadow:
+    rgba(0, 0, 0, 0.106) 0px 0px 0px 1px,
+    rgba(0, 0, 0, 0.02) 0px 9px 20px 0px,
+    rgba(0, 0, 0, 0.106) 0px 1px 2px 0px;
+  display: flex;
+  align-items: center;
+
+  justify-content: center;
+  transform-style: preserve-3d;
+  transform-origin: center center;
+  perspective: 320px;
+}
+.card--done {
+  overflow: hidden;
+}
+.card--done .card__front{
+  background: rgb(23, 95, 44);
+}
+
+.card.card--active:hover .card__front:not(.flipped) {
+  transform: perspective(1000px) rotateY(10deg);
+}
+.badge-passed {
+  z-index: 10;
+}
+.today {
+  text-align: center;
+  position: absolute;
+  background: #fff;
+  border-radius: 50%;
+  top: -28px;
+  right: -28px;
+  height: 59px;
+  font-size: 12px;
+  width: 59px;
+  display: flex;
+  align-items: center;
+  box-shadow: 1px 1px 1px 1px #0000004d;
+  text-align: center;
+  color: #000;
+  justify-content: center;
+  z-index: 10;
+  transition: all 0.9s ease;
+  will-change: contents;
+}
+
+.today.flipped {
+  transform: perspective(1000px) translate3d(-236px, 0, 0) rotate(360deg);
+}
+
+.task-actions {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+.task-actions > * {
+  margin-bottom: 10px;
+}
+
+.user-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #000;
+  border: 3px solid #dc2625;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  margin-right: 5px;
+}
+.user-list__item {
+  display: flex;
+  margin-bottom: 10px;
+  align-items: center;
+}
+.user-list__item:last-child {
+  margin-bottom: 0;
+}
+
+#sticky {
+  width: 186px;
+  padding: 10px;
+}
+.user-btn {
+  width: 100px;
+}
+
+.loader {
+  background: #000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100%;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+}
+
+:root{
+  --fire-size:20vw;
+}
+.fire {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -25%);
+  height: var(--fire-size);
+  width: var(--fire-size);
+}
+.loader h2 {
+  position: absolute;
+  top: 80%;
+  width: 90%;
+  left: 50%;
+  transform: translate(-50%, -25%);
+  text-align: center;
+  background: -webkit-linear-gradient(#fed100, #a22a07);
+  font-size: 20px;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+
+body .fire .flames {
+  position: absolute;
+  bottom: 40%;
+  left: 50%;
+  width: 60%;
+  height: 60%;
+  transform: translateX(-50%) rotate(45deg);
+}
+body .fire .flames .flame {
+  position: absolute;
+  right: 0%;
+  bottom: 0%;
+  width: 0%;
+  height: 0%;
+  background-color: #FFDC01;
+  border-radius: 1vw;
+}
+body .fire .flames .flame:nth-child(2n+1) {
+  -webkit-animation: flameodd 1.5s ease-in infinite;
+  animation: flameodd 1.5s ease-in infinite;
+}
+body .fire .flames .flame:nth-child(2n) {
+  -webkit-animation: flameeven 1.5s ease-in infinite;
+  animation: flameeven 1.5s ease-in infinite;
+}
+body .fire .flames .flame:nth-child(1) {
+  -webkit-animation-delay: 0s;
+  animation-delay: 0s;
+}
+body .fire .flames .flame:nth-child(2) {
+  -webkit-animation-delay: 0.375s;
+  animation-delay: 0.375s;
+}
+body .fire .flames .flame:nth-child(3) {
+  -webkit-animation-delay: 0.75s;
+  animation-delay: 0.75s;
+}
+body .fire .flames .flame:nth-child(4) {
+  -webkit-animation-delay: 1.125s;
+  animation-delay: 1.125s;
+}
+body .fire .logs {
+  position: absolute;
+  bottom: 25%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  height: 15%;
+}
+body .fire .logs:before, body .fire .logs:after {
+  position: absolute;
+  content: "";
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(20deg);
+  height: 100%;
+  width: 100%;
+  border-radius: 1vw;
+  background-color: #70392F;
+}
+body .fire .logs:before {
+  transform: translate(-50%, -50%) rotate(-20deg);
+  background-color: #612E25;
+}
+
+@-webkit-keyframes flameodd {
+  0%, 100% {
+    width: 0%;
+    height: 0%;
+  }
+  25% {
+    width: 100%;
+    height: 100%;
+  }
+  0% {
+    background-color: #FFDC01;
+    z-index: 1000000;
+  }
+  40% {
+    background-color: #FDAC01;
+    z-index: 1000000;
+  }
+  100% {
+    background-color: #F73B01;
+    z-index: -10;
+  }
+  0% {
+    right: 0%;
+    bottom: 0%;
+  }
+  25% {
+    right: 1%;
+    bottom: 2%;
+  }
+  100% {
+    right: 150%;
+    bottom: 170%;
+  }
+}
+
+@keyframes flameodd {
+  0%, 100% {
+    width: 0%;
+    height: 0%;
+  }
+  25% {
+    width: 100%;
+    height: 100%;
+  }
+  0% {
+    background-color: #FFDC01;
+    z-index: 1000000;
+  }
+  40% {
+    background-color: #FDAC01;
+    z-index: 1000000;
+  }
+  100% {
+    background-color: #F73B01;
+    z-index: -10;
+  }
+  0% {
+    right: 0%;
+    bottom: 0%;
+  }
+  25% {
+    right: 1%;
+    bottom: 2%;
+  }
+  100% {
+    right: 150%;
+    bottom: 170%;
+  }
+}
+@-webkit-keyframes flameeven {
+  0%, 100% {
+    width: 0%;
+    height: 0%;
+  }
+  25% {
+    width: 100%;
+    height: 100%;
+  }
+  0% {
+    background-color: #FFDC01;
+    z-index: 1000000;
+  }
+  40% {
+    background-color: #FDAC01;
+    z-index: 1000000;
+  }
+  100% {
+    background-color: #F73B01;
+    z-index: -10;
+  }
+  0% {
+    right: 0%;
+    bottom: 0%;
+  }
+  25% {
+    right: 2%;
+    bottom: 1%;
+  }
+  100% {
+    right: 170%;
+    bottom: 150%;
+  }
+}
+@keyframes flameeven {
+  0%, 100% {
+    width: 0%;
+    height: 0%;
+  }
+  25% {
+    width: 100%;
+    height: 100%;
+  }
+  0% {
+    background-color: #FFDC01;
+    z-index: 1000000;
+  }
+  40% {
+    background-color: #FDAC01;
+    z-index: 1000000;
+  }
+  100% {
+    background-color: #F73B01;
+    z-index: -10;
+  }
+  0% {
+    right: 0%;
+    bottom: 0%;
+  }
+  25% {
+    right: 2%;
+    bottom: 1%;
+  }
+  100% {
+    right: 170%;
+    bottom: 150%;
+  }
+}
+
+.modal .content{
+  color:#000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.month {
+  letter-spacing: 0px;
+}
+
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+.card:nth-child(1) {
+  animation: 1s fadeIn forwards ease-in-out;
+  animation-delay: 0.1s;
+}
+
+.card:nth-child(2) {
+  animation: 1s fadeIn forwards ease-in-out;
+  animation-delay: 0.2s;
+}
+
+.card:nth-child(3) {
+  animation: 1s fadeIn forwards ease-in-out;
+  animation-delay: 0.3s;
+}
+
+.card:nth-child(4) {
+  animation: 1s fadeIn forwards ease-in-out;
+  animation-delay: 0.4s;
+}
+
+.card:nth-child(5) {
+  animation: 1s fadeIn forwards ease-in-out;
+  animation-delay: 0.5s;
+}
+
+.card:nth-child(6) {
+  animation: 1s fadeIn forwards ease-in-out;
+  animation-delay: 0.6s;
+}
+
+.card:nth-child(7) {
+  animation: 1s fadeIn forwards ease-in-out;
+  animation-delay: 0.7s;
+}
+
+.card:nth-child(8) {
+  animation: 1s fadeIn forwards ease-in-out;
+  animation-delay: 0.8s;
+}
+
+.card:nth-child(9) {
+  animation: 1s fadeIn forwards ease-in-out;
+  animation-delay: 0.9s;
+}
+
+.card:nth-child(10) {
+  animation: 1s fadeIn forwards ease-in-out;
+  animation-delay: 1s;
+}
+
+.card:nth-child(11) {
+  animation: 1s fadeIn forwards ease-in-out;
+  animation-delay: 1.1s;
+}
+
+.card:nth-child(12) {
+  animation: 1s fadeIn forwards ease-in-out;
+  animation-delay: 1.2s;
+}
+
+.card:nth-child(13) {
+  animation: 1s fadeIn forwards ease-in-out;
+  animation-delay: 1.3s;
+}
+
+.card:nth-child(14) {
+  animation: 1s fadeIn forwards ease-in-out;
+  animation-delay: 1.4s;
+}
+
+.card:nth-child(15) {
+  animation: 1s fadeIn forwards ease-in-out;
+  animation-delay: 1.5s;
+}
+
+.card:nth-child(16) {
+  animation: 1s fadeIn forwards ease-in-out;
+  animation-delay: 1.6s;
+}
+
+.card:nth-child(17) {
+  animation: 1s fadeIn forwards ease-in-out;
+  animation-delay: 1.7s;
+}
+
+.card:nth-child(18) {
+  animation: 1s fadeIn forwards ease-in-out;
+  animation-delay: 1.8s;
+}
+
+.card:nth-child(19) {
+  animation: 1s fadeIn forwards ease-in-out;
+  animation-delay: 1.9s;
+}
+
+.card:nth-child(20) {
+  animation: 1s fadeIn forwards ease-in-out;
+  animation-delay: 2s;
+}
+
+.card:nth-child(21) {
+  animation: 1s fadeIn forwards ease-in-out;
+  animation-delay: 2.1s;
+}
+
+.card:nth-child(22) {
+  animation: 1s fadeIn forwards ease-in-out;
+  animation-delay: 2.2s;
+}
+
+.card:nth-child(23) {
+  animation: 1s fadeIn forwards ease-in-out;
+  animation-delay: 2.3s;
+}
+
+.card:nth-child(24) {
+  animation: 1s fadeIn forwards ease-in-out;
+  animation-delay: 2.4s;
+}
+
+.card:nth-child(25) {
+  animation: 1s fadeIn forwards ease-in-out;
+  animation-delay: 2.5s;
+}
+
+.card:nth-child(26) {
+  animation: 1s fadeIn forwards ease-in-out;
+  animation-delay: 2.6s;
+}
+
+.card:nth-child(27) {
+  animation: 1s fadeIn forwards ease-in-out;
+  animation-delay: 2.7s;
+}
+
+.card:nth-child(28) {
+  animation: 1s fadeIn forwards ease-in-out;
+  animation-delay: 2.8s;
+}
+
+.card:nth-child(29) {
+  animation: 1s fadeIn forwards ease-in-out;
+  animation-delay: 2.9s;
+}
+
+.card:nth-child(30) {
+  animation: 1s fadeIn forwards ease-in-out;
+  animation-delay: 3s;
+}
+
+.card:nth-child(31) {
+  animation: 1s fadeIn forwards ease-in-out;
+  animation-delay: 3.1s;
+}
+
+.modal--noty {
+
+}
+.modal--noty h1 {
+  color:#dc2626;
+  font-size: 30px;
+}
+
+.user-btn {
+  background:#111827!important;
+}
+/*//mobile*/
+
+@media screen and (max-width: 900px) {
+  :root {
+    --fire-size:40vh;
+  }
+  .modal--noty h1 {
+    color:#dc2626;
+    font-size: 25px;
+  }
+}
