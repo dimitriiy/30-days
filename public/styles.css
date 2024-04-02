@@ -639,6 +639,11 @@ body .fire .logs:before {
   padding: 10px;
 }
 /*//mobile*/
+@media screen and (max-width: 425px) {
+  #table-cards-modal {
+    padding: 5px;
+  }
+}
 @media screen and (max-width: 900px) {
   :root {
     --fire-size:40vh;
