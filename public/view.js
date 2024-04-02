@@ -111,7 +111,7 @@ function createMinCard({ day, users, tasks }) {
         </div>`
     : '';
 
-  return `<div class="table-cards__item ${isDone && isPastDay ? 'table-cards__item--done' : ''}">   
+  return `<div class="table-cards__item ${isDone && isPastDay ? 'table-cards__item--done' : ''} ${isToday ? 'table-cards__item--today animate__animated animate__pulse animate__infinite infinite' : ''}">   
 
         ${todayBadge}
     <span class="table-cards__item-pic">${ICON_STATUS[picType]}</span>

@@ -606,6 +606,7 @@ body .fire .logs:before {
   background: var(--red);
   border-radius: 10px;
   position: relative;
+  z-index: 111;
 }
 .table-cards__day {
   position: absolute;
@@ -645,7 +646,9 @@ body .fire .logs:before {
   height: 30px;
   top: -15px;
   right: -13px;
-
+}
+.table-cards__item--today {
+  box-shadow: 1px 1px 1px 1px #0000004d;
 }
 /*//mobile*/
 @media screen and (max-width: 425px) {
