@@ -105,8 +105,15 @@ function createMinCard({ day, users, tasks }) {
   const isPastDay = day < today;
 
   const picType = isPastDay ? (isDone ? 'done' : 'fail') : 'base';
+  const todayBadge = isToday
+    ? `<div class=" font-bold tracking-tighter  today">
+          Сегодня
+        </div>`
+    : '';
 
-  return `<div class="table-cards__item ${isDone && isPastDay ? 'table-cards__item--done' : ''}">
+  return `<div class="table-cards__item ${isDone && isPastDay ? 'table-cards__item--done' : ''}">   
+
+        ${todayBadge}
     <span class="table-cards__item-pic">${ICON_STATUS[picType]}</span>
 <span class="table-cards__day">${day}</span></div>`;
 }

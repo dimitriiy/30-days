@@ -638,6 +638,15 @@ body .fire .logs:before {
 #table-cards-modal {
   padding: 10px;
 }
+
+.table-cards__item  .today {
+  font-size: 6px;
+  width: 30px;
+  height: 30px;
+  top: -15px;
+  right: -13px;
+
+}
 /*//mobile*/
 @media screen and (max-width: 425px) {
   #table-cards-modal {
