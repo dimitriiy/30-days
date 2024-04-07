@@ -93,6 +93,8 @@ const createCard = ({ day, users, tasks }) => {
       
       
       ${mainPic}
+       <p class="absolute top-4 right-4 text-l text-white">${getWeekDay(getDate({ year: 2024, month: 3, day }))}</p>
+
       <p class="absolute bottom-4 right-4 text-xl font-bold text-white">${day}</p>
 </div>
     </div>
