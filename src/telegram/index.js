@@ -36,9 +36,19 @@ function startCron(bot) {
   cron.schedule('45 23 * * *', async () => {
     console.log('running a task every minute', new Date().getDate());
 
-    const usersIds = await database.getChatIds();
+    const currentDate = new Date().getDate();
+    const [users, tasks, usersIds] = await Promise.all([
+      database.getUsers(),
+      database.getTask(),
+      database.getChatIds(),
+    ]);
 
     usersIds.forEach(({ id, first_name, username }) => {
+      const currentUser = users.find(({ telegram }) => telegram === username);
+      const isCurrentUserDoneToday = tasks[currentDate]?.includes(currentUser.id);
+
+      if (!currentUser || isCurrentUserDoneToday) return;
+
       const name = first_name ?? username;
       bot.telegram.sendMessage(id, `${name} 🤟\n\n${END_OF_DAY}🏃🏃`);
     });

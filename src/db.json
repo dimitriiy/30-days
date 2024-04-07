@@ -2,11 +2,13 @@
   "users": [
     {
       "name": "Дима",
-      "id": "1"
+      "id": "1",
+      "telegram": "ddimedrol"
     },
     {
       "name": "Юля",
-      "id": "2"
+      "id": "2",
+      "telegram": "iuliagrekova"
     }
   ],
   "notifications": {
@@ -49,7 +51,9 @@
       "1"
     ],
     "6": [
+      "2",
       "1"
-    ]
+    ],
+    "7": []
   }
 }
