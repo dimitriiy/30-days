@@ -33,7 +33,7 @@ export async function startBot() {
 function startCron(bot) {
   console.log(bot);
 
-  cron.schedule('45 23 * *', async () => {
+  cron.schedule('45 23 * * *', async () => {
     console.log('running a task every minute', new Date().getDay());
 
     const usersIds = await database.getChatIds();
