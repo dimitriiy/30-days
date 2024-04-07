@@ -9,14 +9,17 @@
     "start": "nodemon index.js"
   },
   "dependencies": {
+    "app-root-path": "^3.1.0",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "node-cron": "^3.0.3",
     "nodemon": "^3.1.0",
     "prettier": "^3.2.5",
     "tailwindcss": "^3.4.3",
     "tailwindcss-animate": "^1.0.7",
-    "telegraf": "^4.16.3",    "dotenv": "^16.4.5"
+    "telegraf": "^4.16.3",
+    "winston": "^3.13.0"
   }
 }

@@ -1,4 +1,5 @@
 import { database } from './db.js';
+import { logger } from '../logger.js';
 
 export const controllers = {
   '/': {
