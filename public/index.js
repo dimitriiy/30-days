@@ -1,5 +1,5 @@
 const createTimer = () => {
-  const now = new Date().getDay();
+  const now = new Date().getDate();
 
   return 30 - now;
 };
@@ -57,7 +57,6 @@ function authModalHandler(e) {
   $.modal.close();
 
   updateUserView(Auth.getCurrentUser().name);
-  console.log(userId);
 }
 
 async function showLoader() {
@@ -116,7 +115,6 @@ async function app() {
   await Promise.all([store.loadUsers(), store.loadTasks()]);
   await showLoader();
 
-  console.log('here', localStorage.getItem(USER_KEY));
   if (!localStorage.getItem(USER_KEY)) {
     $('#sticky').modal({
       escapeClose: false,
@@ -147,7 +145,6 @@ async function app() {
 
     const data = await store.updateTask({ day, isDone: value });
 
-    console.log({ data });
     if (data === null) {
       alert('Error');
       return;

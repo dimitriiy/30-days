@@ -34,7 +34,7 @@ function startCron(bot) {
   console.log(bot);
 
   cron.schedule('45 23 * * *', async () => {
-    console.log('running a task every minute', new Date().getDay());
+    console.log('running a task every minute', new Date().getDate());
 
     const usersIds = await database.getChatIds();
 

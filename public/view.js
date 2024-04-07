@@ -1,5 +1,5 @@
 const getBadge = ({ day, tasks, users }) => {
-  const today = new Date().getDay();
+  const today = new Date().getDate();
   const isToday = today === day;
   const isDone = tasks[day]?.length === users.length ?? false;
   const isPastDay = day < today;
@@ -56,10 +56,10 @@ const getIconByStatus = (type, day) => {
   return icons[type];
 };
 const createCard = ({ day, users, tasks }) => {
-  const tday = new Date().getDay();
+  const tday = new Date().getDate();
   const isDone = tasks[day]?.length === users.length ?? false;
 
-  const isToday = new Date().getDay() === day;
+  const isToday = new Date().getDate() === day;
   const today = getBadge({ day, tasks, users });
 
   const isPastDay = day < tday;
@@ -108,7 +108,7 @@ const createCard = ({ day, users, tasks }) => {
 
 function createMinCard({ day, users, tasks }) {
   console.log(users, tasks, day);
-  const today = new Date().getDay();
+  const today = new Date().getDate();
   const isToday = today === day;
   const isDone = tasks[day]?.length === users.length ?? false;
   const isPastDay = day < today;
