@@ -103,7 +103,9 @@ const createCard = ({ day, users, tasks }) => {
       ${createActionButtons({ users, tasks, day })}
 </div>
 </div>
-  </div>
+  </div>    
+  ${isToday && '<div class="fireworks"></div>'}
+
 </div>
 `;
 };

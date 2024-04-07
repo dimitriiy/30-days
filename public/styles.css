@@ -677,6 +677,13 @@ body .fire .logs:before {
   color:var(--red);
 }
 
+.fireworks{
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  z-index: 9999;
+}
 
 
 

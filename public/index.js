@@ -111,6 +111,22 @@ function scrollToToday() {
     800 //speed
   );
 }
+
+function showFireworks() {
+  const container = document.querySelector('.fireworks');
+  const fireworks = new Fireworks.default(container);
+  fireworks.start();
+
+  return new Promise((res) => {
+    setTimeout(() => {
+      fireworks.stop();
+      fireworks.clear();
+      $('.fireworks canvas').remove();
+
+      res();
+    }, 3000);
+  });
+}
 async function app() {
   await Promise.all([store.loadUsers(), store.loadTasks()]);
   await showLoader();
@@ -149,6 +165,8 @@ async function app() {
       alert('Error');
       return;
     }
+
+    value && (await showFireworks());
 
     const type = data ? '#noty-success' : '#noty-fail';
     $(type).modal({
