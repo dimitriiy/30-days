@@ -4,6 +4,7 @@ import { END_OF_DAY, SUCCESS_WEEK } from './messages.js';
 import { database } from '../db.js';
 import { endOfMonth } from '../../utils.js';
 import { logger } from '../../logger.js';
+import { getInfoStat } from './view.js';
 
 export async function startBot() {
   try {
@@ -97,7 +98,11 @@ const dailyMorningReminder = (bot) => {
     try {
       console.log('running a task every day', new Date().getDate());
 
-      const [users, usersIds] = await Promise.all([database.getUsers(), database.getChatIds()]);
+      const [users, usersIds, tasks] = await Promise.all([
+        database.getUsers(),
+        database.getChatIds(),
+        database.getTask(),
+      ]);
 
       usersIds.forEach(({ id, first_name, username }) => {
         const currentUser = users.find(({ telegram }) => telegram === username);
@@ -105,8 +110,17 @@ const dailyMorningReminder = (bot) => {
         if (!currentUser) return;
 
         const name = first_name ?? username;
-        const leftDays = endOfMonth(new Date()).getDate() - new Date().getDate();
-        bot.telegram.sendMessage(id, `Доброе утро ${name}!\n\nДо конца челленджа осталось ${leftDays} дней!`);
+
+        const endOfMonthDate = endOfMonth(new Date());
+        const daysInMonth = endOfMonthDate.getDate();
+        const leftDays = daysInMonth - new Date().getDate();
+        const today = new Date().getDate();
+        const formatted = getInfoStat({ today, daysInMonth, id: currentUser.id, tasks });
+
+        bot.telegram.sendMessage(
+          id,
+          `Доброе утро ${name}!\n\nДо конца челленджа осталось ${leftDays} дней!\n\n${formatted}`
+        );
       });
     } catch (e) {
       console.log(e);
