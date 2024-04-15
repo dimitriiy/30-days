@@ -67,7 +67,7 @@ const successfullWeekReminder = (bot) => {
     try {
       console.log('running a task every day', new Date().getDate());
 
-      const currentDate = 8;
+      const currentDate = new Date().getDate();
       const [users, tasks, usersIds] = await Promise.all([
         database.getUsers(),
         database.getTask(),
