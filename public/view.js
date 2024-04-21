@@ -29,11 +29,17 @@ const createActionButtons = ({ users, tasks, day }) => {
   const getDoneStatus = (u) => tasks[day]?.includes(u.id);
   const actionsBtn = users.map(
     (user) => ` <label class="inline-flex items-center cursor-pointer">
-           <input type="checkbox" value="" ${getDoneStatus(user) && 'checked'} class="sr-only peer" ${user.id !== Auth.getCurrentUser()?.id && 'disabled="true"'}">
-            <div data-user="${user.id}" data-day="${day}" class="task-check relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer  peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-             <span class="ms-3">  &#128170;</span>
+        <div class="toggle-btn ${getDoneStatus(user) ? 'toggle-btn--done' : ''} ${user.id !== Auth.getCurrentUser()?.id ? 'toggle-btn--disabled' : ''}" data-user='${JSON.stringify(
+          {
+            id: user.id,
+            day,
+          }
+        )}' >
+            <div class="icon">
+              <i class="fa-regular fa-circle-xmark"></i>
+            </div>
+          </div>
            <span class="ms-1 text-sm font-medium text-white ">${user.name}</span>
-        
 
     </label>`
   );
@@ -104,7 +110,7 @@ const createCard = ({ day, users, tasks }) => {
 </div>
 </div>
   </div>    
-  ${isToday && '<div class="fireworks"></div>'}
+
 
 </div>
 `;

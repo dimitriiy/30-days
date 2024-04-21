@@ -108,11 +108,12 @@ function scrollToToday() {
     {
       scrollTop: scrollToEl.offset().top - 100,
     },
-    800 //speed
+    1000 //speed
   );
 }
 
 function showFireworks() {
+  $('body').append(`<div class="fireworks"></div>`);
   const container = document.querySelector('.fireworks');
   const fireworks = new Fireworks.default(container);
   fireworks.start();
@@ -121,10 +122,10 @@ function showFireworks() {
     setTimeout(() => {
       fireworks.stop();
       fireworks.clear();
-      $('.fireworks canvas').remove();
+      $('.fireworks').remove();
 
       res();
-    }, 3000);
+    }, 5000);
   });
 }
 async function app() {
@@ -154,21 +155,32 @@ async function app() {
 
   $('.card.card--active').click(handleFlip);
 
-  $('.task-check').click(async function (e) {
-    const { day, user } = $(this).data();
-    if (user.toString() !== Auth.getCurrentUser().id) return;
-    const value = !$(this).siblings('.sr-only')[0].checked;
+  $('.toggle-btn').click(async function (e) {
+    const {
+      user: { id, day },
+    } = $(this).data();
+    console.log(e, $(this), id, day, id.toString(), Auth.getCurrentUser().id);
+    if (id.toString() !== Auth.getCurrentUser().id) return;
 
-    const data = await store.updateTask({ day, isDone: value });
+    $(this).toggleClass('toggle-btn--done');
+    const isDone = $(this).hasClass('toggle-btn--done');
 
-    if (data === null) {
+    const response = await store.updateTask({ day, isDone });
+
+    if (response === null) {
       alert('Error');
       return;
     }
 
-    value && (await showFireworks());
+    const lockIcon = $(this).find('.icon i');
 
-    const type = data ? '#noty-success' : '#noty-fail';
+    if ($(this).hasClass('toggle-btn--done')) {
+      lockIcon.removeClass('fa-circle-xmark').addClass('fa-circle-check');
+    } else lockIcon.removeClass('fa-circle-check').addClass('fa-circle-xmark');
+
+    isDone && (await showFireworks());
+
+    const type = response ? '#noty-success' : '#noty-fail';
     $(type).modal({
       escapeClose: false,
       clickClose: false,
@@ -198,7 +210,7 @@ async function app() {
   });
   startDayTimer();
 
-  isMobile() && scrollToToday();
+  scrollToToday();
 }
 
 $(document).ready(function () {

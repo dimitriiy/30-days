@@ -13,7 +13,7 @@ export function getInfoStat({ today, daysInMonth, id, tasks }) {
       return icons.today;
     }
     if (tasks[day]) {
-      return tasks[day].includes(id) ? icons.done : icons.fail;
+      return tasks[day].length === 2 ? icons.done : icons.fail;
     }
 
     return icons.base;
