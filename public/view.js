@@ -36,7 +36,7 @@ const createActionButtons = ({ users, tasks, day }) => {
           }
         )}' >
             <div class="icon">
-              <i class="fa-regular fa-circle-xmark"></i>
+              <i class="fa-regular ${getDoneStatus(user) ? 'fa-circle-check' : 'fa-circle-xmark'}"></i>
             </div>
           </div>
            <span class="ms-1 text-sm font-medium text-white ">${user.name}</span>
@@ -117,7 +117,6 @@ const createCard = ({ day, users, tasks }) => {
 };
 
 function createMinCard({ day, users, tasks }) {
-  console.log(users, tasks, day);
   const today = new Date().getDate();
   const isToday = today === day;
   const isDone = tasks[day]?.length === users.length ?? false;
