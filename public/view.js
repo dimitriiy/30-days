@@ -54,7 +54,7 @@ const getIconByStatus = (type, day) => {
     base: `<img
         width="150"
         height="150"
-        src="img/abs_six_pack${day < 6 ? '_start' : ' (' + (30 - day) + ')'}.svg"
+        src="books.svg"
 
       />`,
   };
@@ -76,7 +76,7 @@ const createCard = ({ day, users, tasks }) => {
     base: `<img
         width="150"
         height="150"
-        src="img/abs_six_pack${day < 6 ? '_start' : ' (' + (30 - day) + ')'}.svg"
+        src="books.svg"
       />`,
   };
   const picType = isPastDay ? (isDone ? 'done' : 'fail') : 'base';

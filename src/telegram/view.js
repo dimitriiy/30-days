@@ -6,18 +6,20 @@ export function getInfoStat({ today, daysInMonth, id, tasks }) {
     today: '📍',
   };
 
-  const stat = Array.from({ length: daysInMonth }).map((_, i) => {
-    const day = i + 1;
+  const stat = Array.from({ length: daysInMonth + 1 }, (_, i) => i)
+    .slice(2)
+    .map((i) => {
+      const day = i;
 
-    if (today === day) {
-      return icons.today;
-    }
-    if (tasks[day]) {
-      return tasks[day].length === 2 ? icons.done : icons.fail;
-    }
+      if (today === day) {
+        return icons.today;
+      }
+      if (tasks[day]) {
+        return tasks[day].length === 2 ? icons.done : icons.fail;
+      }
 
-    return icons.base;
-  });
+      return icons.base;
+    });
 
   const chunks = [];
 

@@ -84,7 +84,9 @@
 .card--done .card__front{
   background: var(--green)
 }
-
+.card--active {
+  z-index: 1;
+}
 .card.card--active:hover .card__front:not(.flipped) {
   transform: perspective(1000px) rotateY(10deg);
 }
@@ -186,10 +188,9 @@
   left: 50%;
   transform: translate(-50%, -25%);
   text-align: center;
-  background: -webkit-linear-gradient(#fed100, #a22a07);
+  /*background: -webkit-linear-gradient(#fed100, #a22a07);*/
   font-size: 20px;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color:#fff;
 }
 
 
@@ -672,7 +673,7 @@ body .fire .logs:before {
 
 .fire-pic{
   display: inline-block;
-  width: 80px;
+  width: 112px;
   vertical-align: top;
   margin-left: -23px;
 }
@@ -743,6 +744,7 @@ body .fire .logs:before {
 
 
 
+
 /*//mobile*/
 @media screen and (max-width: 425px) {
   #table-cards-modal {
@@ -763,7 +765,7 @@ body .fire .logs:before {
   }
   .fire-pic{
     width: 50px;
-    vertical-align: bottom;
+    vertical-align: middle;
     margin-left: -11px;
   }
   .modal{
