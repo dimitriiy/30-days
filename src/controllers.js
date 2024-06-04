@@ -19,7 +19,6 @@ export const controllers = {
       try {
         const data = await database.getTask();
 
-        console.log(data);
         res.json(data);
       } catch (e) {
         res.json({ result: false });
@@ -29,11 +28,13 @@ export const controllers = {
       try {
         const { id, day, isDone } = req.body;
 
+        console.log(req.body);
         const data = await database.editTask({ isDone, id, day });
 
         console.log(data);
         res.json({ result: true });
       } catch (e) {
+        console.log(e);
         res.json({ result: false });
       }
     },

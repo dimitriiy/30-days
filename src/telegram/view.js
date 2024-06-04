@@ -1,9 +1,9 @@
 export function getInfoStat({ today, daysInMonth, id, tasks }) {
   const icons = {
-    done: '✅',
+    done: '💪',
     fail: '❌',
     base: '🗓️',
-    today: '📍',
+    today: '🗓️',
   };
 
   const stat = Array.from({ length: daysInMonth }).map((_, i) => {

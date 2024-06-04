@@ -8,11 +8,15 @@
       content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
     />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <link rel="stylesheet" href="stolen-styles.css" />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="css/stolen-styles.css" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="apple-touch-icon" sizes="180x180" href="img/fav/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="img/fav/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="img/fav/favicon-16x16.png">
 
-    <title>Burn</title>
+    <title>Жир Бёрнинг 2.0</title>
   </head>
+
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
@@ -25,10 +29,14 @@
   <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
-  <script type="text/javascript" src="utils.js"></script>
-  <script type="text/javascript" src="api.js"></script>
-  <script type="text/javascript" src="view.js"></script>
-  <script type="text/javascript" src="index.js"></script>
+  <script type="module" defer>
+
+  </script>
+  <script type="text/javascript" src="js/init.js" defer></script>
+  <script type="text/javascript" src="js/utils.js" defer></script>
+  <script type="text/javascript" src="js/api.js" defer></script>
+  <script type="text/javascript" src="js/view.js" defer></script>
+  <script src="js/index.js" defer type="module" ></script>
   <script src="https://unpkg.com/fireworks-js@2.x/dist/index.umd.js" defer></script>
 
   <body>
@@ -64,13 +72,13 @@
               class="animate__animated animate__rubberBand mb-10 mt-16 text-4xl font-bold tracking-tighter text-black dark:text-white sm:text-8xl"
             >
               <div>
-                <span>Жир</span> <span class="text-red-600">Бёрнинг</span>
-                <img class="fire-pic" src="fire.gif" alt="" />
+                <span>Жир</span> <span class="text-red-600">Бёрнинг</span> <span class="version">2.0</span>
+                <img class="fire-pic" src="img/fire.gif" alt="" />
               </div>
               <div class="text-3xl animate__animated animate__rubberBand h-full w-full transform-gpu month">АПРЕЛЬ</div>
             </h1>
 
-            <div class="timer font-bold tracking-tighter" style="font-size: 20px">Осталось <span></span> дней</div>
+            <div class="timer font-bold tracking-tighter" style="font-size: 20px">Осталось <span></span></div>
           </div>
         </div>
         <div class="container">
@@ -135,13 +143,13 @@
     <div id="noty-success" class="modal modal--noty">
       <div class="content">
         <h1>Ты скала!</h1>
-        <img src="justdoit.gif" alt="" />
+        <img src="img/justdoit.gif" alt="" />
       </div>
     </div>
     <div id="noty-fail" class="modal modal--noty">
       <div class="content">
         <h1>Постарайся в следующий раз!</h1>
-        <img src="giphy.gif" alt="" />
+        <img src="img/giphy.gif" alt="" />
       </div>
     </div>
 
