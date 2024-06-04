@@ -1,7 +1,7 @@
 const createTimer = () => {
   const now = new Date().getDate();
 
-  return 31 - now + 1;
+  return 30 - now;
 };
 
 const USER_KEY = 'user';

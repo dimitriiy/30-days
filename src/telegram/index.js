@@ -11,6 +11,7 @@ export async function startBot() {
     const bot = new Telegraf(process.env.BOT_TOKEN);
     bot.start(async (ctx) => {
       const { id, first_name, username } = ctx.message.chat;
+      console.log(ctx.message.chat);
       await database.addChatUser({ id, first_name, username });
 
       ctx.reply('Ку!');
@@ -103,7 +104,6 @@ const dailyMorningReminder = (bot) => {
         database.getTask(),
       ]);
 
-      console.log(usersIds);
       usersIds.forEach(({ id, first_name, username }) => {
         const currentUser = users.find(({ telegram }) => telegram === username);
 
@@ -113,7 +113,7 @@ const dailyMorningReminder = (bot) => {
 
         const endOfMonthDate = endOfMonth(new Date());
         const daysInMonth = endOfMonthDate.getDate();
-        const leftDays = daysInMonth - new Date().getDate() + 1;
+        const leftDays = daysInMonth - new Date().getDate();
         const today = new Date().getDate();
         const formatted = getInfoStat({ today, daysInMonth, id: currentUser.id, tasks });
 
@@ -132,6 +132,6 @@ function startCron(bot) {
   console.log(bot);
 
   dailyReminder(bot);
-  // successfullWeekReminder(bot);
+  successfullWeekReminder(bot);
   dailyMorningReminder(bot);
 }
