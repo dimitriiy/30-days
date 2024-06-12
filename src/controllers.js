@@ -1,5 +1,4 @@
 import { database } from './db.js';
-import { logger } from '../logger.js';
 
 export const controllers = {
   '/': {
@@ -28,10 +27,8 @@ export const controllers = {
       try {
         const { id, day, isDone } = req.body;
 
-        console.log(req.body);
         const data = await database.editTask({ isDone, id, day });
 
-        console.log(data);
         res.json({ result: true });
       } catch (e) {
         console.log(e);

@@ -20,10 +20,8 @@ function handleFlip(evt) {
 
 const fetchTasks = effector.createEffect(async () => Api.getTasks());
 
-console.log({ fetchTasks });
 const $taskStore = effector.createStore({}).on(fetchTasks.doneData, (_, repos) => repos);
 
-console.log($taskStore);
 $taskStore.watch((repos) => {
   console.log({ repos });
 });
@@ -165,7 +163,6 @@ async function app() {
   $('#cards').html(cards);
 
   const leftDays = createTimer();
-  console.log({ leftDays });
   const d = getPluralDay(leftDays);
 
   $('.timer span').html(`${leftDays} ${d}`);

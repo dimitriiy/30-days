@@ -94,7 +94,7 @@ const successfullWeekReminder = (bot) => {
 };
 
 const dailyMorningReminder = (bot) => {
-  cron.schedule('0 9 * * *', async () => {
+  cron.schedule('0 11 10 * *', async () => {
     try {
       console.log('running a task every day', new Date().getDate());
 
