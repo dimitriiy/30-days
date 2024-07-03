@@ -26,16 +26,18 @@ const getBadge = ({ day, tasks, users }) => {
 };
 
 const createActionButtons = ({ users, tasks, day }) => {
+  console.log(tasks, day);
   const getDoneStatus = (u) => tasks[day]?.includes(u.id);
   const actionsBtn = users.map(
     (user) => ` <label class="inline-flex items-center cursor-pointer">
         <div class="toggle-btn ${getDoneStatus(user) ? 'toggle-btn--done' : ''} ${user.id !== Auth.getCurrentUser()?.id ? 'toggle-btn--disabled' : ''}" data-user='${JSON.stringify(
           {
             id: user.id,
-            day,
+            day: day,
           }
         )}' >
             <div class="icon">
+            
               <i class="fa-regular ${getDoneStatus(user) ? 'fa-circle-check' : 'fa-circle-xmark'}"></i>
             </div>
           </div>
@@ -54,7 +56,7 @@ const getIconByStatus = (type, day) => {
     base: `<img
         width="150"
         height="150"
-        src="books.svg"
+        src="../img/books.svg"
 
       />`,
   };
@@ -63,12 +65,12 @@ const getIconByStatus = (type, day) => {
 };
 const createCard = ({ day, users, tasks }) => {
   const tday = new Date().getDate();
-  const isDone = tasks[day]?.length === users.length ?? false;
+  const isDone = tasks[day.day]?.length === users.length ?? false;
 
-  const isToday = new Date().getDate() === day;
-  const today = getBadge({ day, tasks, users });
+  const isToday = new Date().getDate() === day.day;
+  const today = getBadge({ day: day.day, tasks, users });
 
-  const isPastDay = day < tday;
+  const isPastDay = day.day < tday;
 
   const pic = {
     done: `<span style="color:#fff; font-size: 140px">${getIconByStatus('done')}</i></span>`,
@@ -76,15 +78,21 @@ const createCard = ({ day, users, tasks }) => {
     base: `<img
         width="150"
         height="150"
-        src="books.svg"
+        src="../img/shark-svgrepo-com.svg"
       />`,
   };
   const picType = isPastDay ? (isDone ? 'done' : 'fail') : 'base';
   const mainPic = pic[picType];
 
   const timer = isToday ? `<div class="today-timer"></div>` : '';
+
+  const rootClass = classes('card', {
+    'card--active': isToday,
+    'card--past': isPastDay,
+    'card--done': isPastDay && isDone,
+  });
   return `
-<div class="card ${isToday ? 'card--active' : ''} ${isPastDay ? 'card--past' : ''} ${isPastDay && isDone ? 'card--done' : ''}">
+<div class="${rootClass}">
   <div class="card__body">
      ${today}
      
@@ -99,14 +107,14 @@ const createCard = ({ day, users, tasks }) => {
       
       
       ${mainPic}
-       <p class="absolute top-4 right-4 text-l text-white">${getWeekDay(getDate({ year: 2024, month: 3, day }))}</p>
+       <p class="absolute top-4 right-4 text-l text-white">${getWeekDay(day.name, true)}</p>
 
-      <p class="absolute bottom-4 right-4 text-xl font-bold text-white">${day}</p>
+      <p class="absolute bottom-4 right-4 text-xl font-bold text-white">${day.day}</p>
 </div>
     </div>
     <div class="card__back">
     <div class="task-actions" onclick="window.event.cancelBubble = true;">
-      ${createActionButtons({ users, tasks, day })}
+      ${createActionButtons({ users, tasks, day: day.day })}
 </div>
 </div>
   </div>    
@@ -136,8 +144,8 @@ function createMinCard({ day, users, tasks }) {
 <span class="table-cards__day">${day}</span></div>`;
 }
 function generateTableCards({ users, tasks }) {
-  const cards = generateMonth()
-    .map((i) => createMinCard({ day: i, users, tasks }))
+  const cards = generateMonth({ year: CURRENT_YEAR_CHALLENGE, month: CURRENT_MONTH_CHALLENGE })
+    .map(({ day }) => createMinCard({ day, users, tasks }))
     .join('');
 
   return `<div class="table-cards">${cards}</div>`;

@@ -4,11 +4,6 @@
       "name": "Дима",
       "id": "1",
       "telegram": "ddimedrol"
-    },
-    {
-      "name": "Юля",
-      "id": "2",
-      "telegram": "iuliagrekova"
     }
   ],
   "notifications": {
@@ -21,15 +16,8 @@
         "id": 284171312,
         "first_name": "dimitriy",
         "username": "ddimedrol"
-      },
-      {
-        "id": 432200795,
-        "first_name": "Iulia",
-        "username": "iuliagrekova"
       }
     ]
   },
-  "tasks": {
-    "2": []
-  }
+  "tasks": {}
 }

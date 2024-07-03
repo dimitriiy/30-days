@@ -5,6 +5,7 @@ import { database } from '../db.js';
 import { endOfMonth } from '../../utils.js';
 import { logger } from '../../logger.js';
 import { getInfoStat } from './view.js';
+import { questions } from './tasks.js';
 
 export async function startBot() {
   try {
@@ -34,9 +35,9 @@ export async function startBot() {
 }
 
 const dailyReminder = (bot) => {
-  cron.schedule('45 23 * * *', async () => {
+  cron.schedule('0 23 * * *', async () => {
     try {
-      console.log('running a task every day', new Date().getDate());
+      console.log('running a task every evening', new Date().getDate());
 
       const currentDate = new Date().getDate();
       const [users, tasks, usersIds] = await Promise.all([
@@ -49,45 +50,16 @@ const dailyReminder = (bot) => {
         const currentUser = users.find(({ telegram }) => telegram === username);
         const isCurrentUserDoneToday = tasks[currentDate]?.includes(currentUser.id);
 
-        if (!currentUser || isCurrentUserDoneToday) return;
+        console.log({ currentUser, isCurrentUserDoneToday, currentDate });
 
         const name = first_name ?? username;
-        bot.telegram.sendMessage(id, `${name} 🤟\n\n${END_OF_DAY}🏃🏃`);
+        const greet = `${name} 🤟\n Вот и подошел еще один день к концу!`;
+
+        bot.telegram.sendMessage(id, greet);
       });
     } catch (e) {
       console.log(e);
       logger.error('dailyReminder Error: ', e);
-    }
-  });
-};
-
-const successfullWeekReminder = (bot) => {
-  cron.schedule('0 9 * * MON', async () => {
-    try {
-      console.log('running a task every day', new Date().getDate());
-
-      const currentDate = new Date().getDate();
-      const [users, tasks, usersIds] = await Promise.all([
-        database.getUsers(),
-        database.getTask(),
-        database.getChatIds(),
-      ]);
-
-      usersIds.forEach(({ id, first_name, username }) => {
-        const currentUser = users.find(({ telegram }) => telegram === username);
-        const isPrevWeekDone = Array.from({ length: 7 }, (_, i) => currentDate - i - 1).every((i) =>
-          tasks[i]?.includes(currentUser.id)
-        );
-        console.log({ isPrevWeekDone });
-
-        if (!currentUser || !isPrevWeekDone) return;
-
-        const name = first_name ?? username;
-        bot.telegram.sendMessage(id, `${name} 🤟\n\n${SUCCESS_WEEK}\n 🔥🔥🔥`);
-      });
-    } catch (e) {
-      console.log(e);
-      logger.error('successfullWeekReminder Error: ', e);
     }
   });
 };
@@ -103,7 +75,6 @@ const dailyMorningReminder = (bot) => {
         database.getTask(),
       ]);
 
-      console.log(usersIds);
       usersIds.forEach(({ id, first_name, username }) => {
         const currentUser = users.find(({ telegram }) => telegram === username);
 
@@ -113,14 +84,19 @@ const dailyMorningReminder = (bot) => {
 
         const endOfMonthDate = endOfMonth(new Date());
         const daysInMonth = endOfMonthDate.getDate();
-        const leftDays = daysInMonth - new Date().getDate() + 1;
-        const today = new Date().getDate();
-        const formatted = getInfoStat({ today, daysInMonth, id: currentUser.id, tasks });
+        const leftDays = daysInMonth - new Date().getDate() + 1 - 3;
 
-        bot.telegram.sendMessage(
-          id,
-          `Доброе утро ${name}!\n\nДо конца челленджа осталось ${leftDays} дней!\n\n${formatted}`
-        );
+        bot.telegram.sendMessage(id, `Доброе утро ${name}!\n\nДо конца челленджа осталось ${leftDays} дней!`);
+        bot.telegram.sendMessage(id, `Прочитай все условия и да начнется игра!`);
+
+        const question = questions[daysInMonth];
+        if (!question) return;
+
+        setTimeout(() => {
+          const questionText = `<b>${question.title}</b>\n ${question.questions.map((q, i) => `${i + 1}) ${q}`).join('\n')}`;
+          const info = `Дополнительное задание на сегодня:`;
+          bot.telegram.sendMessage(id, `${info} \n\n${questionText}`, { parse_mode: 'HTML' });
+        }, 1000 * 15);
       });
     } catch (e) {
       console.log(e);
@@ -129,9 +105,6 @@ const dailyMorningReminder = (bot) => {
   });
 };
 function startCron(bot) {
-  console.log(bot);
-
   dailyReminder(bot);
-  // successfullWeekReminder(bot);
   dailyMorningReminder(bot);
 }

@@ -22,7 +22,8 @@ export const controllers = {
         console.log(data);
         res.json(data);
       } catch (e) {
-        res.json({ result: false });
+        console.log(e);
+        res.send(e);
       }
     },
     put: async (req, res) => {
@@ -31,10 +32,11 @@ export const controllers = {
 
         const data = await database.editTask({ isDone, id, day });
 
-        console.log(data);
+        console.log({ data });
         res.json({ result: true });
       } catch (e) {
-        res.json({ result: false });
+        console.log(e);
+        res.status(500).send(e);
       }
     },
   },

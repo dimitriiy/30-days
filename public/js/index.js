@@ -1,7 +1,13 @@
-const createTimer = () => {
+// See https://www.npmjs.com/package/effector documentation.
+import * as effector from 'https://esm.run/effector';
+
+const CURRENT_MONTH_CHALLENGE = 6;
+const CURRENT_YEAR_CHALLENGE = 2024;
+
+const createTimer = (start = 0) => {
   const now = new Date().getDate();
 
-  return 31 - now + 1;
+  return 31 - now + 1 - start;
 };
 
 const USER_KEY = 'user';
@@ -10,13 +16,20 @@ function updateUserView(name) {
   $('#name').html(name);
 }
 function handleFlip(evt) {
-  console.log(evt.target);
-  // if (!$(evt.target).hasClass('task-actions')) return;
-
   $(this).find('.card__front').toggleClass('flipped');
   $(this).find('.card__back').toggleClass('flipped');
   $(this).find('.today').toggleClass('flipped');
 }
+
+const fetchTasks = effector.createEffect(async () => Api.getTasks());
+
+console.log({ fetchTasks });
+const $taskStore = effector.createStore({}).on(fetchTasks.doneData, (_, repos) => repos);
+
+console.log($taskStore);
+$taskStore.watch((repos) => {
+  console.log({ repos });
+});
 
 class Store {
   users = {};
@@ -129,7 +142,7 @@ function showFireworks() {
   });
 }
 async function app() {
-  await Promise.all([store.loadUsers(), store.loadTasks()]);
+  await Promise.all([store.loadUsers(), store.loadTasks(), fetchTasks()]);
   await showLoader();
 
   if (!localStorage.getItem(USER_KEY)) {
@@ -145,13 +158,18 @@ async function app() {
   Auth.setUser(JSON.parse(localStorage.getItem(USER_KEY)));
 
   updateUserView(Auth.getCurrentUser().name);
-  const cards = generateMonth()
-    .map((i) => createCard({ day: i, users: Object.values(store.users), tasks: store.tasks }))
+
+  $('.month').text(getNameOfMonth());
+  const cards = generateMonth({ start: 3, year: CURRENT_YEAR_CHALLENGE, month: CURRENT_MONTH_CHALLENGE })
+    .map((day) => createCard({ start: 3, day, users: Object.values(store.users), tasks: store.tasks }))
     .join('');
 
   $('#cards').html(cards);
 
-  $('.timer span').html(createTimer());
+  const leftDays = createTimer(3);
+  const d = getPluralDay(leftDays);
+
+  $('.timer span').html(`${leftDays} ${d}`);
 
   $('.card.card--active').click(handleFlip);
 
@@ -159,7 +177,7 @@ async function app() {
     const {
       user: { id, day },
     } = $(this).data();
-    console.log(e, $(this), id, day, id.toString(), Auth.getCurrentUser().id);
+
     if (id.toString() !== Auth.getCurrentUser().id) return;
 
     $(this).toggleClass('toggle-btn--done');
@@ -214,6 +232,6 @@ async function app() {
 }
 
 $(document).ready(function () {
-  console.log('Готов!');
   app();
+  console.log('Готов!');
 });

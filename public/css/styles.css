@@ -1,3 +1,4 @@
+
 :root{
   --red:#b22323;
   --green:rgb(23, 95, 44);
@@ -22,6 +23,13 @@
   backface-visibility: hidden;
   position: absolute;
   transform: none;
+}
+
+.card__content img {
+  transition: all .2s linear;
+}
+.card__content img:hover {
+  transform: scale(1.1);
 }
 
 .ui-widget-overlay.ui-front {
@@ -167,7 +175,13 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
 
+}
+
+.loader-pic {
+
+  width: 200px;
 }
 
 :root{
@@ -182,15 +196,13 @@
   width: var(--fire-size);
 }
 .loader h2 {
-  position: absolute;
-  top: 80%;
-  width: 90%;
-  left: 50%;
-  transform: translate(-50%, -25%);
+
+
   text-align: center;
   /*background: -webkit-linear-gradient(#fed100, #a22a07);*/
-  font-size: 20px;
+  font-size: 30px;
   color:#fff;
+  margin: 30px 0 0;
 }
 
 
@@ -778,4 +790,8 @@ body .fire .logs:before {
   #table-cards-modal {
     max-width: 400px;
   }
+}
+
+.month {
+  text-transform: uppercase;
 }
