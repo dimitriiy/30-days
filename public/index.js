@@ -1,7 +1,8 @@
 const createTimer = () => {
-  const now = new Date().getDate();
+  const t1 = new Date().getTime();
+  const t2 = END_DATE.getTime();
 
-  return 31 - now + 1;
+  return Math.floor((t2 - t1) / (24 * 3600 * 1000));
 };
 
 const USER_KEY = 'user';
@@ -146,7 +147,7 @@ async function app() {
 
   updateUserView(Auth.getCurrentUser().name);
   const cards = generateMonth()
-    .map((i) => createCard({ day: i, users: Object.values(store.users), tasks: store.tasks }))
+    .map((day) => createCard({ day, users: Object.values(store.users), tasks: store.tasks }))
     .join('');
 
   $('#cards').html(cards);
@@ -159,7 +160,7 @@ async function app() {
     const {
       user: { id, day },
     } = $(this).data();
-    console.log(e, $(this), id, day, id.toString(), Auth.getCurrentUser().id);
+
     if (id.toString() !== Auth.getCurrentUser().id) return;
 
     $(this).toggleClass('toggle-btn--done');

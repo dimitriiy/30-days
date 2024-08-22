@@ -103,7 +103,6 @@ const dailyMorningReminder = (bot) => {
         database.getTask(),
       ]);
 
-      console.log(usersIds);
       usersIds.forEach(({ id, first_name, username }) => {
         const currentUser = users.find(({ telegram }) => telegram === username);
 
@@ -111,16 +110,12 @@ const dailyMorningReminder = (bot) => {
 
         const name = first_name ?? username;
 
-        const endOfMonthDate = endOfMonth(new Date());
-        const daysInMonth = endOfMonthDate.getDate();
-        const leftDays = daysInMonth - new Date().getDate() + 1;
-        const today = new Date().getDate();
-        const formatted = getInfoStat({ today, daysInMonth, id: currentUser.id, tasks });
+        const START_DATE = new Date(2024, 7, 22, 0, 0);
+        const END_DATE = new Date(2024, 8, 22, 0, 0);
 
-        bot.telegram.sendMessage(
-          id,
-          `Доброе утро ${name}!\n\nДо конца челленджа осталось ${leftDays} дней!\n\n${formatted}`
-        );
+        const leftDays = getDiffInDays(new Date(), END_DATE);
+
+        bot.telegram.sendMessage(id, `Доброе утро ${name}!\n\nДо конца челленджа осталось ${leftDays} дней!\n`);
       });
     } catch (e) {
       console.log(e);
@@ -134,4 +129,11 @@ function startCron(bot) {
   dailyReminder(bot);
   // successfullWeekReminder(bot);
   dailyMorningReminder(bot);
+}
+
+function getDiffInDays(d1, d2) {
+  const diffTime = Math.abs(d2 - d1);
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+  return diffDays;
 }
