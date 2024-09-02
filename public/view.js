@@ -38,7 +38,7 @@ const createActionButtons = ({ users, tasks, day }) => {
               <i class="fa-regular ${getDoneStatus(user) ? 'fa-circle-check' : 'fa-circle-xmark'}"></i>
             </div>
           </div>
-           <span class="ms-1 text-sm font-medium color " style="color:#000">${user.name}</span>
+           <span class="ms-1 text-sm font-medium color " >${user.name}</span>
 
     </label>`
   );
@@ -61,103 +61,70 @@ const getIconByStatus = (type, day) => {
   return icons[type];
 };
 let index = 1;
+
+const createCountDayBlock = (idx) => {
+  if (idx < 10) {
+    return `<span class="first-day">${idx}</span>`;
+  }
+
+  return `<span class="first-day">${Math.floor(idx / 10)}</span><span class="second-day">${idx % 10}</span>`;
+};
+
 const createCard = ({ day, users, tasks }) => {
   const isDone = tasks[day.getDay()]?.length === users.length ?? false;
 
   const isToday = day.isToday();
+  const today = getBadge({ day, tasks, users });
 
   const isPastDay = day.getTimestamp() < +new Date() && !isToday;
 
   const pic = {
-    done: `<span style="color:#fff; font-size: 140px" class="status-pic">${getIconByStatus('done')}</i></span>`,
-    fail: `<span style="color:#fff; font-size: 140px" class="status-pic">${getIconByStatus('fail')}</span>`,
+    done: `<span style="color:#fff; font-size: 140px">${getIconByStatus('done')}</i></span>`,
+    fail: `<span style="color:#fff; font-size: 140px">${getIconByStatus('fail')}</span>`,
+    base: `<img
+
+        src="img/Book_SVG.svg.png"
+      />`,
   };
   const picType = isPastDay ? (isDone ? 'done' : 'fail') : 'base';
-  const mainPic = pic[picType] ?? '';
+  const mainPic = pic[picType];
 
   const timer = isToday ? `<div class="today-timer"></div>` : '';
 
-  return `<div class="book ${isToday ? 'card--active' : ''} ${isPastDay ? 'card--past' : ''} ${isPastDay && isDone ? 'card--done' : ''}">
+  const countDay = isPastDay ? '' : createCountDayBlock(index);
+  index++;
+  return `
+<div class="card ${isToday ? 'card--active' : ''} ${isPastDay ? 'card--past' : ''} ${isPastDay && isDone ? 'card--done' : ''}">
+  <div class="card__body">
+     ${today}
 
-  <div class="back">
+
+    <div
+    tabindex="0"
+     class="card__front "
+    >
+         ${timer}
+    <div class="card__content">
+
+
+       ${countDay}
+      ${mainPic}
+       <p class="absolute top-4 right-4 text-l text-white">${day.getWeekDay()}</p>
+
+      <p class="absolute bottom-4 right-4 text-xl font-bold text-white">${day.getDay()}</p>
 </div>
-  <div class="page6"><div class="task-actions" onclick="window.event.cancelBubble = true;">
-       ${createActionButtons({ users, tasks, day })}
- </div>
- </div>
-  <div class="page5"></div>
-  <div class="page4"></div>
-  <div class="page3"></div>
-  <div class="page2"></div>
-  <div class="page1"></div>
-  <div class="front">
-        ${timer}
-       ${mainPic}
-        <p class="absolute top-4 right-4 text-l text-white">${day.getDay()} ${day.getWeekDay()}</p>
-
-                  <p class="absolute font-bold text-white  top-1 left-1 "></p>
-
-       <p class="absolute font-bold text-white book-day">${index++}</p>
+    </div>
+    <div class="card__back">
+    <div class="task-actions" onclick="window.event.cancelBubble = true;">
+      ${createActionButtons({ users, tasks, day })}
+</div>
+</div>
   </div>
-  
-  
-  
-  
-</div>`;
-};
 
-// const createCard = ({ day, users, tasks }) => {
-//   const isDone = tasks[day.getDay()]?.length === users.length ?? false;
-//
-//   const isToday = day.isToday();
-//   const today = getBadge({ day, tasks, users });
-//
-//   const isPastDay = day.getTimestamp() < +new Date() && !isToday;
-//
-//   const pic = {
-//     done: `<span style="color:#fff; font-size: 140px">${getIconByStatus('done')}</i></span>`,
-//     fail: `<span style="color:#fff; font-size: 140px">${getIconByStatus('fail')}</span>`,
-//     base: `<img
-//
-//         src="img/Book_SVG.svg.png"
-//       />`,
-//   };
-//   const picType = isPastDay ? (isDone ? 'done' : 'fail') : 'base';
-//   const mainPic = pic[picType];
-//
-//   const timer = isToday ? `<div class="today-timer"></div>` : '';
-//   return `
-// <div class="card ${isToday ? 'card--active' : ''} ${isPastDay ? 'card--past' : ''} ${isPastDay && isDone ? 'card--done' : ''}">
-//   <div class="card__body">
-//      ${today}
-//
-//
-//     <div
-//     tabindex="0"
-//      class="card__front "
-//     >
-//          ${timer}
-//     <div class="card__content">
-//
-//
-//
-//       ${mainPic}
-//        <p class="absolute top-4 right-4 text-l text-white">${day.getWeekDay()}</p>
-//
-//       <p class="absolute bottom-4 right-4 text-xl font-bold text-white">${day.getDay()}</p>
-// </div>
-//     </div>
-//     <div class="card__back">
-//     <div class="task-actions" onclick="window.event.cancelBubble = true;">
-//       ${createActionButtons({ users, tasks, day })}
-// </div>
-// </div>
-//   </div>
-//
-//
-// </div>
-// `;
-// };
+
+</div>
+`;
+};
 
 function createMinCard({ day, users, tasks }) {
   const isToday = day.isToday();
