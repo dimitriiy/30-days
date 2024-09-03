@@ -52,7 +52,9 @@ const dailyReminder = (bot) => {
         if (!currentUser || isCurrentUserDoneToday) return;
 
         const name = first_name ?? username;
-        bot.telegram.sendMessage(id, `${name} 🤟\n\n${END_OF_DAY}🏃🏃`);
+        bot.telegram.sendMessage(id, `${name} 🤟\n\n${END_OF_DAY}🏃🏃\n <a href="http://book.ddimedrol.ru/">Клик</a>`, {
+          parse_mode: 'HTML',
+        });
       });
     } catch (e) {
       console.log(e);

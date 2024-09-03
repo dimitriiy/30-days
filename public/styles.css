@@ -770,13 +770,18 @@ span.first-day {
 }
 
 
-
+.date-range {
+  font-size: clamp(18px, 4vw,40px)!important;
+}
 /*//mobile*/
 @media screen and (max-width: 425px) {
   #table-cards-modal {
     padding: 5px;
   }
 
+  .version {
+    font-size: 17px;
+  }
 }
 @media screen and (max-width: 900px) {
   :root {
