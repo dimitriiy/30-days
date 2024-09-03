@@ -117,7 +117,14 @@ const dailyMorningReminder = (bot) => {
 
         const leftDays = getDiffInDays(new Date(), END_DATE);
 
-        bot.telegram.sendMessage(id, `Доброе утро ${name}!\n\nДо конца челленджа осталось ${leftDays} дней!\n`);
+        const passedDays = getDiffInDays(START_DATE, new Date()) + 1;
+        const doneDays = Object.values(tasks).filter((userIds) => userIds.includes(currentUser.id));
+        const passedDaysMessage = `Ты читал(а) ${doneDays.length} из ${passedDays} дней.`;
+
+        bot.telegram.sendMessage(
+          id,
+          `Доброе утро ${name}!\n\nДо конца челленджа осталось ${leftDays} дней!\n${passedDaysMessage}`
+        );
       });
     } catch (e) {
       console.log(e);
