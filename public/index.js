@@ -155,6 +155,7 @@ async function app() {
   $('.timer span').html(createTimer());
 
   $('.card.card--active').click(handleFlip);
+  $('.card.card--past').click(handleFlip);
 
   $('.toggle-btn').click(async function (e) {
     const {

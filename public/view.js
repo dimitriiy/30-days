@@ -70,6 +70,7 @@ const createCountDayBlock = (idx) => {
   return `<span class="first-day">${Math.floor(idx / 10)}</span><span class="second-day">${idx % 10}</span>`;
 };
 
+let i = 1;
 const createCard = ({ day, users, tasks }) => {
   const isDone = tasks[day.getDay()]?.length === users.length ?? false;
 
@@ -78,12 +79,15 @@ const createCard = ({ day, users, tasks }) => {
 
   const isPastDay = day.getTimestamp() < +new Date() && !isToday;
 
+  if (i > 9) {
+    i = 1;
+  }
   const pic = {
     done: `<span style="color:#fff; font-size: 140px">${getIconByStatus('done')}</i></span>`,
     fail: `<span style="color:#fff; font-size: 140px">${getIconByStatus('fail')}</span>`,
     base: `<img
-
-        src="img/Book_SVG.svg.png"
+        src="img/people/${i++}.png"
+        style="height: 200px"
       />`,
   };
   const picType = isPastDay ? (isDone ? 'done' : 'fail') : 'base';
@@ -106,12 +110,11 @@ const createCard = ({ day, users, tasks }) => {
          ${timer}
     <div class="card__content">
 
-
-       ${countDay}
+       <div class="absolute top-4 left-4 text-l font-bold">${index}</div>
       ${mainPic}
-       <p class="absolute top-4 right-4 text-l text-white">${day.getWeekDay()}</p>
+       <p class="absolute top-4 right-4 text-l font-bold">${day.getWeekDay()}</p>
 
-      <p class="absolute bottom-4 right-4 text-xl font-bold text-white">${day.getDay()}</p>
+      <p class="absolute bottom-4 right-4 text-xl font-bold">${day.getDay()}</p>
 </div>
     </div>
     <div class="card__back">

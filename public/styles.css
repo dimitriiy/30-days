@@ -57,6 +57,13 @@
   transform: rotateY(0deg);
 }
 
+.card__front img {
+   max-height: 100%;
+  object-fit: contain;
+}
+.card__content {
+  overflow: hidden;
+}
 .card__front.flipped {
   transform: perspective(1000px) rotateY(180deg);
 }
@@ -68,7 +75,7 @@
   position: absolute;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
-  background-color: var(--red);
+  background-color: #fff;
   border-radius: 0.5rem;
   box-shadow:
           rgba(0, 0, 0, 0.106) 0px 0px 0px 1px,
@@ -76,12 +83,13 @@
           rgba(0, 0, 0, 0.106) 0px 1px 2px 0px;
   display: flex;
   align-items: center;
-
+color:#000;
   justify-content: center;
   transform-style: preserve-3d;
   transform-origin: center center;
   perspective: 320px;
 }
+
 .card--past {
   overflow: hidden;
 }
@@ -161,7 +169,7 @@
 }
 
 .loader {
-  background: #000;
+  background: #ffd940;
   position: fixed;
   top: 0;
   left: 0;
@@ -671,8 +679,8 @@ body .fire .logs:before {
 }
 .today-timer {
   position: absolute;
-  top: 20px;
-  text-shadow: 1px 1px 2px #09090b;
+  bottom: 20px;
+  font-weight: bold;
 }
 
 .fire-pic{
@@ -747,7 +755,7 @@ body .fire .logs:before {
 }
 
 body {
-  font-family: 'Henry',sans-serif;
+  /*font-family: 'Henry',sans-serif;*/
 }
 
 span.second-day {

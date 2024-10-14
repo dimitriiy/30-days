@@ -1,6 +1,6 @@
-const START_DATE = new Date(2024, 7, 22, 0, 0);
+const START_DATE = new Date(2024, 9, 14, 0, 0);
 
-const END_DATE = new Date(2024, 8, 22, 0, 0);
+const END_DATE = new Date(2024, 10, 15, 0, 0);
 
 class Day {
   constructor(date) {
@@ -15,7 +15,7 @@ class Day {
   }
 
   getWeekDay() {
-    const weekDayName = this.date.toLocaleDateString('en-EN', { weekday: 'long' });
+    const weekDayName = this.date.toLocaleDateString('ru-Ru', { weekday: 'long' });
     const [firstLetter, ...restLetters] = weekDayName;
 
     return `${firstLetter.toUpperCase()}${restLetters.join('')}`;
@@ -26,9 +26,9 @@ class Day {
   }
 }
 const generateMonth = () => {
-  const START_DATE = new Date(2024, 7, 22, 0, 0);
+  const START_DATE = new Date(2024, 9, 14, 0, 0);
 
-  const END_DATE = new Date(2024, 8, 22, 0, 0);
+  const END_DATE = new Date(2024, 10, 14, 0, 0);
 
   let current = START_DATE;
   let days = [];
@@ -37,6 +37,7 @@ const generateMonth = () => {
     days.push(new Day(new Date(current)));
     current.setDate(current.getDate() + 1);
   }
+  console.log(days);
   return days;
 };
 

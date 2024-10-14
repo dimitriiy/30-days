@@ -34,7 +34,7 @@ export async function startBot() {
 }
 
 const dailyReminder = (bot) => {
-  cron.schedule('45 23 * * *', async () => {
+  cron.schedule('* * * * *', async () => {
     try {
       console.log('running a task every day', new Date().getDate());
 
@@ -112,19 +112,15 @@ const dailyMorningReminder = (bot) => {
 
         const name = first_name ?? username;
 
-        const START_DATE = new Date(2024, 7, 22, 0, 0);
-        const END_DATE = new Date(2024, 8, 22, 0, 0);
+        const START_DATE = new Date(2024, 9, 14, 0, 0);
+        const END_DATE = new Date(2024, 10, 15, 0, 0);
 
         const leftDays = getDiffInDays(new Date(), END_DATE);
 
         const passedDays = getDiffInDays(START_DATE, new Date()) + 1;
         const doneDays = Object.values(tasks).filter((userIds) => userIds.includes(currentUser.id));
-        const passedDaysMessage = `Ты читал(а) ${doneDays.length} из ${passedDays} дней.`;
 
-        bot.telegram.sendMessage(
-          id,
-          `Доброе утро ${name}!\n\nДо конца челленджа осталось ${leftDays} дней!\n${passedDaysMessage}`
-        );
+        bot.telegram.sendMessage(id, `Доброе утро ${name}!\n\nДо конца челленджа осталось ${leftDays} дней!\n`);
       });
     } catch (e) {
       console.log(e);
