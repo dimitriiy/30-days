@@ -727,7 +727,7 @@ body .fire .logs:before {
   transition: all 0.4s ease;
 }
 .toggle-btn.toggle-btn--done {
-  background: #e0ffff85;
+  background:#ffd70078;
 }
 .toggle-btn .icon {
   position: absolute;
@@ -749,8 +749,8 @@ body .fire .logs:before {
 .toggle-btn.toggle-btn--done .icon {
   left: calc(100% - 38px);
   color: #fff;
-  background: var(--green);
-  border: 1px solid #e0ffff;
+  background: gold;
+  border: 1px solid gold;
 }
 .toggle-btn.toggle-btn--done .icon i {
   animation: spin 0.5s;
