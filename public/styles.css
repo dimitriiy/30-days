@@ -164,6 +164,8 @@ color:#000;
   width: 186px;
   padding: 10px;
 }
+
+
 .user-btn {
   width: 100px;
 }
@@ -789,6 +791,13 @@ span.first-day {
 
   .version {
     font-size: 17px;
+  }
+
+  #sticky{
+    width: 200px!important;
+  }
+  .header {
+    font-size: 47px!important;
   }
 }
 @media screen and (max-width: 900px) {

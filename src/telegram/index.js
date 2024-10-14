@@ -2,10 +2,15 @@ import { Telegraf } from 'telegraf';
 import cron from 'node-cron';
 import { END_OF_DAY, SUCCESS_WEEK } from './messages.js';
 import { database } from '../db.js';
-import { endOfMonth } from '../../utils.js';
 import { logger } from '../../logger.js';
-import { getInfoStat } from './view.js';
 
+const RULES = [
+  '🚫  Не есть мучное 🥞, даже 🍞',
+  '🚫 Не есть жареное 🥓',
+  '🚫 Не есть сладкое 🍬, за исключением фруктов 🍏',
+  '🚫 Не есть фастфуд 🍟 и прочую вредную пищу',
+  '🏃💪🧘 Каждый день тренировка ',
+];
 export async function startBot() {
   try {
     const bot = new Telegraf(process.env.BOT_TOKEN);
@@ -13,7 +18,10 @@ export async function startBot() {
       const { id, first_name, username } = ctx.message.chat;
       await database.addChatUser({ id, first_name, username });
 
-      ctx.reply('Ку!');
+      await ctx.reply(`${first_name}, добро пожаловать в игру!`);
+      await ctx.replyWithPhoto({ source: process.cwd() + '/src/telegram' + '/games.jpg' });
+      const rules = RULES.map((s, i) => `${i + 1}. ${s}`).join('\n');
+      ctx.reply(`Правила:\n\n${rules}`);
     });
     bot.on('stop', () => console.log('STOP'));
 
@@ -34,7 +42,7 @@ export async function startBot() {
 }
 
 const dailyReminder = (bot) => {
-  cron.schedule('* * * * *', async () => {
+  cron.schedule('0 23 * * *', async () => {
     try {
       console.log('running a task every day', new Date().getDate());
 
@@ -52,9 +60,13 @@ const dailyReminder = (bot) => {
         if (!currentUser || isCurrentUserDoneToday) return;
 
         const name = first_name ?? username;
-        bot.telegram.sendMessage(id, `${name} 🤟\n\n${END_OF_DAY}🏃🏃\n <a href="http://book.ddimedrol.ru/">Клик</a>`, {
-          parse_mode: 'HTML',
-        });
+        bot.telegram.sendMessage(
+          id,
+          `${name} 🤟\n\n${END_OF_DAY}🏃🏃\n<a href="http://fatburn.ddimedrol.ru/">Клик</a>`,
+          {
+            parse_mode: 'HTML',
+          }
+        );
       });
     } catch (e) {
       console.log(e);
