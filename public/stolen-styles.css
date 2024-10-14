@@ -331,7 +331,7 @@ video {
 }
 
 body {
-  background-color: hsl(var(--background));
+  /*background-color: hsl(var(--background));*/
   color: hsl(var(--foreground));
 }
 
@@ -384,7 +384,7 @@ body {
   --tw-backdrop-invert: ;
   --tw-backdrop-opacity: ;
   --tw-backdrop-saturate: ;
-  --tw-backdrop-sepia:  
+  --tw-backdrop-sepia:
 ;
 }
 
@@ -435,7 +435,7 @@ body {
   --tw-backdrop-invert: ;
   --tw-backdrop-opacity: ;
   --tw-backdrop-saturate: ;
-  --tw-backdrop-sepia:  
+  --tw-backdrop-sepia:
 ;
 }
 
@@ -10683,7 +10683,7 @@ video {
 }
 
 body {
-  background-color: hsl(var(--background));
+  /*background-color: hsl(var(--background));*/
   color: hsl(var(--foreground));
 }
 
@@ -10736,7 +10736,7 @@ body {
   --tw-backdrop-invert: ;
   --tw-backdrop-opacity: ;
   --tw-backdrop-saturate: ;
-  --tw-backdrop-sepia:  
+  --tw-backdrop-sepia:
 ;
 }
 
@@ -10787,7 +10787,7 @@ body {
   --tw-backdrop-invert: ;
   --tw-backdrop-opacity: ;
   --tw-backdrop-saturate: ;
-  --tw-backdrop-sepia:  
+  --tw-backdrop-sepia:
 ;
 }
 

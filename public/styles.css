@@ -7,6 +7,11 @@
   --green:rgb(23, 95, 44);
 }
 
+body {
+  /*font-family: 'Henry',sans-serif;*/
+  background: #001830!important;
+}
+
 .card {
   height: 320px;
   perspective: 1200px;
@@ -756,9 +761,7 @@ body .fire .logs:before {
   }
 }
 
-body {
-  /*font-family: 'Henry',sans-serif;*/
-}
+
 
 span.second-day {
   position: absolute;
