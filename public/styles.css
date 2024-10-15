@@ -3,8 +3,8 @@
   src: url('henny-penny.regular.ttf')  format('truetype');  }
 
 :root{
-  --red:#b22323;
-  --green:rgb(23, 95, 44);
+  --red:linear-gradient(180deg, #a31b1b 46%, #b22323ad 83%);
+  --green:linear-gradient(180deg, rgb(24 101 47 / 82%) 46%, rgb(16 57 28 / 91%) 83%);
 }
 
 body {
@@ -95,11 +95,20 @@ color:#000;
   perspective: 320px;
 }
 
+.root-flipped .badge-passed {
+  opacity: 0;
+}
 .card--past {
   overflow: hidden;
 }
+.card--past .card__front , .card--past .card__back{
+  background: var(--red);
+}
 .card--done .card__front{
   background: var(--green)
+}
+.card--past .card__front,.card--past .card__back {
+  color:#fff;
 }
 .card--active {
   z-index: 1;

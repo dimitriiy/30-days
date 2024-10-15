@@ -96,7 +96,7 @@ const createCard = ({ day, users, tasks }) => {
   const timer = isToday ? `<div class="today-timer"></div>` : '';
 
   const countDay = isPastDay ? '' : createCountDayBlock(index);
-  index++;
+
   return `
 <div class="card ${isToday ? 'card--active' : ''} ${isPastDay ? 'card--past' : ''} ${isPastDay && isDone ? 'card--done' : ''}">
   <div class="card__body">
@@ -110,11 +110,10 @@ const createCard = ({ day, users, tasks }) => {
          ${timer}
     <div class="card__content">
 
-       <div class="absolute top-4 left-4 text-l font-bold">${index}</div>
+       <div class="absolute bottom-4 left-4 text-l font-bold">${index++}</div>
       ${mainPic}
-       <p class="absolute top-4 right-4 text-l font-bold">${day.getWeekDay()}</p>
+       <p class="absolute top-4 right-4 text-l font-bold">${day.getWeekDay()}, ${day.getDay()}</p>
 
-      <p class="absolute bottom-4 right-4 text-xl font-bold">${day.getDay()}</p>
 </div>
     </div>
     <div class="card__back">
