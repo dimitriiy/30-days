@@ -98,7 +98,7 @@ export const createCard = ({ day, users, tasks, currentUser }) => {
   const countDay = isPastDay ? '' : createCountDayBlock(index);
 
   return `
-<div class="card ${isToday ? 'card--active' : ''} ${isPastDay ? 'card--past' : ''} ${isPastDay && isDone ? 'card--done' : ''}">
+<div style="animation-delay: ${(index - 1) * 0.3}s" class="card ${isToday ? 'card--active' : ''} ${isPastDay ? 'card--past' : ''} ${isPastDay && isDone ? 'card--done' : ''}">
   <div class="card__body">
      ${today}
 

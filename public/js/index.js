@@ -169,6 +169,10 @@ function showNoChallenge() {
   );
 }
 
+function cardAnimate() {
+  //  animation: 1s fadeIn forwards ease-in-out;
+  //   animation-delay: 3.1s;
+}
 async function app() {
   await store.init();
   await showLoader();
