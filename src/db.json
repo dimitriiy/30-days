@@ -3,7 +3,8 @@
     {
       "name": "Дима",
       "id": "1",
-      "telegram": "ddimedrol"
+      "telegram": "ddimedrol",
+      "weight": 111
     },
     {
       "name": "Юля",
@@ -30,9 +31,6 @@
     ]
   },
   "tasks": {
-    "14": [
-      "1",
-      "2"
-    ]
+    "12": []
   }
 }

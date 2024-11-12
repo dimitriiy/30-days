@@ -1,10 +1,8 @@
-const createTimer = () => {
-  const t1 = new Date().getTime();
-  const t2 = END_DATE.getTime();
-
-  return Math.floor((t2 - t1) / (24 * 3600 * 1000));
-};
-
+import { createTimer, generateMonth, startDayTimer } from './utils.js';
+import { Api, Auth } from './api.js';
+import { createCard, generateTableCards } from './view.js';
+import { store } from './store.js';
+import { DateUtils } from './date.js';
 const USER_KEY = 'user';
 
 function updateUserView(name) {
@@ -12,40 +10,12 @@ function updateUserView(name) {
 }
 function handleFlip(evt) {
   console.log(evt.target);
-  // if (!$(evt.target).hasClass('task-actions')) return;
 
   $(this).find('.card__front').toggleClass('flipped');
   $(this).find('.card__back').toggleClass('flipped');
   $(this).find('.today').toggleClass('flipped');
 }
 
-class Store {
-  users = {};
-  tasks = {};
-
-  async loadUsers() {
-    const users = await Api.getUsers();
-    this.users = users.reduce(
-      (acc, user) => ({
-        ...acc,
-        [user.id]: user,
-      }),
-      {}
-    );
-  }
-
-  async loadTasks() {
-    this.tasks = await Api.getTasks();
-  }
-
-  async updateTask({ day, isDone }) {
-    const resp = await Api.updateTask({ id: Auth.getCurrentUser().id, day, isDone });
-
-    return resp.result ? isDone : null;
-  }
-}
-
-const store = new Store();
 function authModalHandler(e) {
   const userId = e.target.dataset.user;
 
@@ -65,12 +35,30 @@ async function showLoader() {
     setTimeout(() => {
       $('.loader').remove();
       res();
-    }, 2000);
+    }, 200);
   });
 }
 
 async function auth() {
   $('.user-list button span').click(authModalHandler);
+
+  const savedCurrentUser = localStorage.getItem(USER_KEY);
+  if (savedCurrentUser) {
+    try {
+      Auth.setUser(JSON.parse(savedCurrentUser));
+    } catch (e) {
+      console.error(e);
+    }
+    return;
+  }
+
+  $('#sticky').modal({
+    escapeClose: false,
+    clickClose: false,
+    showClose: false,
+    fadeDuration: 300,
+    fadeDelay: 0.5,
+  });
 
   return new Promise((res) => {
     $('#sticky').on($.modal.AFTER_CLOSE, () => res());
@@ -84,22 +72,6 @@ function showTableCardView() {
     fadeDuration: 300,
     fadeDelay: 0.5,
   });
-}
-
-function startDayTimer() {
-  setInterval(() => {
-    const now = new Date();
-    const h = 23 - now.getHours();
-    const m = 59 - now.getMinutes();
-    const s = 59 - now.getSeconds();
-
-    let hh = h < 10 ? '0' + h : h;
-    let mm = m < 10 ? '0' + m : m;
-    let ss = s < 10 ? '0' + s : s;
-
-    const value = `${hh}:${mm}:${ss}`;
-    $('.today-timer').text(value);
-  }, 1000);
 }
 
 function scrollToToday() {
@@ -129,34 +101,8 @@ function showFireworks() {
     }, 5000);
   });
 }
-async function app() {
-  await Promise.all([store.loadUsers(), store.loadTasks()]);
-  await showLoader();
 
-  if (!localStorage.getItem(USER_KEY)) {
-    $('#sticky').modal({
-      escapeClose: false,
-      clickClose: false,
-      showClose: false,
-      fadeDuration: 300,
-      fadeDelay: 0.5,
-    });
-    await auth();
-  }
-  Auth.setUser(JSON.parse(localStorage.getItem(USER_KEY)));
-
-  updateUserView(Auth.getCurrentUser().name);
-  const cards = generateMonth()
-    .map((day) => createCard({ day, users: Object.values(store.users), tasks: store.tasks }))
-    .join('');
-
-  $('#cards').html(cards);
-
-  $('.timer span').html(createTimer());
-
-  $('.card.card--active').click(handleFlip);
-  $('.card.card--past').click(handleFlip);
-
+function handleTodoChange() {
   $('.toggle-btn').click(async function (e) {
     const {
       user: { id, day },
@@ -196,6 +142,60 @@ async function app() {
       $.modal.close();
     }, 2000);
   });
+}
+function viewCards({ startDate, endDate }) {
+  const cards = generateMonth({ startDate, endDate })
+    .map((day) =>
+      createCard({ day, users: Object.values(store.users), tasks: store.tasks, currentUser: Auth.getCurrentUser() })
+    )
+    .join('');
+
+  $('#cards').html(cards);
+
+  $('.card.card--active').click(handleFlip);
+  $('.card.card--past').click(handleFlip);
+  handleTodoChange();
+}
+
+function viewHeader({ startDate, endDate, version, dateTitle }) {
+  $('.timer span').html(createTimer(startDate, endDate));
+  $('.version').text(version);
+  $('.date-range').text(dateTitle);
+}
+
+function showNoChallenge() {
+  $('.main-content').html(
+    '<h1  style="font-size: 4em" class="w-full font-bold text-center bg-gradient-to-r from-blue-600 via-green-500 to-indigo-400 inline-block text-transparent bg-clip-text">Челленж еще начался!</h1>'
+  );
+}
+
+async function app() {
+  await store.init();
+  await showLoader();
+  await auth();
+  updateUserView(Auth.getCurrentUser().name);
+
+  const {
+    challengeManifest: { startDate, endDate },
+  } = store;
+  viewHeader(store.challengeManifest);
+
+  const challengeHasStarted = !DateUtils.isDateBeforeToday(new Date(), new Date(startDate));
+
+  if (!challengeHasStarted) {
+    showNoChallenge();
+    return;
+  }
+
+  $('#user-info').modal({
+    escapeClose: false,
+    clickClose: false,
+    showClose: false,
+    fadeDuration: 300,
+    fadeDelay: 0.5,
+  });
+
+  viewCards({ startDate, endDate });
 
   $('.zoom-btn').click(showTableCardView);
 
@@ -210,8 +210,8 @@ async function app() {
     });
     auth();
   });
-  startDayTimer();
 
+  startDayTimer();
   scrollToToday();
 }
 

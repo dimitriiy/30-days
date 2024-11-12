@@ -42,6 +42,21 @@ class DataBase {
   getChatIds() {
     return this.db.telegram.users;
   }
+
+  editUser(id, data) {
+    const dbCopy = { ...this.db };
+    const user = dbCopy.users.find((user) => user.id === id);
+    if (!user) {
+      throw new Error('User is not found!');
+    }
+
+    for (const key in data) {
+      if (key === 'id') return;
+
+      user[key] = data[key];
+    }
+    return fs.writeFile('./src/db.json', JSON.stringify(dbCopy, null, 2));
+  }
 }
 
 export const database = new DataBase();

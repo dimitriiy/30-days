@@ -8,8 +8,8 @@
       content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
     />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <link rel="stylesheet" href="stolen-styles.css" />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="css/stolen-styles.css" />
+    <link rel="stylesheet" href="css/styles.css" />
 
     <title>FatBurn челлендж</title>
   </head>
@@ -25,10 +25,10 @@
   <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
-  <script type="text/javascript" src="utils.js"></script>
-  <script type="text/javascript" src="api.js"></script>
-  <script type="text/javascript" src="view.js"></script>
-  <script type="text/javascript" src="index.js"></script>
+  <script type="module"  src="js/utils.js"></script>
+  <script type="module" src="js/api.js"></script>
+  <script type="module" src="js/view.js"></script>
+  <script type="module" src="js/index.js"></script>
   <script src="https://unpkg.com/fireworks-js@2.x/dist/index.umd.js" defer></script>
 
   <body>
@@ -65,15 +65,15 @@
             >
               <div>
                 <span>Жир</span><span class="text-red-600">бёрнинг </span> челлендж <span class="version">3.0</span>
-                <img class="fire-pic" src="fire.gif" alt="" />
+                <img class="fire-pic" src="img/fire.gif" alt="" />
               </div>
-              <div class="text-3xl animate__animated animate__rubberBand h-full w-full transform-gpu month date-range">Октябрь - Ноябрь</div>
+              <div class="text-3xl animate__animated animate__rubberBand h-full w-full transform-gpu month date-range">Ноябрь - Октябрь</div>
             </h1>
 
             <div class="timer font-bold tracking-tighter" style="font-size: 20px">Осталось <span></span> дней</div>
           </div>
         </div>
-        <div class="container">
+        <div class="container main-content">
           <section
             id="cards"
             class="w-[calc(100% + 8rem)] grid grid-cols-[repeat(1,240px)] justify-center gap-4 sm:px-8 md:-mx-16 md:grid-cols-[repeat(3,240px)] md:px-0 lg:mx-0 lg:w-full xl:grid-cols-[repeat(4,240px)] 2xl:gap-8"
@@ -127,13 +127,13 @@
     <div id="noty-success" class="modal modal--noty">
       <div class="content">
         <h1>Ты скала!</h1>
-        <img src="justdoit.gif" alt="" />
+        <img src="img/justdoit.gif" alt="" />
       </div>
     </div>
     <div id="noty-fail" class="modal modal--noty">
       <div class="content">
         <h1>Постарайся в следующий раз!</h1>
-        <img src="giphy.gif" alt="" />
+        <img src="img/giphy.gif" alt="" />
       </div>
     </div>
 

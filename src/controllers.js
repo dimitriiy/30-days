@@ -1,5 +1,6 @@
 import { database } from './db.js';
 import { logger } from '../logger.js';
+import config from '../challenge.config.js';
 
 export const controllers = {
   '/': {
@@ -13,7 +14,11 @@ export const controllers = {
       res.json(users);
     },
   },
-
+  '/challenge': {
+    post: async (req, res) => {
+      res.json(config);
+    },
+  },
   '/tasks': {
     post: async (req, res) => {
       try {

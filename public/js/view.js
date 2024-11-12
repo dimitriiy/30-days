@@ -24,11 +24,11 @@ const getBadge = ({ day, tasks, users }) => {
   return '';
 };
 
-const createActionButtons = ({ users, tasks, day }) => {
+const createActionButtons = ({ users, tasks, day, currentUser }) => {
   const getDoneStatus = (u) => tasks[day.getDay()]?.includes(u.id);
   const actionsBtn = users.map(
     (user) => ` <label class="inline-flex items-center cursor-pointer">
-        <div class="toggle-btn ${getDoneStatus(user) ? 'toggle-btn--done' : ''} ${user.id !== Auth.getCurrentUser()?.id ? 'toggle-btn--disabled' : ''}" data-user='${JSON.stringify(
+        <div class="toggle-btn ${getDoneStatus(user) ? 'toggle-btn--done' : ''} ${user.id !== currentUser?.id ? 'toggle-btn--disabled' : ''}" data-user='${JSON.stringify(
           {
             id: user.id,
             day: day.getDay(),
@@ -53,7 +53,7 @@ const getIconByStatus = (type, day) => {
     base: `<img
         width="150"
         height="150"
-        src="books.svg"
+        src="../img/books.svg"
 
       />`,
   };
@@ -71,7 +71,7 @@ const createCountDayBlock = (idx) => {
 };
 
 let i = 1;
-const createCard = ({ day, users, tasks }) => {
+export const createCard = ({ day, users, tasks, currentUser }) => {
   const isDone = tasks[day.getDay()]?.length === users.length ?? false;
 
   const isToday = day.isToday();
@@ -118,7 +118,7 @@ const createCard = ({ day, users, tasks }) => {
     </div>
     <div class="card__back">
     <div class="task-actions" onclick="window.event.cancelBubble = true;">
-      ${createActionButtons({ users, tasks, day })}
+      ${createActionButtons({ users, tasks, day, currentUser })}
 </div>
 </div>
   </div>
@@ -128,7 +128,7 @@ const createCard = ({ day, users, tasks }) => {
 `;
 };
 
-function createMinCard({ day, users, tasks }) {
+export function createMinCard({ day, users, tasks }) {
   const isToday = day.isToday();
   const isDone = tasks[day.getDay()]?.length === users.length ?? false;
   const isPastDay = day.getTimestamp() < +new Date();
@@ -146,7 +146,7 @@ function createMinCard({ day, users, tasks }) {
     <span class="table-cards__item-pic">${getIconByStatus(picType, day.getDay())}</span>
 <span class="table-cards__day">${day.getDay()}</span></div>`;
 }
-function generateTableCards({ users, tasks }) {
+export function generateTableCards({ users, tasks }) {
   const cards = generateMonth()
     .map((day) => createMinCard({ day, users, tasks }))
     .join('');

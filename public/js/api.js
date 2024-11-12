@@ -6,7 +6,6 @@ class AuthClass {
     return this.user;
   }
 }
-const Auth = new AuthClass();
 
 class APIClass {
   async getUsers() {
@@ -44,5 +43,17 @@ class APIClass {
       console.error(e);
     }
   }
+
+  async getChallengeManifest() {
+    try {
+      const response = await fetch('challenge', { method: 'POST' });
+
+      return await response.json();
+    } catch (e) {
+      console.error(e);
+      return [];
+    }
+  }
 }
-const Api = new APIClass();
+export const Api = new APIClass();
+export const Auth = new AuthClass();
