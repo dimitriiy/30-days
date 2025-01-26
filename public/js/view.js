@@ -87,18 +87,18 @@ export const createCard = ({ day, users, tasks, currentUser }) => {
     fail: `<span style="color:#fff; font-size: 140px">${getIconByStatus('fail')}</span>`,
     base: `<img
         src="img/people/${i++}.png"
-        style="height: 200px"
+        style="height: 160px"
       />`,
   };
   const picType = isPastDay ? (isDone ? 'done' : 'fail') : 'base';
   const mainPic = pic[picType];
 
-  const timer = isToday ? `<div class="today-timer"></div>` : '';
+  const timer = isToday ? `<div class="today-timer" id="today-timer" ></div>` : '';
 
   const countDay = isPastDay ? '' : createCountDayBlock(index);
 
   return `
-<div style="animation-delay: ${(index - 1) * 0.3}s" class="card ${isToday ? 'card--active' : ''} ${isPastDay ? 'card--past' : ''} ${isPastDay && isDone ? 'card--done' : ''}">
+<div  style="animation-delay: ${(index - 1) * 0.02}s" class="card ${isToday ? 'card--active' : ''} ${isPastDay ? 'card--past' : ''} ${isPastDay && isDone ? 'card--done' : ''}">
   <div class="card__body">
      ${today}
 
@@ -107,12 +107,15 @@ export const createCard = ({ day, users, tasks, currentUser }) => {
     tabindex="0"
      class="card__front "
     >
+<div class="card__fav">
+<img src="../img/flame-icon.svg" alt="">
+</div>
          ${timer}
     <div class="card__content">
 
-       <div class="absolute bottom-4 left-4 text-l font-bold">${index++}</div>
+       <div class="absolute card__count  text-l font-bold">День ${index++}</div>
       ${mainPic}
-       <p class="absolute top-4 right-4 text-l font-bold">${day.getWeekDay()}, ${day.getDay()}</p>
+       <p class="absolute card__date text-l font-bold">${day.getWeekDay()}, ${day.getDay()}</p>
 
 </div>
     </div>

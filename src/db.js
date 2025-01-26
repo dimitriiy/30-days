@@ -1,4 +1,5 @@
-import db from './db.json' assert { type: 'json' };
+import db from './db.json' with { type: 'json' };
+
 import fs from 'fs/promises';
 
 class DataBase {

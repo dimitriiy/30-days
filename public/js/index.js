@@ -1,4 +1,4 @@
-import { createTimer, generateMonth, startDayTimer } from './utils.js';
+import { createTimer, generateMonth, startTimers } from './utils.js';
 import { Api, Auth } from './api.js';
 import { createCard, generateTableCards } from './view.js';
 import { store } from './store.js';
@@ -81,7 +81,7 @@ function scrollToToday() {
     {
       scrollTop: scrollToEl.offset().top - 100,
     },
-    1000 //speed
+    100 //speed
   );
 }
 
@@ -215,8 +215,9 @@ async function app() {
     auth();
   });
 
-  startDayTimer();
-  scrollToToday();
+  $('.scroll-btn').click(scrollToToday);
+
+  startTimers({ endDate });
 }
 
 $(document).ready(function () {

@@ -6,7 +6,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "nodemon --experimental-json-modules index.js"
   },
   "dependencies": {
     "app-root-path": "^3.1.0",

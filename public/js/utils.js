@@ -34,7 +34,7 @@ export const generateMonth = ({ startDate, endDate }) => {
 
 const isMobile = () => /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-export function startDayTimer() {
+export function startTimers({ endDate }) {
   setInterval(() => {
     const now = new Date();
     const h = 23 - now.getHours();
@@ -48,6 +48,8 @@ export function startDayTimer() {
     const value = `${hh}:${mm}:${ss}`;
     $('.today-timer').text(value);
   }, 1000);
+
+  new FlipDown(+new Date(endDate) / 1000, 'main-countdown').start();
 }
 
 export const createTimer = (startDate, endDate) => {
