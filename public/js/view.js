@@ -27,7 +27,7 @@ const getBadge = ({ day, tasks, users }) => {
 const createActionButtons = ({ users, tasks, day, currentUser }) => {
   const getDoneStatus = (u) => tasks[day.getDay()]?.includes(u.id);
   const actionsBtn = users.map(
-    (user) => ` <label class="inline-flex items-center cursor-pointer">
+    (user) => ` <div class="inline-flex items-center cursor-pointer">
         <div class="toggle-btn ${getDoneStatus(user) ? 'toggle-btn--done' : ''} ${user.id !== currentUser?.id ? 'toggle-btn--disabled' : ''}" data-user='${JSON.stringify(
           {
             id: user.id,
@@ -40,7 +40,7 @@ const createActionButtons = ({ users, tasks, day, currentUser }) => {
           </div>
            <span class="ms-1 text-sm font-medium color " >${user.name}</span>
 
-    </label>`
+    </div>`
   );
 
   return actionsBtn.join('');

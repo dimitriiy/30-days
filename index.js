@@ -18,5 +18,5 @@ initRestControllers(app);
 startBot();
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+  console.log(`Example app listening on port ${port} http://localhost:${port}`);
 });

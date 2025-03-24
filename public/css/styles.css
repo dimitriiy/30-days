@@ -1,6 +1,4 @@
-@font-face {
-  font-family: "Henry";
-  src: url('../fonts/henny-penny.regular.ttf')  format('truetype');  }
+
 
 :root{
   --red:linear-gradient(180deg, #a31b1b 46%, #b22323ad 83%);
@@ -14,6 +12,9 @@
 body {
   /*font-family: 'Henry',sans-serif;*/
   background: var(--main-bg-color)!important;
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
 }
 
 .card {
