@@ -899,6 +899,12 @@ video {
   box-shadow: 1px 1px 9px 1px #00000063;
 }
 
+.say-0 {
+  animation: fade 1s ease-out 1s forwards;
+  animation-delay: 1s;
+  z-index: 8;
+}
+
 .say-1 {
   animation: fade 1s ease-out 1s forwards;
   animation-delay: 5s;
