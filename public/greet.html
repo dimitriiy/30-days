@@ -243,8 +243,8 @@
       sendGiftLogic();
       playSound();
 
-      // const targetTimestamp = Date.UTC(2025, 11, 31, 20, 0);
-      const targetTimestamp = Date.UTC(2025, 11, 30, 21, 6); // 30 декабря UTC = 31 декабря MSK
+      const targetTimestamp = Date.UTC(2025, 11, 31, 20, 0);
+      // const targetTimestamp = Date.UTC(2025, 11, 30, 21, 6); // 30 декабря UTC = 31 декабря MSK
 
       const nowMSK = new Date().toLocaleString('en-US', { timeZone: 'Europe/Moscow' });
 
@@ -279,7 +279,6 @@
         })
           .then((response) => response.blob())
           .then(async (data) => {
-            console.log(data);
             const blob = new Blob([data], { type: 'application/pdf' });
             const link = document.createElement('a');
             link.href = window.URL.createObjectURL(blob);
