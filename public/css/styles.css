@@ -15,7 +15,7 @@ body {
 }
 
 .card {
-  height: 340px;
+  /* height: 340px; */
   perspective: 1200px;
   transform-style: preserve-3d;
   position: relative;
@@ -770,306 +770,395 @@ span.first-day {
 body {
   overflow: hidden;
 }
-video {
-  object-fit: none;
-  position: absolute;
-  z-index: -11;
-  filter: blur(5px);
-  max-height: 300px;
-  width: 100vw;
+
+:root {
+  --color-primary: #32b8c6;
+  --color-primary-hover: #2da6b2;
+  --color-text: #f5f5f5;
+  --color-bg: #0f1419;
+  --color-accent: #ffd700;
 }
 
-.anim-item {
-  position: absolute;
-  opacity: 0;
-}
-
-/* Item 1: из левого верхнего угла */
-.anim-item:nth-of-type(1) {
-  left: 0;
-  top: 0px;
-  max-width: 500px;
-  animation: slideInFromTopLeft 1s ease-out 0.2s forwards;
-}
-
-@keyframes slideInFromTopLeft {
-  from {
-    opacity: 0;
-    transform: translate(-100px, -100px);
-  }
-  to {
-    opacity: 1;
-    transform: translate(0, 0);
-  }
-}
-
-/* Item 2: из правого нижнего угла */
-.anim-item:nth-of-type(2) {
-  right: 0;
-  bottom: 0;
-  max-width: 300px;
-  animation: slideInFromBottomRight 1s ease-out 0.4s forwards;
-}
-
-@keyframes slideInFromBottomRight {
-  from {
-    opacity: 0;
-    transform: translate(100px, 100px);
-  }
-  to {
-    opacity: 1;
-    transform: translate(0, 0);
-  }
-}
-
-/* Item 3: из левого нижнего угла */
-.anim-item:nth-of-type(3) {
-  left: 0;
-  bottom: 0;
-  max-height: 450px;
-  animation: slideInFromBottomLeft 1s ease-out 0.6s forwards;
-}
-
-@keyframes slideInFromBottomLeft {
-  from {
-    opacity: 0;
-    transform: translate(-150px, 150px);
-  }
-  to {
-    opacity: 1;
-    transform: translate(0, 0);
-  }
-}
-
-/* Item 4: из правого верхнего угла (за границы) */
-.anim-item:nth-of-type(4) {
-  top: -100px;
-  right: -300px;
-  animation: slideInFromTopRight 1.2s ease-out 0.8s forwards;
-}
-
-@keyframes slideInFromTopRight {
-  from {
-    opacity: 0;
-    transform: translate(200px, -200px);
-  }
-  to {
-    opacity: 1;
-    transform: translate(0, 0);
-  }
-}
-
-/* Item 5: из центра экрана (с масштабом) */
-.anim-item:nth-of-type(5) {
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  animation: zoomIn 1s ease-out 1s forwards;
-}
-
-@keyframes zoomIn {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.3);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
-}
-
-/* Item 5: из центра экрана (с масштабом) */
-.anim-item:nth-of-type(6) {
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  animation: zoomIn 1s ease-out 1s forwards;
-  animation-delay: 3s;
-}
-.say {
-  position: absolute;
-  background: #fff;
-  color: #000;
-  padding: 20px;
-
-  opacity: 0;
-  top: 50%;
-  left: 50%;
-  transform: translate(14%, 36%);
-  box-shadow: 1px 1px 9px 1px #00000063;
-}
-
-.say-0 {
-  animation: fade 1s ease-out 1s forwards;
-  animation-delay: 1s;
-  z-index: 8;
-}
-
-.say-1 {
-  animation: fade 1s ease-out 1s forwards;
-  animation-delay: 8s;
-  z-index: 9;
-}
-
-.say-2 {
-  animation: fade 1s ease-out 1s forwards;
-  animation-delay: 13s;
-  z-index: 10;
-}
-
-.say-3 {
-  animation: fade 1s ease-out 1s forwards;
-  animation-delay: 16s;
-  z-index: 11;
-}
-@keyframes fade {
-  from {
-    opacity: 0;
-    top: 45%;
-  }
-  to {
-    opacity: 1;
-    top: 50%;
-  }
-}
-
-.l-wrap {
-  position: absolute;
-
-  height: 100vh;
-  width: 100vw;
-  background: var(--main-bg-color) !important;
-  z-index: 100;
-}
-
-.loaderr {
-  width: 48px;
-  height: 48px;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  position: absolute;
-  border: 5px solid #fff;
-  border-bottom-color: transparent;
-  border-radius: 50%;
-  display: inline-block;
+* {
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
-  animation: rotation 1s linear infinite;
 }
 
-@keyframes rotation {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.text {
-  font-size: 20px;
+body {
+  font-family: 'Pattaya', serif;
   font-weight: bold;
-  font-family: 'Rubik Glitch', system-ui;
-  font-weight: bold;
-  font-style: normal;
-  font-weight: bold;
-  font-style: normal;
-}
-.say .text {
-  /* background: #001830;
-  color: #fff; */
-  margin-bottom: 4px;
-  padding: 4px;
-}
-
-input,
-button {
-  border: 1px solid #000;
-  font-family: 'Rubik Glitch', system-ui;
-  padding: 10px;
-}
-
-.upload {
-  position: absolute;
-  padding: 16px 32px;
-  font-size: 18px;
-  font-weight: 700;
-  color: #fff;
-  background: linear-gradient(135deg, #001830, #145ea8, #ff9ff3, #54a0ff);
-  background-size: 300% 300%;
-  border: none;
-  border-radius: 3px;
-  cursor: pointer;
-  box-shadow:
-    0 10px 30px rgba(255, 107, 107, 0.4),
-    inset 0 2px 0 rgba(255, 255, 255, 0.3);
-  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #0f1419 0%, #1a3a4a 50%, #0f1419 100%);
+  color: var(--color-text);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  animation: spinIn 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+  position: relative;
 }
 
-@keyframes spinIn {
+/* Снежные частицы */
+.snowflake {
+  position: fixed;
+  top: -10px;
+  color: #fff;
+  font-size: 1.5em;
+  opacity: 0.8;
+  z-index: 1;
+  animation: snowfall linear infinite;
+  pointer-events: none;
+}
+
+@keyframes snowfall {
   0% {
-    opacity: 0;
-    transform: rotate(-360deg) scale(0.3);
-  }
-  50% {
-    opacity: 0.7;
-    transform: rotate(-180deg) scale(0.8);
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
   }
   100% {
-    opacity: 1;
-    transform: rotate(0deg) scale(1) translate(-50%, -50%);
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0;
   }
 }
 
-.upload:hover {
-  transform: translateY(-3px);
-  box-shadow:
-    0 20px 40px rgba(255, 107, 107, 0.6),
-    inset 0 2px 0 rgba(255, 255, 255, 0.4);
-  background-position: 100% 0;
-}
-
-.upload:active {
-  transform: translateY(-1px);
-}
-
-.upload::before {
-  content: '';
-  position: absolute;
+/* Фоновые огоньки */
+.bg-lights {
+  position: fixed;
   top: 0;
-  left: -100%;
+  left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-  transition: left 0.5s;
+  z-index: 0;
+  overflow: hidden;
 }
 
-.upload:hover::before {
-  left: 100%;
+.light {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  animation: twinkle 3s infinite;
 }
 
-/* Анимация получения подарка */
-@keyframes celebrate {
-  0% {
-    transform: scale(1);
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.3;
   }
   50% {
-    transform: scale(1.1) rotate(5deg);
+    opacity: 1;
+  }
+}
+
+.container {
+  position: relative;
+  z-index: 2;
+  max-width: 500px;
+  width: 95%;
+}
+
+.card {
+  background: rgba(31, 51, 71, 0.9);
+  border: 2px solid var(--color-primary);
+  border-radius: 20px;
+  padding: 40px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(50, 184, 198, 0.2);
+  animation: slideIn 0.6s ease-out forwards;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.title {
+  text-align: center;
+  font-size: 2.5em;
+  margin-bottom: 10px;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: glow 2s ease-in-out infinite;
+  font-weight: bold;
+}
+
+@keyframes glow {
+  0%,
+  100% {
+    text-shadow: 0 0 20px rgba(50, 184, 198, 0.5);
+  }
+  50% {
+    text-shadow: 0 0 40px rgba(50, 184, 198, 0.8);
+  }
+}
+
+.subtitle {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 30px;
+  font-size: 0.95em;
+}
+
+/* Секция логина */
+.login-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.login-section.hidden {
+  display: none;
+}
+
+.form-group {
+  position: relative;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.9em;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+}
+
+input[type='input'] {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--color-primary);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text);
+  font-size: 1em;
+  transition: all 0.3s ease;
+}
+
+input[type='input']:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-primary), #2da6b2);
+  color: #000;
+  width: 100%;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(50, 184, 198, 0.4);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-download {
+  background: linear-gradient(135deg, var(--color-accent), #ffed4e);
+  color: #000;
+  padding: 14px 28px;
+  margin-top: 20px;
+}
+
+.btn-download:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4);
+}
+
+/* Секция поздравления */
+.greeting-section {
+  display: none;
+  text-align: center;
+  animation: fadeInScale 0.8s ease-out;
+}
+
+.greeting-section.show {
+  display: block;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.greeting-title {
+  font-size: 2.2em;
+  margin: 20px 0;
+  background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  font-weight: bold;
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  50% {
+    opacity: 1;
+  }
+  70% {
+    transform: scale(1.05);
   }
   100% {
     transform: scale(1);
   }
 }
 
-.gift-button.success {
-  animation: celebrate 0.6s ease;
-  background: linear-gradient(135deg, #00b894, #00cec9);
+.greeting-text {
+  font-size: 1.3em;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 20px 0;
+  line-height: 1.6;
+}
+
+.confetti {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  background: var(--color-accent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.error-message {
+  color: #ff6b6b;
+  text-align: center;
+  font-size: 0.9em;
+  margin-top: 10px;
+  animation: shake 0.5s ease;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-10px);
+  }
+  75% {
+    transform: translateX(10px);
+  }
+}
+
+.hidden-error {
+  display: none;
+}
+
+/* Декоративные элементы */
+.ornament {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  opacity: 0.1;
+  animation: float 4s ease-in-out infinite;
+}
+
+.ornament-1 {
+  top: 20px;
+  right: 30px;
+  background: var(--color-accent);
+  animation-delay: 0s;
+}
+
+.ornament-2 {
+  bottom: 30px;
+  left: 30px;
+  background: var(--color-primary);
+  animation-delay: 1s;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@media (max-width: 600px) {
+  .title {
+    font-size: 1.8em;
+  }
+
+  .greeting-title {
+    font-size: 1.6em;
+  }
+
+  .card {
+    padding: 30px;
+  }
+}
+
+.music-btn {
+  bottom: 0;
+  position: absolute;
+  background: linear-gradient(135deg, var(--color-primary), #2da6b2);
+  color: #000;
+}
+
+.h-box {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  width: 100%;
+  height: 300px;
+}
+
+.horse {
+  -webkit-animation: shake-horizontal 4s cubic-bezier(0.455, 0.03, 0.515, 0.955) both;
+  animation: shake-horizontal 4s cubic-bezier(0.455, 0.03, 0.515, 0.955) both;
+}
+
+@keyframes shake-horizontal {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+  }
 }

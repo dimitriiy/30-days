@@ -11,11 +11,13 @@
     <link rel="stylesheet" href="css/stolen-styles.css" />
     <link rel="stylesheet" href="css/styles.css" />
 
-    <title>Max</title>
+    <title>С новым годом!</title>
   </head>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
+
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Rubik+Glitch&family=Rubik+Iso&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Pattaya&family=Marck+Script&display=swap" rel="stylesheet" />
+
   <!-- <link
     href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
     rel="stylesheet"
@@ -43,96 +45,5 @@
   <script defer type="module" src="js/view.js"></script>
   <script defer type="module" src="js/index.js"></script> -->
 
-  <body>
-    <div class="l-wrap"><div class="loaderr"></div></div>
-    <div class="anim-item"><img src="img/temp/1.png" alt="" /></div>
-    <div class="anim-item"><img src="img/temp/2.png" alt="" /></div>
-    <div class="anim-item"><img src="img/temp/3.png" alt="" /></div>
-    <div class="anim-item"><img src="img/temp/4.png" alt="" /></div>
-    <div class="anim-item"><img src="img/temp/6.png" alt="" /></div>
-
-    <div class="anim-item neo"><img src="img/temp/5.png" alt="" /></div>
-
-    <div class="say say-0">
-      <div class="text">"Бля пацаны у Макса днюха!</div>
-    </div>
-
-    <div class="say say-1">
-      <div class="text">"In nomine Patris, et Filii, et Spiritus Sancti</div>
-      <div class="text">Давайте его поздравим!</div>
-    </div>
-
-    <div class="say say-2">
-      <div class="text">Мы и Юля+Дима поздравляют тебя с днем рождения!</div>
-    </div>
-
-    <div class="say say-3">
-      <div class="text">
-        Чтобы получить подарок который был куплен на кассовые сборы
-        <br />
-        наших фильмов ответь на вопрос!
-      </div>
-      <div class="text">В каком классе тебе пригодилось знание латыни?</div>
-
-      <input type="text" id="input" />
-      <button onclick="checkAnswer()">ok</button>
-    </div>
-
-    <script>
-      function checkAnswer() {
-        const v = document.querySelector('#input').value;
-
-        if (btoa(v) === 'MTA=') {
-          alert('Верно!');
-
-          document.querySelectorAll('.say').forEach((el) => el.remove());
-          const container = document.querySelector('body');
-          const fireworks = new Fireworks.default(container);
-          fireworks.start();
-
-          document.querySelector('.neo').classList.add('finish');
-          setTimeout(() => {
-            const button = document.createElement('a');
-            button.className = 'upload';
-            button.href = '/sert.pdf';
-            button.textContent = '🎁 Получить подарок и стать рабом вещей!';
-            button.target = '_blank';
-            button.rel = 'noopener noreferrer';
-
-            button.download = 'document.pdf'; // Для скачивания вместо открытия
-
-            document.body.appendChild(button); // Добавление в body
-          }, 2000);
-        } else {
-          alert('Не верный ответ! Еще одна попытка, после твой сертификат сгорит!');
-        }
-      }
-      document.addEventListener('DOMContentLoaded', () => {
-        const images = [...document.querySelectorAll('img')];
-        const loadPromises = images.map(
-          (img) =>
-            new Promise((resolve) => {
-              if (img.complete) {
-                resolve();
-              } else {
-                img.onload = img.onerror = resolve;
-              }
-            })
-        );
-
-        Promise.all(loadPromises).then(() => {
-          // Здесь запускаем анимацию
-          setTimeout(() => {
-            document.body.classList.add('animation-ready');
-            document.querySelector('.l-wrap').remove();
-
-            setTimeout(() => {
-              document.querySelectorAll('.say-0').forEach((el) => el.remove());
-            }, 2000);
-          }, 3000);
-          console.log('Все изображения загружены!');
-        });
-      });
-    </script>
-  </body>
+  <body></body>
 </html>
