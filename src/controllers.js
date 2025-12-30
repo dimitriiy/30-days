@@ -1,7 +1,8 @@
 import { database } from './db.js';
 import { logger } from '../logger.js';
 import config from '../challenge.config.js';
-
+import path from 'path';
+import fs from 'fs/promises';
 export const controllers = {
   '/': {
     get: (req, res) => {
@@ -41,6 +42,21 @@ export const controllers = {
       } catch (e) {
         res.json({ result: false });
       }
+    },
+  },
+  '/file': {
+    post: async (req, res) => {
+      const { answer, pass } = req.body;
+      const fileByName = { вика: 1, эдик: 2, маша: 3, оля: 4, саша: 5, наташа: 6, аня: 7, ира: 8, гева: 9, юля: 10 };
+
+      if (answer !== 'лошадь' || fileByName[pass] === undefined) {
+        res.status(403).send();
+        return;
+      }
+
+      var data = await fs.readFile(path.join(process.cwd(), 'src', 'pdfs', `output_${fileByName[pass]}.pdf`));
+      res.contentType('application/pdf');
+      res.send(data);
     },
   },
 };

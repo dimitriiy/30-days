@@ -17,6 +17,8 @@
 
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Pattaya&family=Marck+Script&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/flipdown@0.3.2/dist/flipdown.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/flipdown@0.3.2/src/flipdown.min.js"></script>
 
   <!-- <link
     href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
@@ -46,21 +48,31 @@
   <script defer type="module" src="js/index.js"></script> -->
 
   <body>
+    <div class="bbox">
+      <div id="main-countdown" class="flipdown"></div>
+    </div>
+
     <div class="bg-lights" id="lights"></div>
 
     <div class="ornament ornament-1"></div>
     <div class="ornament ornament-2"></div>
 
-    <div class="container">
+    <div class="container container-filter">
       <div class="card">
-        <h1 class="title">✨ С новым годом ✨</h1>
+        <h1 class="title main-title">✨ С новым годом ✨</h1>
 
         <!-- Секция логина -->
         <div class="login-section" id="loginSection">
           <div class="form-group">
+            <label for="password">Слово загаданное в ребусе</label>
+            <input type="input" id="ans" placeholder="Введи слово..." autocomplete="off" />
+          </div>
+
+          <div class="form-group">
             <label for="password">Магическое слово:</label>
             <input type="input" id="password" placeholder="Введи слово..." autocomplete="off" />
           </div>
+
           <button class="btn btn-primary" id="submitBtn">Войти</button>
           <div class="error-message hidden-error" id="errorMsg"></div>
         </div>
@@ -68,7 +80,7 @@
         <!-- Секция поздравления -->
         <div class="greeting-section" id="greetingSection">
           <h2 class="greeting-title">🎉 Поздравляю! 🎉</h2>
-          <p class="greeting-text"></p>
+          <!-- <p class="greeting-text"></p> -->
           <p class="greeting-text">Пусть этот год принесет тебе радость, успех и исполнение всех желаний!</p>
           <button class="btn btn-download" id="downloadBtn">📥 Получить подарок</button>
         </div>
@@ -129,8 +141,11 @@
 
       const decodeBase64 = (b64) => new TextDecoder().decode(Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)));
 
+      let pass;
+      let answer;
       function sendGiftLogic() {
         const randoms = [
+          '0Y7Qu9GP',
           '0Y3QtNC40Lo=',
           '0LzQsNGI0LA=',
           '0L7Qu9GP',
@@ -142,6 +157,8 @@
           '0LLQuNC60LA=',
         ];
 
+        const answerInput = document.querySelector('#ans');
+
         const passwordInput = document.getElementById('password');
         const submitBtn = document.getElementById('submitBtn');
         const loginSection = document.getElementById('loginSection');
@@ -151,19 +168,35 @@
 
         submitBtn.addEventListener('click', () => {
           const enteredPassword = passwordInput.value.toLowerCase().trim();
+          const ansRebus = answerInput.value.toLowerCase().trim();
+
           const decoded = encodeBase64(enteredPassword);
 
-          if (randoms.includes(decoded)) {
+          answer = ansRebus;
+          pass = enteredPassword;
+          if (randoms.includes(decoded) && ansRebus === 'лошадь') {
             loginSection.classList.add('hidden');
             greetingSection.classList.add('show');
-            document.querySelector('.greeting-text').innerHTML =
-              `С Новым Годом, ${upperFirstLet(enteredPassword)} ! 🎄`;
+            document.querySelector('.main-title').innerHTML =
+              `✨ С Новым Годом, ${upperFirstLet(enteredPassword)} ! ✨`;
             createConfetti();
+
+            //  <h1 class="title main-title">✨ С новым годом ✨</h1>
 
             // Очистка ошибки
             errorMsg.classList.add('hidden-error');
           } else {
-            errorMsg.textContent = '❌ Неверное слово. Попробуй еще раз...';
+            const errors = [];
+
+            if (!randoms.includes(decoded)) {
+              errors.push('❌ Неверное магическое слово. Попробуй еще раз...');
+            }
+
+            if (ansRebus !== 'лошадь') {
+              errors.push('❌ Неверный ответ на ребус. Попробуй еще раз...');
+            }
+
+            errorMsg.textContent = errors.join('\n');
             errorMsg.classList.remove('hidden-error');
             passwordInput.value = '';
             passwordInput.focus();
@@ -179,35 +212,7 @@
 
         // Скачивание файла
         downloadBtn.addEventListener('click', () => {
-          const text = `
-            ╔════════════════════════════════════════════╗
-            ║  🎉  С НОВЫМ ГОДОМ, ДИМА!  🎉             ║
-            ╚════════════════════════════════════════════╝
-
-            Дорогой Дима!
-
-            Пусть этот Новый Год принесет тебе:
-            ✨ Радость и вдохновение
-            🎯 Достижение всех целей
-            💪 Здоровье и силу
-            🚀 Успех во всех начинаниях
-            ❤️ Любовь и тепло близких людей
-
-            Желаю тебе быть счастливым каждый день,
-            воплощать смелые идеи,
-            достигать невероятных высот
-            и никогда не сдаваться!
-
-            Поздравляю! 🎄✨
-
-            Создано: ${new Date().toLocaleDateString('ru-RU')}
-                        `;
-
-          const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-          const link = document.createElement('a');
-          link.href = URL.createObjectURL(blob);
-          link.download = 'Поздравление_Диме.txt';
-          link.click();
+          downloadFile({ answer, pass });
         });
       }
       function playSound() {
@@ -237,6 +242,52 @@
       createLights();
       sendGiftLogic();
       playSound();
+
+      // const targetTimestamp = Date.UTC(2025, 11, 31, 20, 0);
+      const targetTimestamp = Date.UTC(2025, 11, 30, 21, 6); // 30 декабря UTC = 31 декабря MSK
+
+      const nowMSK = new Date().toLocaleString('en-US', { timeZone: 'Europe/Moscow' });
+
+      // Проверяем, наступило ли точное время 31.12.2025 23:00 MSK
+      const isTargetTime = new Date().getTime() >= targetTimestamp;
+
+      if (!isTargetTime) {
+        // Показываем FlipDown, если время не наступило
+        const flipdown = new FlipDown(targetTimestamp / 1000, 'main-countdown').start().ifEnded(() => {
+          // Логика при окончании обратного отсчета
+          document.querySelector('.container-filter')?.classList.remove('container-filter');
+          document.querySelector('.bbox').remove();
+        });
+      } else {
+        // Если время наступило - скрываем FlipDown и убираем класс
+        const countdownEl = document.getElementById('main-countdown');
+        if (countdownEl) {
+          countdownEl.style.display = 'none';
+        }
+        document.querySelector('.container-filter')?.classList.remove('container-filter');
+        document.querySelector('.bbox').remove();
+      }
+
+      function downloadFile({ answer, pass }) {
+        fetch('file', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ answer, pass }),
+        })
+          .then((response) => response.blob())
+          .then(async (data) => {
+            console.log(data);
+            const blob = new Blob([data], { type: 'application/pdf' });
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = 'ticket_basta.pdf';
+            document.body.appendChild(link);
+            link.click();
+          });
+      }
     </script>
   </body>
 </html>
