@@ -6,9 +6,11 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "start": "nodemon --experimental-json-modules index.js"
+    "start": "nodemon --experimental-json-modules index.js",
+    "force": "git pull origin --force && pm2 restart index.js"
   },
   "dependencies": {
+    "@distube/ytdl-core": "^4.16.12",
     "app-root-path": "^3.1.0",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
@@ -16,7 +18,7 @@
     "express": "^4.19.2",
     "node-cron": "^3.0.3",
     "nodemon": "^3.1.0",
-    "prettier": "^3.2.5",
+    "prettier": "^3.7.4",
     "tailwindcss": "^3.4.3",
     "tailwindcss-animate": "^1.0.7",
     "telegraf": "^4.16.3",

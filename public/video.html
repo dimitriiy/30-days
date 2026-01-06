@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="stylesheet" href="css/video.css" />
+    <!-- <link rel="stylesheet" href="css/styles.css" /> -->
+
+    <title>Video</title>
+  </head>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Pattaya&family=Marck+Script&display=swap" rel="stylesheet" />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+  <!-- <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" /> -->
+  <!-- <link rel="stylesheet" href="/resources/demos/style.css" /> -->
+  <!-- <link href="https://cdn.jsdelivr.net/npm/flipdown@0.3.2/dist/flipdown.min.css" rel="stylesheet" /> -->
+  <script defer src="https://cdn.tailwindcss.com"></script>
+
+  <script
+    defer
+    src="
+  https://cdn.jsdelivr.net/npm/tailwindcss-animated@1.0.1/src/index.min.js
+  "
+  ></script>
+
+  <script defer src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
+  <!-- <script defer src="https://code.jquery.com/jquery-3.6.0.js"></script> -->
+  <!-- <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script> -->
+  <!-- <script defer src="https://cdn.jsdelivr.net/npm/flipdown@0.3.2/src/flipdown.min.js"></script> -->
+  <script defer src="https://unpkg.com/fireworks-js@2.x/dist/index.umd.js" defer></script>
+  <!-- <script defer type="module" src="js/utils.js"></script>
+  <script defer type="module" src="js/api.js"></script>
+  <script defer type="module" src="js/view.js"></script>
+  <script defer type="module" src="js/index.js"></script> -->
+
+  <body>
+    <form id="uploader">
+      <div class="grid gap-6 mb-6 md:grid-cols-2">
+        <div>
+          <label for="link" class="block mb-2.5 text-sm font-medium text-heading">First name</label>
+          <input
+            type="text"
+            id="link"
+            class="bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand block w-full px-3 py-2.5 shadow-xs placeholder:text-body"
+            placeholder="https://"
+            required
+          />
+        </div>
+      </div>
+      <button
+        type="submit"
+        class="text-white bg-brand box-border border border-transparent hover:bg-brand-strong focus:ring-4 focus:ring-brand-medium shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none"
+      >
+        Submit
+      </button>
+    </form>
+
+    <script>
+      async function renderBasicInfo(data) {
+        if (!data || !data.success) {
+          alert('Failed to load video data');
+          return;
+        }
+
+        const { video, qualities } = data;
+        const { title, thumbnail, author, duration, viewCount } = video;
+
+        // Создаем контейнер
+        const container = document.createElement('div');
+        container.className = 'max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-lg border border-gray-200';
+
+        // Блок с картинкой (последний/лучший thumbnail)
+        const mediaContainer = document.createElement('div');
+        mediaContainer.className =
+          'relative w-full aspect-video rounded-lg overflow-hidden mb-6 bg-gray-100 flex items-center justify-center group';
+        console.log(thumbnail.blob);
+        const myImage = document.createElement('IMG');
+        const objectURL = URL.createObjectURL(thumbnail.blob);
+        myImage.src = objectURL;
+        document.body.appendChild(myImage);
+
+        //       mediaContainer.innerHTML = `
+        //   <img id="video-thumbnail" src="${thumbnailUrl}" alt="${title}"
+        //        class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-200">
+        //   <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
+        //     <svg class="w-20 h-20 text-white drop-shadow-lg" fill="currentColor" viewBox="0 0 24 24">
+        //       <path d="M8 5v14l11-7z"/>
+        //     </svg>
+        //   </div>
+        // `;
+
+        //       // Заголовок
+        //       const titleEl = document.createElement('h2');
+        //       titleEl.className = 'text-3xl md:text-4xl font-bold text-gray-900 mb-3 leading-tight';
+        //       titleEl.textContent = title;
+
+        //       // Мета информация
+        //       const metaEl = document.createElement('div');
+        //       metaEl.className = 'flex flex-wrap items-center gap-4 mb-6 text-sm text-gray-600 border-b pb-4';
+        //       metaEl.innerHTML = `
+        //   <div class="flex items-center gap-2">
+        //     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+        //       <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+        //     </svg>
+        //     <span>${author}</span>
+        //   </div>
+        //   <div class="flex items-center gap-2">
+        //     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+        //       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+        //     </svg>
+        //     <span>${formatDuration(parseInt(duration))}</span>
+        //   </div>
+        //   <div class="flex items-center gap-2">
+        //     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+        //       <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+        //     </svg>
+        //     <span>${formatViewCount(viewCount)} просмотров</span>
+        //   </div>
+        // `;
+
+        //       // Контролы (селект качества и кнопка)
+        //       const controlsContainer = document.createElement('div');
+        //       controlsContainer.className = 'flex flex-col sm:flex-row gap-4 items-stretch sm:items-center mb-6';
+
+        //       // Селект качества с доступными вариантами
+        //       const qualitySelect = document.createElement('select');
+        //       qualitySelect.id = 'quality-select';
+        //       qualitySelect.className =
+        //         'flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-base font-medium transition-all hover:border-gray-400';
+
+        //       const optionsHtml = qualities
+        //         .map((q) => {
+        //           const label = `${q.label}${q.hasAudio ? ' (MP4)' : ' (видео)'}${q.bitrate ? ` - ${Math.round(q.bitrate / 1000)}kbps` : ''}`;
+        //           return `<option value="${q.label}" data-url="${q.url || ''}" data-video-url="${q.videoUrl || ''}" data-audio-url="${q.audioUrl || ''}">${label}</option>`;
+        //         })
+        //         .join('');
+
+        //       qualitySelect.innerHTML = optionsHtml;
+
+        //       // Кнопка воспроизведения
+        //       const playBtn = document.createElement('button');
+        //       playBtn.id = 'play-btn';
+        //       playBtn.className =
+        //         'px-8 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-bold rounded-lg hover:from-red-700 hover:to-red-800 focus:ring-4 focus:ring-red-300 transition-all duration-200 shadow-lg flex items-center justify-center gap-2 min-w-[160px] text-base';
+        //       playBtn.innerHTML = `
+        //   <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+        //     <path d="M8 5v14l11-7z"/>
+        //   </svg>
+        //   Воспроизвести
+        // `;
+
+        //       // Кнопка скачивания
+        //       const downloadBtn = document.createElement('button');
+        //       downloadBtn.id = 'download-btn';
+        //       downloadBtn.className =
+        //         'px-8 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-bold rounded-lg hover:from-green-700 hover:to-green-800 focus:ring-4 focus:ring-green-300 transition-all duration-200 shadow-lg flex items-center justify-center gap-2 min-w-[160px] text-base';
+        //       downloadBtn.innerHTML = `
+        //   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        //     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+        //   </svg>
+        //   Скачать
+        // `;
+
+        //       controlsContainer.appendChild(qualitySelect);
+        //       controlsContainer.appendChild(playBtn);
+        //       controlsContainer.appendChild(downloadBtn);
+
+        //       // Статус сообщение
+        //       const statusEl = document.createElement('div');
+        //       statusEl.id = 'status-message';
+        //       statusEl.className = 'hidden p-4 rounded-lg mb-4 text-sm font-medium';
+
+        //       // Собираем все элементы
+        //       container.appendChild(mediaContainer);
+        //       container.appendChild(titleEl);
+        //       container.appendChild(metaEl);
+        //       container.appendChild(statusEl);
+        //       container.appendChild(controlsContainer);
+
+        //       // Логика взаимодействия
+        //       const thumbnailImg = container.querySelector('#video-thumbnail');
+        //       const select = container.querySelector('#quality-select');
+        //       const play = container.querySelector('#play-btn');
+        //       const download = container.querySelector('#download-btn');
+        //       const status = container.querySelector('#status-message');
+
+        //       let currentVideoUrl = qualities[0]?.url || '';
+        //       let isPlaying = false;
+
+        //       // Показать сообщение статуса
+        //       const showStatus = (message, type = 'info') => {
+        //         const bgClass =
+        //           {
+        //             success: 'bg-green-100 text-green-800',
+        //             error: 'bg-red-100 text-red-800',
+        //             info: 'bg-blue-100 text-blue-800',
+        //             warning: 'bg-yellow-100 text-yellow-800',
+        //           }[type] || 'bg-blue-100 text-blue-800';
+
+        //         status.innerHTML = message;
+        //         status.className = `p-4 rounded-lg mb-4 text-sm font-medium ${bgClass}`;
+        //         status.classList.remove('hidden');
+
+        //         setTimeout(() => status.classList.add('hidden'), 4000);
+        //       };
+
+        //       // Обновление URL при выборе качества
+        //       select.addEventListener('change', (e) => {
+        //         const option = e.target.options[e.target.selectedIndex];
+        //         currentVideoUrl = option.dataset.url;
+        //         showStatus(`✓ Выбрано качество: ${e.target.value}`, 'info');
+        //       });
+
+        //       // Воспроизведение видео
+        //       play.addEventListener('click', async () => {
+        //         if (!currentVideoUrl) {
+        //           showStatus('⚠️ URL видео недоступен. Попробуйте другое качество.', 'warning');
+        //           return;
+        //         }
+
+        //         if (isPlaying) {
+        //           // Закрыть видео
+        //           const videoContainer = container.querySelector('#video-player');
+        //           if (videoContainer) {
+        //             videoContainer.remove();
+        //             mediaContainer.innerHTML = `
+        //         <img id="video-thumbnail" src="${thumbnailUrl}" alt="${title}"
+        //              class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-200">
+        //         <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
+        //           <svg class="w-20 h-20 text-white drop-shadow-lg" fill="currentColor" viewBox="0 0 24 24">
+        //             <path d="M8 5v14l11-7z"/>
+        //           </svg>
+        //         </div>
+        //       `;
+        //             mediaContainer.classList.add('group');
+        //             play.innerHTML = `
+        //         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+        //           <path d="M8 5v14l11-7z"/>
+        //         </svg>
+        //         Воспроизвести
+        //       `;
+        //             isPlaying = false;
+        //           }
+        //           return;
+        //         }
+
+        //         try {
+        //           play.disabled = true;
+        //           play.innerHTML = `<svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2" opacity="0.25"/><path stroke-width="2" d="M4 12a8 8 0 018-8" d="M4 12a8 8 0 018-8"/></svg> Загрузка...`;
+
+        //           // Заменяем thumbnail на видео
+        //           mediaContainer.innerHTML = `
+        //       <video id="video-player" class="w-full h-full object-cover" src="${currentVideoUrl}"
+        //              preload="metadata" controls autoplay>
+        //         Ваш браузер не поддерживает видео.
+        //       </video>
+        //       <button id="close-video" class="absolute top-3 right-3 p-2 bg-black/70 hover:bg-black/90 text-white rounded-full transition-all shadow-lg">
+        //         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        //           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        //         </svg>
+        //       </button>
+        //     `;
+        //           mediaContainer.classList.remove('group');
+
+        //           // Кнопка закрытия
+        //           const closeBtn = container.querySelector('#close-video');
+        //           closeBtn?.addEventListener('click', () => {
+        //             mediaContainer.innerHTML = `
+        //         <img id="video-thumbnail" src="${thumbnailUrl}" alt="${title}"
+        //              class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-200">
+        //         <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
+        //           <svg class="w-20 h-20 text-white drop-shadow-lg" fill="currentColor" viewBox="0 0 24 24">
+        //             <path d="M8 5v14l11-7z"/>
+        //           </svg>
+        //         </div>
+        //       `;
+        //             mediaContainer.classList.add('group');
+        //             play.innerHTML = `
+        //         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+        //           <path d="M8 5v14l11-7z"/>
+        //         </svg>
+        //         Воспроизвести
+        //       `;
+        //             isPlaying = false;
+        //           });
+
+        //           play.innerHTML = `
+        //       <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+        //         <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+        //       </svg>
+        //       Закрыть
+        //     `;
+        //           isPlaying = true;
+        //           showStatus('▶️ Видео загружено', 'success');
+        //         } catch (error) {
+        //           showStatus(`❌ Ошибка при загрузке: ${error.message}`, 'error');
+        //         } finally {
+        //           play.disabled = false;
+        //         }
+        //       });
+
+        //       // Скачивание видео
+        //       download.addEventListener('click', async () => {
+        //         if (!currentVideoUrl) {
+        //           showStatus('⚠️ URL видео недоступен. Попробуйте другое качество.', 'warning');
+        //           return;
+        //         }
+
+        //         try {
+        //           download.disabled = true;
+        //           download.innerHTML = `
+        //       <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        //         <circle cx="12" cy="12" r="10" stroke-width="2" opacity="0.25"/>
+        //         <path stroke-width="2" d="M4 12a8 8 0 018-8"/>
+        //       </svg>
+        //       Загрузка...
+        //     `;
+
+        //           // Создаем временный элемент для скачивания
+        //           const response = await fetch(currentVideoUrl, { mode: 'no-cors' });
+        //           const blob = await response.blob();
+
+        //           const a = document.createElement('a');
+        //           a.href = URL.createObjectURL(blob);
+        //           a.download = `${title.replace(/[^a-z0-9]/gi, '_').substring(0, 50)}_${select.value}.mp4`;
+        //           document.body.appendChild(a);
+        //           a.click();
+        //           document.body.removeChild(a);
+        //           URL.revokeObjectURL(a.href);
+
+        //           showStatus('✓ Скачивание начато!', 'success');
+        //         } catch (error) {
+        //           showStatus(`❌ Ошибка скачивания: ${error.message}`, 'error');
+        //         } finally {
+        //           download.disabled = false;
+        //           download.innerHTML = `
+        //       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        //         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+        //       </svg>
+        //       Скачать
+        //     `;
+        //         }
+        //       });
+
+        //       // Клик по thumbnail = воспроизведение
+        //       thumbnailImg.addEventListener('click', play.click.bind(play));
+
+        //       // Вставляем в DOM
+        //       const targetContainer = document.getElementById('video-container') || document.body;
+        //       targetContainer.appendChild(container);
+      }
+
+      uploader.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const link = document.querySelector('#link').value;
+
+        const response = await fetch('get-basic-info', {
+          body: JSON.stringify({ link: 'https://www.youtube.com/watch?v=LOZuxwVk7TU' }),
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        const data = await response.json();
+        renderBasicInfo(data);
+      });
+    </script>
+  </body>
+</html>

@@ -3,6 +3,12 @@ import { logger } from '../logger.js';
 import config from '../challenge.config.js';
 import path from 'path';
 import fs from 'fs/promises';
+import ytdl from '@distube/ytdl-core';
+import { createRequire } from 'module';
+import { getAvailableQualities, getYoutubeVideoData } from './video-utils.js';
+
+const require = createRequire(import.meta.url);
+
 export const controllers = {
   '/': {
     get: (req, res) => {
@@ -57,6 +63,16 @@ export const controllers = {
       var data = await fs.readFile(path.join(process.cwd(), 'src', 'pdfs', `output_${fileByName[pass]}.pdf`));
       res.contentType('application/pdf');
       res.send(data);
+    },
+  },
+
+  '/get-basic-info': {
+    post: async (req, res) => {
+      const { link } = req.body;
+      console.log({ link });
+
+      const data = await getYoutubeVideoData(link);
+      res.json(data);
     },
   },
 };

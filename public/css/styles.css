@@ -9,7 +9,7 @@
 body {
   /*font-family: 'Henry',sans-serif;*/
   background: var(--main-bg-color) !important;
-  font-family: 'Pattaya', serif;
+  font-family: 'Montserrat', serif;
 
   font-optical-sizing: auto;
   font-style: normal;
@@ -787,7 +787,7 @@ body {
 }
 
 body {
-  font-family: 'Pattaya', serif;
+  font-family: 'Montserrat', serif;
   font-weight: bold;
   background: linear-gradient(135deg, #0f1419 0%, #1a3a4a 50%, #0f1419 100%);
   color: var(--color-text);
