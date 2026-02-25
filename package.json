@@ -11,6 +11,7 @@
     "pm2": "pm2 start pm2.json"
   },
   "dependencies": {
+    "@leenguyen/react-flip-clock-countdown": "^1.7.2",
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
     "@prisma/internals": "^7.2.0",
@@ -27,8 +28,10 @@
     "next": "16.1.1",
     "pg": "^8.16.3",
     "prisma": "^7.2.0",
+    "radix-ui": "^1.4.3",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "shadcn": "^3.8.5",
     "tailwind-merge": "^3.4.0",
     "tsx": "^4.21.0"
   },
