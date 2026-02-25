@@ -11,6 +11,7 @@ import { PROGRAM } from "./data";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Spinner } from "@/components/ui/spinner";
+import { toast } from "sonner";
 
 const Coutdown = React.lazy(() => import("./Coutdown"));
 
@@ -108,8 +109,14 @@ export default function Dashboard() {
       if (data?.done) {
         setDoneList(data.done);
       }
+
+      toast.success("Успех!", { position: "top-right" });
     } catch (e) {
       console.error(e);
+      toast.error("Не фортануло!", {
+        description: (e as Error).message,
+        position: "top-right",
+      });
     }
   }, []);
 
@@ -185,8 +192,8 @@ const ProgramColumn: React.FC<ProgramColumnProps> = ({
   );
 
   const handleCheckboxChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      onChange(data.date, event.target.checked);
+    (value: boolean) => {
+      onChange(data.date, value);
     },
     [data.date, onChange],
   );
@@ -214,7 +221,7 @@ const ProgramColumn: React.FC<ProgramColumnProps> = ({
             <Checkbox
               className="border border-black cursor-pointer"
               checked={checked}
-              onChange={handleCheckboxChange}
+              onCheckedChange={handleCheckboxChange}
             />
           </div>
         </div>
