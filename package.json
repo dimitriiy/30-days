@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev -p 8080",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 8080",
     "lint": "eslint",
     "db:seed": "ts-node --require tsconfig-paths/register prisma/seed.ts",
     "pm2": "pm2 start pm2.json"

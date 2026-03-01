@@ -5,8 +5,9 @@ import type { User } from "../auth/register/route";
 
 import type { Session } from "../auth/login/route";
 
-const DB_PATH = path.join(process.cwd(), "app/api/run/db.json");
+const DB_PATH = path.join(process.cwd(), "db.json");
 
+console.log({ DB_PATH });
 interface Program {
   date: string;
   day: number;

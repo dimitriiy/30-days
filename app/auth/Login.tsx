@@ -1,8 +1,11 @@
+"use client";
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useRouter } from "next/navigation";
 
 async function httpPost(url: string, body: Record<string, unknown>) {
   const response = await fetch(url, {
@@ -21,6 +24,7 @@ export function Login({ toggle }: { toggle: () => void }) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,6 +33,8 @@ export function Login({ toggle }: { toggle: () => void }) {
     try {
       const data = await httpPost("/api/auth/login", { email, password });
       console.log("Успешный вход:", data);
+
+      router.push("/");
     } catch (err) {
       setError((err as Error).message || "Не удалось войти");
     } finally {
