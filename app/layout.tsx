@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import { httpGet } from "@/lib/api";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,8 +18,9 @@ export const metadata: Metadata = {
   title: "My APP",
   description: "",
 };
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:8080";
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;

@@ -124,21 +124,23 @@
   }
 }
 
-table {
-  table-layout: auto;
-  width: 100%;
-  border: 1px solid #000;
-}
-
-thead {
-  background: #f8db47;
-  font-weight: bold;
-}
-
-td {
-  border: 1px solid #000;
-}
-
 .capitalize {
   text-transform: capitalize;
+}
+
+.sprite-animation {
+  width: 150px;
+  height: 300px;
+  object-fit: cover;
+  animation: sprite 1.4s steps(4, jump-none) infinite;
+}
+
+@keyframes sprite {
+  from {
+    object-position: 0% 0%;
+  }
+
+  to {
+    object-position: 100% 0%;
+  }
 }
