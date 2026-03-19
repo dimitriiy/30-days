@@ -95,14 +95,14 @@ export function EditDialog({ data, close, onSaved }: Props) {
 
           {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
 
-          <DialogFooter>
+          <DialogFooter className="pt-4">
             <DialogClose asChild>
               <Button type="button" variant="outline" disabled={isPending}>
                 Отмена, пошел ебашить!
               </Button>
             </DialogClose>
             <Button type="submit">
-              {isPending ? "Сохраняю..." : "Сохрани мне!"}
+              {isPending ? "Сохраняю..." : "Сохранить!"}
             </Button>
           </DialogFooter>
         </form>

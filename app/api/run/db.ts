@@ -7,7 +7,6 @@ import type { Session } from "../auth/login/route";
 
 const DB_PATH = path.join(process.cwd(), "db.json");
 
-console.log({ DB_PATH });
 interface Program {
   date: string;
   day: number;
@@ -120,7 +119,6 @@ class DatabaseService {
     const db = this.ensureDb();
 
     await db.update((data) => {
-      console.log("sessions", data);
       data.sessions[session.token] = session;
     });
   }

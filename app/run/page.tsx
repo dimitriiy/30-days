@@ -1,12 +1,6 @@
 "use client";
 
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { Spinner } from "@/components/ui/spinner";
 import { EditDialog } from "./components/Edit";
@@ -25,7 +19,7 @@ import {
   toggleDone,
 } from "./model";
 
-const Coutdown = React.lazy(() => import("./components/Coutdown"));
+const Tool = React.lazy(() => import("./components/Tool"));
 
 export type ProgramItem = {
   date: string; // "dd.mm.yyyy"
@@ -36,12 +30,11 @@ export type ProgramItem = {
 };
 
 const Dashboard = reatomComponent(() => {
-  const { isFirstPending, isPending } = programsStatus();
+  const { isPending } = programsStatus();
 
   const programs = programsAtom();
   const doneList = doneListAtom();
 
-  console.log(doneList);
   const openDialog = (card: ProgramItem) => {
     selectedCard.set(card);
     isModalOpen.setTrue();
@@ -77,8 +70,8 @@ const Dashboard = reatomComponent(() => {
   const currentSelectedCard = selectedCard();
   return (
     <div className="flex min-h-screen items-center justify-center font-sans bg-[#070101]">
-      <main className="flex min-h-screen w-full flex-col items-center justify-between py-2 px-5 sm:items-start">
-        <div className="flex flex-wrap item-st">
+      <main className="flex min-h-screen w-full flex-col items-center justify-between py-2 px-5 sm:items-start ">
+        <div className="lg:grid flex-wrap lg:grid-cols-7 gap-4 flex">
           {programs.map((program: ProgramItem) => {
             const isToday = program.date === today;
 
@@ -108,7 +101,9 @@ const Dashboard = reatomComponent(() => {
         )}
         <React.Suspense>
           <div className="fixed bottom-0 left-1/2 -translate-x-1/2">
-            <Coutdown
+            <Tool
+              doneList={doneList}
+              programs={programs}
               bottomSlot={<Statistics programs={programs} done={doneList} />}
             />
           </div>

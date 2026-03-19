@@ -26,7 +26,7 @@ export const Statistics = ({ programs, done }: Props) => {
     .reduce((acc, c) => (acc += c.distance), 0);
 
   const progress = Math.floor((doneDistance / accDistance) * 100);
-  console.log(accDistance, doneDistance);
+
   const item = {
     name: "Пройдено",
     progress,

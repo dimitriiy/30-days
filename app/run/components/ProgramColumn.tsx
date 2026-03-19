@@ -1,9 +1,12 @@
+"use client";
+
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 
 import { useCallback, useMemo } from "react";
 import type { ProgramItem } from "../page";
-import * as motion from "motion/react-client";
+
+import { motion, useAnimationControls } from "motion/react";
 
 type ProgramColumnProps = {
   data: ProgramItem;
@@ -22,6 +25,8 @@ export const ProgramColumn: React.FC<ProgramColumnProps> = ({
   todayRef,
   onClick,
 }) => {
+  const controls = useAnimationControls();
+
   const formatted = useMemo(() => formatRuDate(data.date), [data.date]);
   const [fullDateLabel, shortDateLabel] = useMemo(
     () => splitDateLabels(formatted, data.date),
@@ -35,15 +40,27 @@ export const ProgramColumn: React.FC<ProgramColumnProps> = ({
 
   const handleCheckboxChange = useCallback(
     (value: boolean) => {
+      if (value) {
+        controls.start({
+          scale: 1.2,
+          rotate: 360,
+          transition: { duration: 0.5 },
+        });
+        setTimeout(() => {
+          controls.start({ scale: 1, transition: { duration: 0.5 } });
+        }, 600);
+      }
+
       onChange(data, value);
     },
-    [data, onChange],
+    [data, onChange, controls],
   );
 
   return (
     <motion.div
       initial={{ scale: 0.7 }}
       whileInView={{ scale: 1 }}
+      animate={controls}
       onClick={onClick}
       ref={isToday ? todayRef : undefined}
       className={`shadow-2xl min-h-[200px] min-w-[200px] rounded-xl flex-1 text-white  m-1 relative ${
@@ -66,7 +83,7 @@ export const ProgramColumn: React.FC<ProgramColumnProps> = ({
           <div className="tday font-bold">День {data.day}</div>
           <div className="done">
             <Checkbox
-              className="border border-black cursor-pointer"
+              className="border border-black cursor-pointer size-6"
               checked={checked}
               onCheckedChange={handleCheckboxChange}
               onClick={(e) => e.stopPropagation()}

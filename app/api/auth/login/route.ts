@@ -42,7 +42,6 @@ export async function POST(request: NextRequest) {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    console.log(hashedPassword, existingUser.passwordHash);
     const hashValid = await bcrypt.compare(password, existingUser.passwordHash);
 
     if (!hashValid) {

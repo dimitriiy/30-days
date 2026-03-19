@@ -491,7 +491,48 @@
       "id": 70
     }
   ],
-  "done": [],
-  "users": {},
-  "sessions": {}
+  "done": [
+    1,
+    2,
+    6,
+    8,
+    7,
+    5,
+    13,
+    25
+  ],
+  "users": {
+    "39544377": {
+      "email": "mazitov.dima@mail.ru",
+      "username": "dimedrol",
+      "passwordHash": "$2b$12$2d2VphjjfWQxYNcLj4KM7.viBozCHeJCdBlwv3BOmM7WbELhg9a1W",
+      "id": 39544377
+    }
+  },
+  "sessions": {
+    "10f00b34971d4abddc66d612998ceef4261e7d6c8399805eaaae11bb1a15d915": {
+      "userId": 39544377,
+      "token": "10f00b34971d4abddc66d612998ceef4261e7d6c8399805eaaae11bb1a15d915",
+      "expiresAt": 1772354197865,
+      "data": {}
+    },
+    "4e4b733de56bffb0ca6560dddcf7757c06a0ed9f43a529db48766e78a5705097": {
+      "userId": 39544377,
+      "token": "4e4b733de56bffb0ca6560dddcf7757c06a0ed9f43a529db48766e78a5705097",
+      "expiresAt": 1772354391240,
+      "data": {}
+    },
+    "02465ae07d9b797fe4901a468fc6f66818e74dd4c13114d6023a3fb958e223d6": {
+      "userId": 39544377,
+      "token": "02465ae07d9b797fe4901a468fc6f66818e74dd4c13114d6023a3fb958e223d6",
+      "expiresAt": 1772355174263,
+      "data": {}
+    },
+    "e32d32de725162c5f6dbe9b1b9e611eb6cf21f722afd3540c27c34dca4933c99": {
+      "userId": 39544377,
+      "token": "e32d32de725162c5f6dbe9b1b9e611eb6cf21f722afd3540c27c34dca4933c99",
+      "expiresAt": 1773902740442,
+      "data": {}
+    }
+  }
 }

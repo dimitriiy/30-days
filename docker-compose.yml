@@ -1,0 +1,15 @@
+version: "3.8"
+
+services:
+  next-app:
+    image: my-next-image # или соберите через build: .
+    build: .
+    container_name: next-app
+    ports:
+      - "8080:8080"
+    volumes:
+      - type: bind
+        source: /var/app/db.json # файл на сервере (HOST)
+        target: /app/db.json # путь в контейнере
+        read_only: false # можно true, если только чтение
+    restart: unless-stopped

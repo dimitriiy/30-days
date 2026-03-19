@@ -11,7 +11,7 @@ export function generateSessionToken() {
 export function createSession(
   userId: number,
   data = {},
-  ttlMs = 1000 * 60 * 5,
+  ttlMs = 60 * 60 * 24 * 7,
 ): Session {
   const token = generateSessionToken();
   const expiresAt = Date.now() + ttlMs;

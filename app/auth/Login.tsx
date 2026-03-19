@@ -32,7 +32,6 @@ export function Login({ toggle }: { toggle: () => void }) {
     setLoading(true);
     try {
       const data = await httpPost("/api/auth/login", { email, password });
-      console.log("Успешный вход:", data);
 
       router.push("/");
     } catch (err) {

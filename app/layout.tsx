@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "My APP",
+  title: "Dimedrol App",
   description: "",
 };
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:8080";
