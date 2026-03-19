@@ -23,7 +23,6 @@ import { useMemo } from "react";
 import type { ProgramItem } from "../page";
 
 interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
   data: TData[];
   doneList: number[];
   close: () => void;
@@ -33,6 +32,9 @@ export type Week = {
   weekNumber: number;
   days: ProgramItem[];
 };
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Workout = any;
 export function groupWorkoutsByWeek(workouts: Workout[]) {
   const weeks: Record<number, (Workout | null)[]> = {};
 
