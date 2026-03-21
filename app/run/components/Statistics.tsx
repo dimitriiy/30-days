@@ -3,7 +3,6 @@ import type { ProgramItem } from "../page";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { type ChartConfig, ChartContainer } from "@/components/ui/chart";
 import { PolarAngleAxis, RadialBar, RadialBarChart } from "recharts";
-import { cn } from "@/lib/utils";
 
 interface Props {
   programs: ProgramItem[];
@@ -17,7 +16,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export const Statistics = ({ programs, done }: Props) => {
+export const PieStatistics = ({ programs, done }: Props) => {
   const accDistance = programs.reduce((acc, c) => (acc += c.distance), 0);
 
   const doneSet = new Set(done);

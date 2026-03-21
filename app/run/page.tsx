@@ -5,7 +5,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import { EditDialog } from "./components/Edit";
 
-import { Statistics } from "./components/Statistics";
+import { PieStatistics } from "./components/Statistics";
 import { ProgramColumn } from "./components/ProgramColumn";
 import { getTodayString } from "@/lib/dates";
 import { reatomComponent } from "@reatom/react";
@@ -104,7 +104,7 @@ const Dashboard = reatomComponent(() => {
             <Tool
               doneList={doneList}
               programs={programs}
-              bottomSlot={<Statistics programs={programs} done={doneList} />}
+              bottomSlot={<PieStatistics programs={programs} done={doneList} />}
             />
           </div>
         </React.Suspense>

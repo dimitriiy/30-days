@@ -4,7 +4,7 @@ import React, { type CSSProperties } from "react";
 import FlipClockCountdown from "@leenguyen/react-flip-clock-countdown";
 import "@leenguyen/react-flip-clock-countdown/dist/index.css";
 import * as motion from "motion/react-client";
-import { StatTable } from "./StatTable";
+import { StatDesktop } from "./StatDesktop";
 import type { ProgramItem } from "../page";
 
 const Tool = ({
@@ -45,7 +45,7 @@ const Tool = ({
       </motion.div>
 
       {show && (
-        <StatTable
+        <StatDesktop
           doneList={doneList}
           data={programs}
           close={() => setShow(false)}
