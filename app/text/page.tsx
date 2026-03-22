@@ -1,112 +1,118 @@
 "use client";
 
-import { useState } from "react";
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import { useState, useEffect, useCallback } from "react";
+import { Plus, Trash2 } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { MarkdownViewer } from "./components/MarkdownViewer";
+import { MarkdownEditor } from "./components/MarkdownEditor";
+import { EditToggle } from "./components/EditToggle";
+import { fetchPages, createPage, deletePage, type Page } from "./api";
+import './styles.css';
 
-type Mode = "edit" | "read";
+export default function TextPage() {
+  const [pages, setPages] = useState<Page[]>([]);
+  const [activePageId, setActivePageId] = useState<string>("");
+  const [isEditing, setIsEditing] = useState(false);
 
-const DATA = `# Заглушка документа
+  useEffect(() => {
+    fetchPages().then((data) => {
+      setPages(data);
+      if (data.length > 0) setActivePageId(String(data[0].id));
+    });
+  }, []);
 
-Это текст, который как будто пришёл с сервера.
-
-## Список
-- пункт 1
-- пункт 2
-- ~~зачёркивание~~
-- [x] задача выполнена
-
-## Таблица
-
-| Имя | Статус |
-| --- | --- |
-| Документ | Загружен |
-`;
-
-export default function Page() {
-  const [mode, setMode] = useState<Mode>("edit");
-  const [markdown, setMarkdown] = useState<string>(
-    "# Привет\n\nНачни писать Markdown...",
+  const handleContentChange = useCallback(
+    (content: string) => {
+      setPages((prev) =>
+        prev.map((p) =>
+          String(p.id) === activePageId ? { ...p, content } : p,
+        ),
+      );
+    },
+    [activePageId],
   );
-  const [status, setStatus] = useState<string>("");
 
-  async function loadDocument() {
-    setStatus("Загрузка...");
+  const handleCreatePage = async () => {
+    const newPage = await createPage();
+    setPages((prev) => [...prev, newPage]);
+    setActivePageId(String(newPage.id));
+  };
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+  const handleDeletePage = async () => {
+    const id = Number(activePageId);
+    await deletePage(id);
+    setPages((prev) => {
+      const next = prev.filter((p) => p.id !== id);
+      if (next.length > 0) setActivePageId(String(next[0].id));
+      return next;
+    });
+  };
 
-    setMarkdown(DATA);
+  const activePage = pages.find((p) => String(p.id) === activePageId);
 
-    setStatus("Документ загружен (заглушка)");
-  }
-
-  async function saveDocument() {
-    setStatus("Сохранение...");
-
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
-    console.log("Сохраняем документ:", markdown);
-    setStatus("Документ сохранён (заглушка)");
-  }
-
-  function toggleMode() {
-    setMode((prev) => (prev === "edit" ? "read" : "edit"));
+  if (pages.length === 0) {
+    return (
+      <main className="dark flex min-h-screen items-center justify-center bg-background text-foreground">
+        <p className="text-muted-foreground">Загрузка...</p>
+      </main>
+    );
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100">
-      <div className="mx-auto max-w-6xl px-6 py-8">
-        <div className="mb-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              Markdown editor
-            </h1>
-            <p className="mt-1 text-sm text-slate-400">
-              {status || "Готов к работе"}
-            </p>
+    <main className="dark min-h-screen bg-background text-foreground">
+      <div className="mx-auto max-w-5xl px-6 py-8">
+        <Tabs value={activePageId} onValueChange={setActivePageId}>
+          <div className="flex items-center gap-2">
+            <TabsList className="max-w-md-[300px] overflow-x-auto overflow-y-hidden">
+              {pages.map((page) => (
+                <TabsTrigger key={page.id} value={String(page.id)}>
+                  Страница {page.id}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleCreatePage}
+              className="size-8 rounded-full text-muted-foreground transition-colors hover:bg-emerald-500/15 hover:text-emerald-400"
+              aria-label="Создать страницу"
+            >
+              <Plus className="size-4" />
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleDeletePage}
+              disabled={pages.length <= 1}
+              className="size-8 rounded-full text-muted-foreground transition-colors hover:bg-red-500/15 hover:text-red-400 disabled:opacity-30"
+              aria-label="Удалить страницу"
+            >
+              <Trash2 className="size-4" />
+            </Button>
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={toggleMode}
-              className="rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-medium transition hover:bg-slate-800"
-            >
-              {mode === "edit" ? "Режим чтения" : "Режим редактирования"}
-            </button>
-
-            <button
-              onClick={saveDocument}
-              className="rounded-xl border border-emerald-700 bg-emerald-600/20 px-4 py-2 text-sm font-medium text-emerald-300 transition hover:bg-emerald-600/30"
-            >
-              Сохранить
-            </button>
-
-            <button
-              onClick={loadDocument}
-              className="rounded-xl border border-sky-700 bg-sky-600/20 px-4 py-2 text-sm font-medium text-sky-300 transition hover:bg-sky-600/30"
-            >
-              Загрузить
-            </button>
-          </div>
-        </div>
-
-        <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl">
-          {mode === "edit" ? (
-            <textarea
-              value={markdown}
-              onChange={(e) => setMarkdown(e.target.value)}
-              placeholder="Пиши Markdown здесь..."
-              className="min-h-[75vh] w-full resize-y bg-slate-900 px-5 py-4 font-mono text-[15px] leading-7 text-slate-100 outline-none placeholder:text-slate-500"
-            />
-          ) : (
-            <div className="min-h-[75vh] px-5 py-4">
-              <article className="prose prose-invert max-w-none prose-headings:scroll-mt-20 prose-pre:overflow-x-auto prose-table:w-full">
-                <Markdown remarkPlugins={[remarkGfm]}>{markdown}</Markdown>
-              </article>
-            </div>
-          )}
-        </div>
+          {pages.map((page) => (
+            <TabsContent key={page.id} value={String(page.id)}>
+              {isEditing ? (
+                <MarkdownEditor
+                  content={page.content}
+                  onChange={handleContentChange}
+                />
+              ) : (
+                <MarkdownViewer content={page.content} />
+              )}
+            </TabsContent>
+          ))}
+        </Tabs>
       </div>
+
+      <EditToggle
+        isEditing={isEditing}
+        onToggle={() => setIsEditing((prev) => !prev)}
+      />
     </main>
   );
 }

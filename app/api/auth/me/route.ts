@@ -1,11 +1,13 @@
-import { NextResponse, NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
-import { databaseService } from "../../run/db";
+import { getUserById } from "@/server/application/use-cases/user/getUserById";
+import { ensureJsonStore } from "@/server/infrastructure/persistence/json/json-store";
+import { jsonUserRepository } from "@/server/infrastructure/repositories/user/JsonUserRepository";
 import { withAuth } from "../withAuth";
 
-// GET /api/me
-export const GET = withAuth(async (req, session) => {
-  const user = await databaseService.getUserById(+session.userId);
+export const GET = withAuth(async (_req, session) => {
+  await ensureJsonStore();
+  const user = await getUserById(jsonUserRepository, +session.userId);
 
   return NextResponse.json({
     data: user,

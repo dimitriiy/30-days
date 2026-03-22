@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Login } from "./Login";
-import { Register } from "./Register";
+import { Login } from "@/features/auth/ui/Login";
+import { Register } from "@/features/auth/ui/Register";
 
 export const Auth = () => {
   const [needRegister, setRegister] = useState(true);

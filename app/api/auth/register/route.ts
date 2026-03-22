@@ -1,48 +1,27 @@
 import { NextResponse, NextRequest } from "next/server";
-import bcrypt from "bcrypt";
 
-import pool from "@/lib/db";
-import { databaseService } from "../../run/db";
+import { registerUser } from "@/server/application/use-cases/user/registerUser";
+import { ensureJsonStore } from "@/server/infrastructure/persistence/json/json-store";
+import { jsonUserRepository } from "@/server/infrastructure/repositories/user/JsonUserRepository";
 
-export type User = {
-  id: number;
-  email: string;
-  passwordHash: string;
-  username: string;
-};
-// GET /api/usersnpm
-export async function GET() {
-  //   const client = await pool.connect();
-
-  const users = await pool.query(
-    "SELECT * FROM users ORDER BY created_at DESC",
-  );
-
-  return NextResponse.json(users.rows);
-}
-
-// POST /api/users
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { email, password, username } = body;
 
-    const existingUser = await databaseService.findUser(email);
+    await ensureJsonStore();
+    const result = await registerUser(jsonUserRepository, {
+      email,
+      password,
+      username,
+    });
 
-    if (existingUser) {
+    if (!result.ok) {
       return NextResponse.json(
-        { message: "Пользователь уже существует", data: existingUser },
+        { message: "Пользователь уже существует" },
         { status: 401 },
       );
     }
-
-    const hashedPassword = await bcrypt.hash(password, 12);
-
-    await databaseService.createUser({
-      email,
-      username,
-      passwordHash: hashedPassword,
-    });
 
     return NextResponse.json(
       { message: "Пользователь создан" },

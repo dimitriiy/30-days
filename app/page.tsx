@@ -7,7 +7,7 @@ import { computed, withAsyncData } from "@reatom/core";
 import { reatomComponent } from "@reatom/react";
 
 import { Spinner } from "@/components/ui/spinner";
-import type { User } from "./api/auth/register/route";
+import type { User } from "@/entities/user/model/types";
 
 const user = computed(async () => {
   return httpGet(`/api/auth/me`);
