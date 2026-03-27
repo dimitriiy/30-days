@@ -1,0 +1,116 @@
+import type { Question } from "./system";
+
+export const mockQuestions: Question[] = [
+  {
+    id: 1,
+    text: "Что на фото?",
+    imageUrl: "/quize/assets/q01-kumquat.png",
+    options: ["Гренадилла", "Чинола", "Инжир", "Кумкват"],
+    correctAnswer: "Кумкват",
+  },
+  {
+    id: 2,
+    text: "Что рекламируют с помощью этих дверей?",
+    options: null,
+    correctAnswer: null,
+  },
+  {
+    id: 3,
+    text: "Из какого фильма цитата «Какие люди и без охраны!»?",
+    options: [
+      "Любовь и голуби",
+      "Москва слезам не верит",
+      "Кавказская пленница",
+      "Покровские ворота",
+    ],
+    correctAnswer: "Кавказская пленница",
+  },
+  {
+    id: 4,
+    text:
+      "В Средние века дороги в Англии были настолько небезопасны, что человек в повозке держал в руке меч. Последствия этого видны до сих пор. Каковы же они?",
+    options: null,
+    correctAnswer: null,
+  },
+  {
+    id: 5,
+    text: "Назовите номер этой модели телефона.",
+    options: null,
+    correctAnswer: null,
+  },
+  {
+    id: 6,
+    text: "Кто из этих персонажей произнес фразу «Средства у нас есть. У нас ума не хватает!»?",
+    imageUrl: "/quize/assets/q06-characters.png",
+    options: ["Карлсон", "Кот Матроскин", "Кеша", "Домовенок Кузя"],
+    correctAnswer: "Кот Матроскин",
+  },
+  {
+    id: 7,
+    text: "Спутником какой планеты Солнечной системы является Титан?",
+    imageUrl: "/quize/assets/q07-titan.png",
+    options: ["Меркурий", "Юпитер", "Сатурн", "Марс"],
+    correctAnswer: "Сатурн",
+  },
+  {
+    id: 8,
+    text: "Альбатрос может спать во время полета.",
+    imageUrl: "/quize/assets/q08-albatross.png",
+    options: ["Правда", "Неправда"],
+    correctAnswer: "Правда",
+  },
+  {
+    id: 9,
+    text: "У близнецов отпечатки пальцев одинаковые.",
+    imageUrl: "/quize/assets/q09-twins.png",
+    options: ["Правда", "Неправда"],
+    correctAnswer: "Неправда",
+  },
+  {
+    id: 10,
+    text: "Страусы прячут голову в песок.",
+    options: ["Правда", "Неправда"],
+    correctAnswer: "Неправда",
+  },
+  {
+    id: 11,
+    text: "Вода может закипеть при температуре около 90 градусов.",
+    imageUrl: "/quize/assets/q11-water.png",
+    options: ["Правда", "Неправда"],
+    correctAnswer: "Правда",
+  },
+  {
+    id: 12,
+    text: "Красный цвет раздражает быков.",
+    imageUrl: "/quize/assets/q12-bull.png",
+    options: ["Правда", "Неправда"],
+    correctAnswer: "Неправда",
+  },
+  {
+    id: 13,
+    text: "Это что за покемон?",
+    imageUrl: "/quize/assets/q13-bulbasaur.png",
+    options: ["Бульбазавр", "Сквиртл", "Джигглипуф", "Слоупок"],
+    correctAnswer: "Бульбазавр",
+  },
+  {
+    id: 14,
+    text: "В греческой мифологии он был богом сновидений, а в фильме пробуждал.",
+    options: null,
+    correctAnswer: null,
+  },
+  {
+    id: 15,
+    text: "Кадр из какого мультфильма изображен?",
+    imageUrl: "/quize/assets/q15-cartoon-frame.png",
+    options: null,
+    correctAnswer: null,
+  },
+  {
+    id: 16,
+    text: "Кто это такой молоденький?",
+    imageUrl: "/quize/assets/q16-girl.png",
+    options: null,
+    correctAnswer: null,
+  },
+];

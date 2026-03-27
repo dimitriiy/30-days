@@ -1,0 +1,54 @@
+.quiz-theme {
+  --quiz-navy: #1a1a3e;
+  --quiz-navy-deep: #12122e;
+  --quiz-navy-light: #252552;
+  --quiz-purple: #6c5ce7;
+  --quiz-purple-light: #a29bfe;
+  --quiz-teal: #00c9a7;
+  --quiz-teal-hover: #00b396;
+  --quiz-coral: #e8505b;
+  --quiz-coral-hover: #d4454f;
+  --quiz-white: #ffffff;
+  --quiz-surface: #f5f5f8;
+  --quiz-surface-dim: #ededf0;
+  --quiz-text-primary: #1a1a3e;
+  --quiz-text-secondary: #636e72;
+  --quiz-text-light: #ffffff;
+  --quiz-text-muted: #b2bec3;
+  --quiz-card-image-bg: #1e2a55;
+  --quiz-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  --quiz-shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.12);
+  --quiz-radius-sm: 8px;
+  --quiz-radius-md: 12px;
+  --quiz-radius-lg: 16px;
+  --quiz-radius-xl: 24px;
+  --quiz-radius-full: 9999px;
+}
+
+.quiz-theme .quiz-time-up-overlay {
+  animation: quiz-time-up-fade-in 0.28s ease-out both;
+}
+
+.quiz-theme .quiz-time-up-content {
+  animation: quiz-time-up-pop-in 0.34s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+}
+
+@keyframes quiz-time-up-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes quiz-time-up-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
