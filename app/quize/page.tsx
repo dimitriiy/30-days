@@ -31,7 +31,7 @@ export default function QuizWelcome() {
             className="w-full"
             onClick={() => gameInProgress.set(true)}
           >
-            Start playing
+            Начать игру!
           </QuizButton>
         </Link>
       </div>

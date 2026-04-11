@@ -2,6 +2,7 @@ import { action, atom, effect } from "@reatom/core";
 import { audioApi } from "./audio";
 import { TIMER_DURATION } from "./constants";
 import { currentQuestionAtom, showCorrectAnswerAtom } from "./question-state";
+import { isQuestionWithAudio } from "../system";
 
 export const showTimeIsUpScreenAtom = atom(false, "showTimeIsUpScreen");
 
@@ -48,7 +49,9 @@ export const startTimer = action(() => {
     }
   }, 1000);
 
-  audioApi.playTick();
+  if (!isQuestionWithAudio(currentQuestionAtom())) {
+    audioApi.playTick();
+  }
 });
 
 export const stopTimer = action(() => {

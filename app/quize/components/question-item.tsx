@@ -39,7 +39,7 @@ export const QuestionItem = reatomComponent(
         className="flex min-h-0 flex-1 flex-col gap-4"
       >
         <h1
-          className={`${isQuestionWithText(question) && "py-10"} shrink-0 text-center text-xl font-bold leading-snug text-white sm:text-5xl`}
+          className={`${isQuestionWithText(question) && "py-10"} whitespace-pre-line shrink-0 text-center text-5xl font-bold leading-snug text-white sm:text-5xl`}
         >
           {question.text}
         </h1>

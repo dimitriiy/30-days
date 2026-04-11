@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { BaseQuestion } from "../system";
 import { QuizOptionsList } from "./quiz-options-list";
+import { AnimatePresence, motion } from "motion/react";
 
 type QeustionFooterProps = {
   question: BaseQuestion;
@@ -25,7 +26,9 @@ export function QeustionFooter({
     return idx >= 0 ? idx : null;
   }, [derivedOptions, question.correctAnswer, showCorrectAnswer]);
 
-  if (!derivedOptions) return null;
+  if (!derivedOptions) {
+    return null;
+  }
 
   return (
     <div className="shrink-0 m-4 w-full">
