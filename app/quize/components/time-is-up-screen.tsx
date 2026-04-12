@@ -1,10 +1,11 @@
 import { cn } from "@/lib/utils";
 import { Clock3, X } from "lucide-react";
-import { useEffect, type ComponentProps } from "react";
+import { useEffect } from "react";
 import * as motion from "motion/react-client";
+import type { HTMLMotionProps } from "motion/react";
 import { audioApi } from "../models";
 
-type TimeIsUpScreenProps = ComponentProps<"section"> & {
+type TimeIsUpScreenProps = HTMLMotionProps<"section"> & {
   message?: string;
   onClose?: () => void;
 };

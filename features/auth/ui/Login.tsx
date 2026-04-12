@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 async function httpPost(url: string, body: Record<string, unknown>) {
@@ -12,13 +13,11 @@ async function httpPost(url: string, body: Record<string, unknown>) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
-  if (!response.ok) {
-    throw new Error(`Ошибка ${response.status}: ${response.statusText}`);
-  }
+
   return response.json();
 }
 
-export function Login({ toggle }: { toggle: () => void }) {
+export function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -34,6 +33,8 @@ export function Login({ toggle }: { toggle: () => void }) {
 
       router.push("/");
     } catch (err) {
+      console.log(err);
+
       setError((err as Error).message || "Не удалось войти");
     } finally {
       setLoading(false);
@@ -89,13 +90,12 @@ export function Login({ toggle }: { toggle: () => void }) {
 
             <p className="mt-6 text-sm text-muted-foreground text-center">
               Нет аккаунта?{" "}
-              <a
-                href="#"
+              <Link
+                href="/register"
                 className="font-medium text-primary hover:text-primary/90 transition-colors"
-                onClick={toggle}
               >
                 Регистрация
-              </a>
+              </Link>
             </p>
           </form>
         </div>

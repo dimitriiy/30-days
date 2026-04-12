@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Link from "next/link";
 import React, { useState } from "react";
 
 interface RegisterData {
@@ -42,7 +43,7 @@ async function registerUser(data: RegisterData): Promise<RegisterResponse> {
   return response.json();
 }
 
-export function Register({ toggle }: { toggle: () => void }) {
+export function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
@@ -171,13 +172,12 @@ export function Register({ toggle }: { toggle: () => void }) {
 
           <p className="mt-6 text-sm text-muted-foreground text-center">
             Уже есть аккаунт?{" "}
-            <a
-              href="#"
+            <Link
+              href="/login"
               className="font-medium text-primary hover:text-primary/90 transition-colors"
-              onClick={toggle}
             >
               Войти
-            </a>
+            </Link>
           </p>
         </div>
       </div>
