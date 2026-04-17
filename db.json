@@ -1,0 +1,679 @@
+{
+  "programs": [
+    {
+      "date": "13.04.2026",
+      "day": 1,
+      "program": "14 км лёгкий кросс",
+      "distance": 14,
+      "id": 1,
+      "isDone": false
+    },
+    {
+      "date": "14.04.2026",
+      "day": 2,
+      "program": "Отдых",
+      "distance": 0,
+      "id": 2,
+      "isDone": false
+    },
+    {
+      "date": "15.04.2026",
+      "day": 3,
+      "program": "Кросс",
+      "distance": 7,
+      "id": 3,
+      "isDone": false
+    },
+    {
+      "date": "16.04.2026",
+      "day": 4,
+      "program": "9.5 км бег в лёгком темпе",
+      "distance": 9.5,
+      "id": 4,
+      "isDone": false,
+      "prevDistance": 10
+    },
+    {
+      "date": "17.04.2026",
+      "day": 5,
+      "program": "Отдых",
+      "distance": 0,
+      "id": 5,
+      "isDone": false
+    },
+    {
+      "date": "18.04.2026",
+      "day": 6,
+      "program": "8 км бег в лёгком темпе + ОФП",
+      "distance": 8,
+      "id": 6,
+      "isDone": false
+    },
+    {
+      "date": "19.04.2026",
+      "day": 7,
+      "program": "18 км длительный бег",
+      "distance": 18,
+      "id": 7,
+      "isDone": false
+    },
+    {
+      "date": "20.04.2026",
+      "day": 8,
+      "program": "Отдых",
+      "distance": 0,
+      "id": 8,
+      "isDone": false
+    },
+    {
+      "date": "21.04.2026",
+      "day": 9,
+      "program": "9 км бег в лёгком темпе + 6 ускорений по 100 м через 100 м трусцой",
+      "distance": 9,
+      "id": 9,
+      "isDone": false
+    },
+    {
+      "date": "22.04.2026",
+      "day": 10,
+      "program": "2 км разминка, Пороговый бег: 3 х (3 км / 3 мин. отдыха), 2 км заминка",
+      "distance": 13,
+      "id": 10,
+      "isDone": false
+    },
+    {
+      "date": "23.04.2026",
+      "day": 11,
+      "program": "11 км бег в лёгком темпе",
+      "distance": 11,
+      "id": 11,
+      "isDone": false
+    },
+    {
+      "date": "24.04.2026",
+      "day": 12,
+      "program": "Отдых",
+      "distance": 0,
+      "id": 12,
+      "isDone": false
+    },
+    {
+      "date": "25.04.2026",
+      "day": 13,
+      "program": "9 км бег в лёгком темпе + ОФП",
+      "distance": 9,
+      "id": 13,
+      "isDone": false
+    },
+    {
+      "date": "26.04.2026",
+      "day": 14,
+      "program": "20 км длительный бег",
+      "distance": 20,
+      "id": 14,
+      "isDone": false
+    },
+    {
+      "date": "27.04.2026",
+      "day": 15,
+      "program": "8 км лёгкий кросс",
+      "distance": 8,
+      "id": 15,
+      "isDone": false
+    },
+    {
+      "date": "28.04.2026",
+      "day": 16,
+      "program": "10 км бег в лёгком темпе + 6 ускорений по 100 м через 100 м трусцой",
+      "distance": 10,
+      "id": 16,
+      "isDone": false
+    },
+    {
+      "date": "29.04.2026",
+      "day": 17,
+      "program": "2 км разминка, Повторный бег: 6 х (600 м быстро через 600 м трусцой), 2 км заминка",
+      "distance": 11.2,
+      "id": 17,
+      "isDone": false
+    },
+    {
+      "date": "30.04.2026",
+      "day": 18,
+      "program": "10 км бег в лёгком темпе",
+      "distance": 10,
+      "id": 18,
+      "isDone": false
+    },
+    {
+      "date": "01.05.2026",
+      "day": 19,
+      "program": "8 км бег в лёгком темпе",
+      "distance": 8,
+      "id": 19,
+      "isDone": false
+    },
+    {
+      "date": "02.05.2026",
+      "day": 20,
+      "program": "Отдых",
+      "distance": 0,
+      "id": 20,
+      "isDone": false
+    },
+    {
+      "date": "03.05.2026",
+      "day": 21,
+      "program": "24 км длительный бег",
+      "distance": 24,
+      "id": 21,
+      "isDone": false
+    },
+    {
+      "date": "04.05.2026",
+      "day": 22,
+      "program": "Отдых",
+      "distance": 0,
+      "id": 22,
+      "isDone": false
+    },
+    {
+      "date": "05.05.2026",
+      "day": 23,
+      "program": "8 км бег в лёгком темпе",
+      "distance": 8,
+      "id": 23,
+      "isDone": false
+    },
+    {
+      "date": "06.05.2026",
+      "day": 24,
+      "program": "2 км разминка, Интервальный бег: 5 х (1 км / 3 мин. отдых), 2 км заминка",
+      "distance": 9,
+      "id": 24,
+      "isDone": false
+    },
+    {
+      "date": "07.05.2026",
+      "day": 25,
+      "program": "8 км бег в лёгком темпе",
+      "distance": 8,
+      "id": 25,
+      "isDone": false
+    },
+    {
+      "date": "08.05.2026",
+      "day": 26,
+      "program": "Отдых",
+      "distance": 0,
+      "id": 26,
+      "isDone": false
+    },
+    {
+      "date": "09.05.2026",
+      "day": 27,
+      "program": "7 км лёгкий бег + ОФП",
+      "distance": 7,
+      "id": 27,
+      "isDone": false
+    },
+    {
+      "date": "10.05.2026",
+      "day": 28,
+      "program": "18 км длительный бег",
+      "distance": 18,
+      "id": 28,
+      "isDone": false
+    },
+    {
+      "date": "11.05.2026",
+      "day": 29,
+      "program": "Отдых",
+      "distance": 0,
+      "id": 29,
+      "isDone": false
+    },
+    {
+      "date": "12.05.2026",
+      "day": 30,
+      "program": "10 км бег в лёгком темпе",
+      "distance": 10,
+      "id": 30,
+      "isDone": false
+    },
+    {
+      "date": "13.05.2026",
+      "day": 31,
+      "program": "2 км разминка, Пороговый бег: 4 х (2 км / 3 мин. отдых), 2 км заминка",
+      "distance": 12,
+      "id": 31,
+      "isDone": false
+    },
+    {
+      "date": "14.05.2026",
+      "day": 32,
+      "program": "10 км бег в лёгком темпе",
+      "distance": 10,
+      "id": 32,
+      "isDone": false
+    },
+    {
+      "date": "15.05.2026",
+      "day": 33,
+      "program": "Отдых",
+      "distance": 0,
+      "id": 33,
+      "isDone": false
+    },
+    {
+      "date": "16.05.2026",
+      "day": 34,
+      "program": "8 км бег в лёгком темпе + ОФП",
+      "distance": 8,
+      "id": 34,
+      "isDone": false
+    },
+    {
+      "date": "17.05.2026",
+      "day": 35,
+      "program": "24 км длительный бег",
+      "distance": 24,
+      "id": 35,
+      "isDone": false
+    },
+    {
+      "date": "18.05.2026",
+      "day": 36,
+      "program": "Отдых",
+      "distance": 0,
+      "id": 36,
+      "isDone": false
+    },
+    {
+      "date": "19.05.2026",
+      "day": 37,
+      "program": "12 км бег в лёгком темпе + 6 ускорений по 100 м через 100 м трусцой",
+      "distance": 12,
+      "id": 37,
+      "isDone": false
+    },
+    {
+      "date": "20.05.2026",
+      "day": 38,
+      "program": "3 км разминка, Повторный бег: 8 х (600 м быстро через 600 м трусцой), 2 км заминка",
+      "distance": 14.6,
+      "id": 38,
+      "isDone": false
+    },
+    {
+      "date": "21.05.2026",
+      "day": 39,
+      "program": "12 км бег в лёгком темпе",
+      "distance": 12,
+      "id": 39,
+      "isDone": false
+    },
+    {
+      "date": "22.05.2026",
+      "day": 40,
+      "program": "Отдых",
+      "distance": 0,
+      "id": 40,
+      "isDone": false
+    },
+    {
+      "date": "23.05.2026",
+      "day": 41,
+      "program": "10 км бег в лёгком темпе + ОФП",
+      "distance": 10,
+      "id": 41,
+      "isDone": false
+    },
+    {
+      "date": "24.05.2026",
+      "day": 42,
+      "program": "28 км длительный бег",
+      "distance": 28,
+      "id": 42,
+      "isDone": false
+    },
+    {
+      "date": "25.05.2026",
+      "day": 43,
+      "program": "Отдых",
+      "distance": 0,
+      "id": 43,
+      "isDone": false
+    },
+    {
+      "date": "26.05.2026",
+      "day": 44,
+      "program": "10 км бег в лёгком темпе",
+      "distance": 10,
+      "id": 44,
+      "isDone": false
+    },
+    {
+      "date": "27.05.2026",
+      "day": 45,
+      "program": "2 км разминка, Пороговый бег: 4 х (2 км / 3 мин. отдыха), 2 км заминка",
+      "distance": 12,
+      "id": 45,
+      "isDone": false
+    },
+    {
+      "date": "28.05.2026",
+      "day": 46,
+      "program": "12 км бег в лёгком темпе",
+      "distance": 12,
+      "id": 46,
+      "isDone": false
+    },
+    {
+      "date": "29.05.2026",
+      "day": 47,
+      "program": "Отдых",
+      "distance": 0,
+      "id": 47,
+      "isDone": false
+    },
+    {
+      "date": "30.05.2026",
+      "day": 48,
+      "program": "10 км бег в лёгком темпе + ОФП",
+      "distance": 10,
+      "id": 48,
+      "isDone": false
+    },
+    {
+      "date": "31.05.2026",
+      "day": 49,
+      "program": "30 км длительный бег",
+      "distance": 30,
+      "id": 49,
+      "isDone": false
+    },
+    {
+      "date": "01.06.2026",
+      "day": 50,
+      "program": "Отдых",
+      "distance": 0,
+      "id": 50,
+      "isDone": false
+    },
+    {
+      "date": "02.06.2026",
+      "day": 51,
+      "program": "8 км бег в лёгком темпе + 6 ускорений по 100 м через 100 м трусцой",
+      "distance": 8,
+      "id": 51,
+      "isDone": false
+    },
+    {
+      "date": "03.06.2026",
+      "day": 52,
+      "program": "2 км разминка, Интервальный бег: 5 х (1 км / 3 мин. отдых), 2 км заминка",
+      "distance": 9,
+      "id": 52,
+      "isDone": false
+    },
+    {
+      "date": "04.06.2026",
+      "day": 53,
+      "program": "10 км бег в лёгком темпе",
+      "distance": 10,
+      "id": 53,
+      "isDone": false
+    },
+    {
+      "date": "05.06.2026",
+      "day": 54,
+      "program": "Отдых",
+      "distance": 0,
+      "id": 54,
+      "isDone": false
+    },
+    {
+      "date": "06.06.2026",
+      "day": 55,
+      "program": "6 км лёгкий бег + ОФП",
+      "distance": 6,
+      "id": 55,
+      "isDone": false
+    },
+    {
+      "date": "07.06.2026",
+      "day": 56,
+      "program": "35 км длительный бег (пиковый)",
+      "distance": 35,
+      "id": 56,
+      "isDone": false
+    },
+    {
+      "date": "08.06.2026",
+      "day": 57,
+      "program": "Отдых",
+      "distance": 0,
+      "id": 57,
+      "isDone": false
+    },
+    {
+      "date": "09.06.2026",
+      "day": 58,
+      "program": "8 км бег в лёгком темпе",
+      "distance": 8,
+      "id": 58,
+      "isDone": false
+    },
+    {
+      "date": "10.06.2026",
+      "day": 59,
+      "program": "2 км разминка, Пороговый бег: 3 х (2 км / 3 мин. отдыха), 2 км заминка",
+      "distance": 10,
+      "id": 59,
+      "isDone": false
+    },
+    {
+      "date": "11.06.2026",
+      "day": 60,
+      "program": "8 км бег в лёгком темпе",
+      "distance": 8,
+      "id": 60,
+      "isDone": false
+    },
+    {
+      "date": "12.06.2026",
+      "day": 61,
+      "program": "Отдых или лёгкая ОФП",
+      "distance": 0,
+      "id": 61,
+      "isDone": false
+    },
+    {
+      "date": "13.06.2026",
+      "day": 62,
+      "program": "22 км длительный бег",
+      "distance": 22,
+      "id": 62,
+      "isDone": false
+    },
+    {
+      "date": "14.06.2026",
+      "day": 63,
+      "program": "Отдых",
+      "distance": 0,
+      "id": 63,
+      "isDone": false
+    },
+    {
+      "date": "15.06.2026",
+      "day": 64,
+      "program": "7 км бег в лёгком темпе",
+      "distance": 7,
+      "id": 64,
+      "isDone": false
+    },
+    {
+      "date": "16.06.2026",
+      "day": 65,
+      "program": "2 км разминка, Повторный бег: 4 х (400 м быстро через 400 м трусцой), 4 х (200 м быстро через 200 м трусцой), 2 км заминка",
+      "distance": 8,
+      "id": 65,
+      "isDone": false
+    },
+    {
+      "date": "17.06.2026",
+      "day": 66,
+      "program": "7 км бег в лёгком темпе",
+      "distance": 7,
+      "id": 66,
+      "isDone": false
+    },
+    {
+      "date": "18.06.2026",
+      "day": 67,
+      "program": "Отдых или мобильность/ОФП",
+      "distance": 0,
+      "id": 67,
+      "isDone": false
+    },
+    {
+      "date": "19.06.2026",
+      "day": 68,
+      "program": "6 км бег в лёгком темпе",
+      "distance": 6,
+      "id": 68,
+      "isDone": false
+    },
+    {
+      "date": "20.06.2026",
+      "day": 69,
+      "program": "16 км длительный бег",
+      "distance": 16,
+      "id": 69,
+      "isDone": false
+    },
+    {
+      "date": "21.06.2026",
+      "day": 70,
+      "program": "Отдых",
+      "distance": 0,
+      "id": 70,
+      "isDone": false
+    },
+    {
+      "date": "22.06.2026",
+      "day": 71,
+      "program": "2 км разминка, Пороговый бег: 3 х (1 км / 3 мин. отдыха), 2 км заминка",
+      "distance": 7,
+      "id": 71,
+      "isDone": false
+    },
+    {
+      "date": "23.06.2026",
+      "day": 72,
+      "program": "Отдых",
+      "distance": 0,
+      "id": 72,
+      "isDone": false
+    },
+    {
+      "date": "24.06.2026",
+      "day": 73,
+      "program": "7 км бег в лёгком темпе",
+      "distance": 7,
+      "id": 73,
+      "isDone": false
+    },
+    {
+      "date": "25.06.2026",
+      "day": 74,
+      "program": "6 км бег в лёгком темпе",
+      "distance": 6,
+      "id": 74,
+      "isDone": false
+    },
+    {
+      "date": "26.06.2026",
+      "day": 75,
+      "program": "12 км длительный бег",
+      "distance": 12,
+      "id": 75,
+      "isDone": false
+    },
+    {
+      "date": "27.06.2026",
+      "day": 76,
+      "program": "Отдых",
+      "distance": 0,
+      "id": 76,
+      "isDone": false
+    },
+    {
+      "date": "28.06.2026",
+      "day": 77,
+      "program": "6 км бег в лёгком темпе + 4 ускорения по 100 м",
+      "distance": 6,
+      "id": 77,
+      "isDone": false
+    },
+    {
+      "date": "29.06.2026",
+      "day": 78,
+      "program": "Отдых",
+      "distance": 0,
+      "id": 78,
+      "isDone": false
+    },
+    {
+      "date": "30.06.2026",
+      "day": 79,
+      "program": "6 км бег в лёгком темпе",
+      "distance": 6,
+      "id": 79,
+      "isDone": false
+    },
+    {
+      "date": "01.07.2026",
+      "day": 80,
+      "program": "30 минут бега в лёгком темпе",
+      "distance": 5,
+      "id": 80,
+      "isDone": false
+    },
+    {
+      "date": "02.07.2026",
+      "day": 81,
+      "program": "Отдых",
+      "distance": 0,
+      "id": 81,
+      "isDone": false
+    },
+    {
+      "date": "03.07.2026",
+      "day": 82,
+      "program": "Отдых — полный отдых, сборы на старт",
+      "distance": 0,
+      "id": 82,
+      "isDone": false
+    },
+    {
+      "date": "04.07.2026",
+      "day": 83,
+      "program": "Марафон! Целевой темп около 5:30/км",
+      "distance": 0,
+      "id": 83,
+      "isDone": false
+    }
+  ],
+  "done": [1, 2, 3, 4],
+  "users": {},
+  "sessions": {
+    "414bd3124397b5a9a9f38d0178ac994cdcbb3832b0e5ce500e387cf47dba2805": {
+      "userId": 86668269,
+      "token": "414bd3124397b5a9a9f38d0178ac994cdcbb3832b0e5ce500e387cf47dba2805",
+      "expiresAt": 1776285399727,
+      "data": {}
+    }
+  }
+}

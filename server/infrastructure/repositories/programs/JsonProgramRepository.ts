@@ -1,4 +1,3 @@
-
 import { Training } from "@/entities/workout/model/types";
 import type { ProgramRepository } from "@/server/domain/repositories/programs/ProgramRepository";
 
@@ -15,16 +14,21 @@ export class JsonProgramRepository implements ProgramRepository {
     return db.data.programs.find((p) => p.id === id);
   }
 
-  async update(
-    id: number,
-    updates: Partial<Omit<Training, "id">>,
-  ) {
+  async update(id: number, updates: Partial<Omit<Training, "id">>) {
     const db = await ensureJsonStore();
     await db.update(({ programs }) => {
       const program = programs.find((p) => p.id === id);
       if (!program) {
         throw new Error(`Training with id ${id} not found`);
       }
+
+      if (
+        updates.distance !== undefined &&
+        updates.distance !== program.distance
+      ) {
+        program.prevDistance = program.distance;
+      }
+
       Object.assign(program, updates);
     });
   }

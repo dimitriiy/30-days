@@ -30,7 +30,7 @@ const Tool = ({
         <div className="m-3 bg-[#252525] p-2 rounded-2xl">
           {topSlot}
           <FlipClockCountdown
-            to={new Date(2026, 4, 3).getTime()}
+            to={new Date(2026, 6, 4).getTime()}
             showLabels={false}
             style={
               {

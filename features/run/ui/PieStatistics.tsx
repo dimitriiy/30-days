@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import type { TrainingItem } from "@/entities/workout/model/types";
 import { calculateDistanceStats } from "../model/statistics";
@@ -20,10 +20,8 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export const PieStatistics = ({ programs, done }: Props) => {
-  const { allDistance, doneDistance, progress } = calculateDistanceStats(
-    programs,
-    done,
-  );
+  const { allDistance, doneDistance, progress, skippedDistance } =
+    calculateDistanceStats(programs, done);
 
   const item = {
     name: "Пройдено",
@@ -33,8 +31,7 @@ export const PieStatistics = ({ programs, done }: Props) => {
     href: "#",
     fill: "rgba(62,180,137,1)",
   };
- 
-  
+
   return (
     <div className="ptyary-2">
       <Card className="p-0 gap-0 ">
@@ -80,6 +77,9 @@ export const PieStatistics = ({ programs, done }: Props) => {
                 {item.current} km / {item.all} km
               </div>
               <dt className="text-sm text-muted-foreground">{item.name}</dt>
+              <div className="text-xs  text-muted-foreground mt-1">
+                Пропущено: {skippedDistance.toFixed()} km
+              </div>
             </div>
           </div>
         </CardContent>

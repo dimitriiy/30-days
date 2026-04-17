@@ -4,6 +4,7 @@ export type Training = {
   program: string;
   id: number;
   distance: number;
+  prevDistance?: number;
 };
 
 /** Training as returned from API (with completion flag when applicable). */
