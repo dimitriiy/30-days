@@ -17,22 +17,14 @@ interface DataTableProps {
   close: () => void;
 }
 
-export function StatDesktop({
-  doneList,
-  data,
-  close,
-}: DataTableProps) {
+export function StatDesktop({ doneList, data, close }: DataTableProps) {
   // console.log(weeks, doneList);
   return (
     <Dialog open={true} onOpenChange={close}>
       <DialogHeader>
-        <DialogTitle>Общая статистика</DialogTitle>
+        {/* <DialogTitle>Общая статистика</DialogTitle> */}
       </DialogHeader>
-      <DialogContent
-        className={
-          "lg:max-w-screen-lg max-h-screen"
-        }
-      >
+      <DialogContent className={"lg:max-w-screen-lg max-h-screen"}>
         <div className="scrollbar-shadcn px-1 w-full h-full max-h-[80vh] overflow-y-auto">
           <Tabs defaultValue="overview" className="w-full">
             <TabsList>

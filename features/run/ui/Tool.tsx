@@ -22,11 +22,7 @@ const Tool = ({
 
   return (
     <>
-      <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        onClick={() => setShow(true)}
-      >
+      <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
         <div className="m-3 bg-[#252525] p-2 rounded-2xl">
           {topSlot}
           <FlipClockCountdown
@@ -40,7 +36,7 @@ const Tool = ({
               } as CSSProperties
             }
           />
-          {bottomSlot}
+          <div onClick={() => setShow(true)}>{bottomSlot}</div>
         </div>
       </motion.div>
 

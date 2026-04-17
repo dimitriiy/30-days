@@ -11,6 +11,7 @@ import { useDoneProgramLookup } from "../model/useDoneProgramLookup";
 import { useTodayProgramRef } from "../model/useTodayProgramRef";
 import {
   doneListAtom,
+  isCalendarOpen,
   isModalOpen,
   programsAtom,
   programsResource,
@@ -18,6 +19,9 @@ import {
   selectedCard,
   toggleDone,
 } from "../model/runModel";
+import { Button } from "@/components/ui/button";
+import { CalendarDays } from "lucide-react";
+import { CalendarPopup } from "./CalendarPopup";
 
 const Tool = React.lazy(() => import("./Tool"));
 
@@ -43,7 +47,6 @@ const RunDashboard = reatomComponent(() => {
 
   const currentSelectedCard = selectedCard();
 
-  
   return (
     <div className="flex min-h-screen items-center justify-center font-sans bg-[#070101]">
       <main className="flex min-h-screen w-full flex-col items-center justify-between py-2 px-5 sm:items-start ">
@@ -77,12 +80,23 @@ const RunDashboard = reatomComponent(() => {
         </React.Suspense>
       </main>
 
-      {
-        isPending && programs.length && <div className="fixed right-5 bottom-5 bg-black p-3 rounded-lg opacity-80">
+      <div className="fixed z-10 top-3">
+        <Button onClick={isCalendarOpen.setTrue}>
+          <CalendarDays />
+        </Button>
+      </div>
+
+      {isCalendarOpen() && (
+        <CalendarPopup
+          open={isCalendarOpen()}
+          onClose={isCalendarOpen.setFalse}
+        />
+      )}
+      {isPending && programs.length && (
+        <div className="fixed right-5 bottom-5 bg-black p-3 rounded-lg opacity-80">
           <Spinner color="#fff" className="size-8" />
         </div>
-      }
-
+      )}
     </div>
   );
 });

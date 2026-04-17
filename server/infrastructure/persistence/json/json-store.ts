@@ -2,6 +2,7 @@ import path from "path";
 
 import { JSONFilePreset } from "lowdb/node";
 
+import type { RunEvent } from "@/entities/run-event/model/types";
 import type { Session, User } from "@/entities/user/model/types";
 import type { Training } from "@/entities/workout/model/types";
 
@@ -10,6 +11,7 @@ export const DB_PATH = path.join(process.cwd(), "db.json");
 interface Data {
   programs: Training[];
   done: number[];
+  events: RunEvent[];
   users: Record<string, User>;
   sessions: Record<string, Session>;
 }
@@ -17,6 +19,7 @@ interface Data {
 const defaultData: Data = {
   programs: [],
   done: [],
+  events: [],
   users: {},
   sessions: {},
 };

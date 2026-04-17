@@ -1,4 +1,4 @@
-export type HttpMethod = "GET" | "POST" | "PUT";
+export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 
 export async function httpGet<T>(url: string): Promise<T> {
   const res = await fetch(url, {
@@ -44,6 +44,23 @@ export async function httpPut<T, B = unknown>(
 
   if (!res.ok) {
     throw new Error(`Failed to PUT ${url}`);
+  }
+
+  return res.json() as Promise<T>;
+}
+
+export async function httpDelete<T, B = unknown>(
+  url: string,
+  body: B,
+): Promise<T> {
+  const res = await fetch(url, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    throw new Error(`Failed to DELETE ${url}`);
   }
 
   return res.json() as Promise<T>;

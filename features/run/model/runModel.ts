@@ -17,6 +17,8 @@ import { toast } from "sonner";
 
 export const isModalOpen = reatomBoolean(false, "isModalOpen");
 
+export const isCalendarOpen = reatomBoolean(false, "isCalendarOpen");
+
 export const selectedCard = atom<TrainingItem | null>(null);
 
 export const programsResource = computed(async () => {
