@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
 
     store.set(SESSION_TOKEN_KEY, result.session.token, {
       httpOnly: true,
-      maxAge: 60 * 60 * 24 * 7,
+      maxAge: 60 * 60 * 24 * 900, // = 900 days
       path: "/",
       sameSite: "lax",
     });

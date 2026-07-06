@@ -34,6 +34,7 @@ export const closeEventForm = action(() => {
 
 export const eventsResource = computed(async () => {
   const data = await wrap(httpGet<RunEvent[]>("/api/run/events"));
+
   return { eventsData: data };
 }, "events.resource").extend(
   withAsyncData({
@@ -51,17 +52,14 @@ export const eventsAtom = computed(
 
 export const eventsStatus = eventsResource.status;
 
-export const createEvent = action(
-  async (input: Omit<RunEvent, "id">) => {
-    await wrap(
-      httpPost<{ success: boolean; data: RunEvent }>("/api/run/events", input),
-    );
-    eventsResource.retry();
-    closeEventForm();
-    toast.success("Событие создано!", { position: "top-right" });
-  },
-  "events.create",
-).extend(withAsync(), withTransaction());
+export const createEvent = action(async (input: Omit<RunEvent, "id">) => {
+  await wrap(
+    httpPost<{ success: boolean; data: RunEvent }>("/api/run/events", input),
+  );
+  eventsResource.retry();
+  closeEventForm();
+  toast.success("Событие создано!", { position: "top-right" });
+}, "events.create").extend(withAsync(), withTransaction());
 
 createEvent.onReject.extend(
   withCallHook((error) => {
@@ -72,17 +70,14 @@ createEvent.onReject.extend(
   }),
 );
 
-export const updateEvent = action(
-  async (input: RunEvent) => {
-    await wrap(
-      httpPut<{ success: boolean; data: RunEvent[] }>("/api/run/events", input),
-    );
-    eventsResource.retry();
-    closeEventForm();
-    toast.success("Событие обновлено!", { position: "top-right" });
-  },
-  "events.update",
-).extend(withAsync(), withTransaction());
+export const updateEvent = action(async (input: RunEvent) => {
+  await wrap(
+    httpPut<{ success: boolean; data: RunEvent[] }>("/api/run/events", input),
+  );
+  eventsResource.retry();
+  closeEventForm();
+  toast.success("Событие обновлено!", { position: "top-right" });
+}, "events.update").extend(withAsync(), withTransaction());
 
 updateEvent.onReject.extend(
   withCallHook((error) => {
@@ -93,19 +88,16 @@ updateEvent.onReject.extend(
   }),
 );
 
-export const deleteEvent = action(
-  async (id: number) => {
-    await wrap(
-      httpDelete<{ success: boolean; data: RunEvent[] }>("/api/run/events", {
-        id,
-      }),
-    );
-    eventsResource.retry();
-    closeEventForm();
-    toast.success("Событие удалено!", { position: "top-right" });
-  },
-  "events.delete",
-).extend(withAsync(), withTransaction());
+export const deleteEvent = action(async (id: number) => {
+  await wrap(
+    httpDelete<{ success: boolean; data: RunEvent[] }>("/api/run/events", {
+      id,
+    }),
+  );
+  eventsResource.retry();
+  closeEventForm();
+  toast.success("Событие удалено!", { position: "top-right" });
+}, "events.delete").extend(withAsync(), withTransaction());
 
 deleteEvent.onReject.extend(
   withCallHook((error) => {

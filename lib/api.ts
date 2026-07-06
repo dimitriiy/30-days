@@ -1,15 +1,22 @@
 export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 
+export class HttpError extends Error {
+  status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "HttpError";
+    this.status = status;
+  }
+}
+
 export async function httpGet<T>(url: string): Promise<T> {
   const res = await fetch(url, {
     method: "GET",
   });
 
   if (!res.ok) {
-    if (res.status === 401) {
-      window.location.href = "/login";
-    }
-    throw new Error(`Failed to fetch ${url}`);
+    throw new HttpError(`Failed to fetch ${url}`, res.status);
   }
 
   return res.json() as Promise<T>;

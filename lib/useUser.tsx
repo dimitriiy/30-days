@@ -1,10 +1,22 @@
+"use client";
+
 import { computed, withAsyncData } from "@reatom/core";
 import { reatomComponent } from "@reatom/react";
-import { httpGet } from "./api";
+import { httpGet, HttpError } from "./api";
 
 
 const userQuery = computed(async () => {
-    return httpGet(`/api/auth/me`);
+    try {
+      return await httpGet(`/api/auth/me`);
+    } catch (err) {
+      if (err instanceof HttpError && err.status === 401) {
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+        return;
+      }
+      throw err;
+    }
   }).extend(withAsyncData({
     cacheParams:true
   }));

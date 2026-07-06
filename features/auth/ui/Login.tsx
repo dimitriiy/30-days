@@ -1,44 +1,21 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-
-async function httpPost(url: string, body: Record<string, unknown>) {
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-
-  return response.json();
-}
+import { useState } from "react";
+import { useAuth } from "../model/useAuth";
 
 export function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
+  const { login, isLoading, error, clearError } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setLoading(true);
-    try {
-      await httpPost("/api/auth/login", { email, password });
-
-      router.push("/");
-    } catch (err) {
-      console.log(err);
-
-      setError((err as Error).message || "Не удалось войти");
-    } finally {
-      setLoading(false);
-    }
+    clearError();
+    await login({ email, password });
   };
 
   return (
@@ -84,8 +61,8 @@ export function Login() {
 
             {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
 
-            <Button type="submit" className="mt-4 w-full" disabled={loading}>
-              {loading ? "Вход..." : "Войти"}
+            <Button type="submit" className="mt-4 w-full" disabled={isLoading}>
+              {isLoading ? "Вход..." : "Войти"}
             </Button>
 
             <p className="mt-6 text-sm text-muted-foreground text-center">

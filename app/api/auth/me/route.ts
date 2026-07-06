@@ -9,6 +9,13 @@ export const GET = withAuth(async (_req, session) => {
   await ensureJsonStore();
   const user = await getUserById(jsonUserRepository, +session.userId);
 
+  if (!user) {
+    return NextResponse.json(
+      { error: "Пользователь не существует" },
+      { status: 404 },
+    );
+  }
+
   return NextResponse.json({
     data: user,
   });

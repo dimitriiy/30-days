@@ -11,8 +11,7 @@ export class JsonUserRepository implements UserRepository {
   async findByEmail(email: string) {
     const db = await ensureJsonStore();
     return (
-      Object.values(db.data.users).find((user) => user.email === email) ??
-      null
+      Object.values(db.data.users).find((user) => user.email === email) ?? null
     );
   }
 

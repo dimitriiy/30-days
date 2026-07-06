@@ -5,5 +5,6 @@ export async function getUserById(
   users: UserRepository,
   id: number,
 ): Promise<User | null> {
+  console.log(users);
   return users.getById(id);
 }
