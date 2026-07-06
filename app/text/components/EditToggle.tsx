@@ -1,7 +1,7 @@
 "use client";
 
 import { Pencil, Eye } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { GlassButton as Button } from "@/components/ui/glass-button";
 
 interface EditToggleProps {
   isEditing: boolean;

@@ -1,7 +1,7 @@
 "use client";
 
-import { TableCell, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+import { GlassTableCell as TableCell, GlassTableRow as TableRow } from "@/components/glass-table";
+import { GlassBadge as Badge } from "@/components/ui/glass-badge";
 import type { TrainingItem } from "@/entities/workout/model/types";
 import { type Week, calculateWeekProgress } from "@/features/run/model";
 

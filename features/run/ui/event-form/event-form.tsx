@@ -1,11 +1,11 @@
 "use client";
 
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  GlassDialog as Dialog,
+  GlassDialogContent as DialogContent,
+  GlassDialogHeader as DialogHeader,
+  GlassDialogTitle as DialogTitle,
+} from "@/components/ui/glass-dialog";
 import { EventFormFields } from "./ui/form-fields";
 import { FormActions } from "./ui/form-actions";
 import { useEventForm } from "./model/useEventForm";

@@ -1,6 +1,6 @@
 "use client";
 
-import { TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { GlassTableBody as TableBody, GlassTableCell as TableCell, GlassTableRow as TableRow } from "@/components/glass-table";
 import type { TrainingItem } from "@/entities/workout/model/types";
 import { useGroupedWeeks } from "./model/useGroupedWeeks";
 import { StatTableHeader } from "./ui/table-header";

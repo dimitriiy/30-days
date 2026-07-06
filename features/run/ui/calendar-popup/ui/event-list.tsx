@@ -18,11 +18,11 @@ export const EventList = ({ events, onEdit }: EventListProps) => {
         >
           <div className="font-bold min-w-0">
             <div className="text-red-600 text-sm">{event.date}</div>
-            <div className="text-sm truncate">{event.location}</div>
+            <div className="text-sm truncate text-white">{event.location}</div>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="font-extrabold text-xl text-black">
+            <span className="font-extrabold text-xl text-white">
               {event.name}
             </span>
           </div>

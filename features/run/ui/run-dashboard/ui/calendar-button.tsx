@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { GlassButton as Button } from "@/components/ui/glass-button";
 import { CalendarDays } from "lucide-react";
 
 interface CalendarButtonProps {

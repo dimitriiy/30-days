@@ -38,6 +38,7 @@ export async function PUT(request: NextRequest) {
     const editParsed = editRunSchema.safeParse(payload);
     await ensureJsonStore();
 
+    console.log(editParsed);
     if (editParsed.success) {
       await updateProgram(jsonProgramRepository, editParsed.data);
     } else {
@@ -54,7 +55,7 @@ export async function PUT(request: NextRequest) {
                 done: doneParsed.error.flatten(),
               },
             },
-            message: "Ошибка валидации",  
+            message: "Ошибка валидации",
             issues: {
               edit: editParsed.error.flatten(),
               done: doneParsed.error.flatten(),
@@ -80,7 +81,10 @@ export async function PUT(request: NextRequest) {
     console.error("PUT /api/run/programs error", error);
 
     return NextResponse.json(
-      { success: false, message: "Внутренняя ошибка сервера" },
+      {
+        success: false,
+        message: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 },
     );
   }

@@ -1,6 +1,6 @@
 "use client";
 
-import { TableHeader, TableRow, TableHead } from "@/components/ui/table";
+import { GlassTableHeader as TableHeader, GlassTableRow as TableRow, GlassTableHead as TableHead } from "@/components/glass-table";
 
 export const StatTableHeader = () => {
   return (

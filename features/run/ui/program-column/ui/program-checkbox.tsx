@@ -1,6 +1,6 @@
 "use client";
 
-import { Checkbox } from "@/components/ui/checkbox";
+import { GlassCheckbox as Checkbox } from "@/components/glass-checkbox";
 
 interface ProgramCheckboxProps {
   checked: boolean;

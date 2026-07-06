@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { DialogFooter } from "@/components/ui/dialog";
+import { GlassButton as Button } from "@/components/ui/glass-button";
+import { GlassDialogFooter as DialogFooter } from "@/components/ui/glass-dialog";
 
 interface FormActionsProps {
   isEdit: boolean;

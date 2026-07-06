@@ -13,7 +13,7 @@ import {
 } from "@reatom/core";
 import type { TrainingItem } from "@/entities/workout/model/types";
 import { httpGet, httpPut } from "@/lib/api";
-import { toast } from "sonner";
+import { toast } from "@/components/glass-notification";
 
 export const isModalOpen = reatomBoolean(false, "isModalOpen");
 
@@ -65,14 +65,13 @@ export const toggleDone = action(async (data: TrainingItem, done: boolean) => {
     doneListAtom.set(response.data.filter((item) => item.isDone).map((item) => item.id));
   }
 
-  toast.success("Успех!", { position: "top-right" });
+  toast.success("Успех!");
 }, "programs.toggleDone").extend(withAsync(), withTransaction());
 
 toggleDone.onReject.extend(
   withCallHook((error) => {
     toast.error("Не фортануло!", {
       description: (error.error as Error).message,
-      position: "top-right",
     });
   }),
 );

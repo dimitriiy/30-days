@@ -1,10 +1,10 @@
 "use client";
 
 import {
-  DialogContent,
-  Dialog,
-  DialogHeader,
-} from "@/components/ui/dialog";
+  GlassDialogContent as DialogContent,
+  GlassDialog as Dialog,
+  GlassDialogHeader as DialogHeader,
+} from "@/components/ui/glass-dialog";
 import React from "react";
 
 interface StatDialogProps {

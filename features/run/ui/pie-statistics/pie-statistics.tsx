@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
+import { GlassCard as Card, GlassCardContent as CardContent } from "@/components/ui/glass-card";
 import { ProgressChart } from "./ui/progress-chart";
 import { StatsInfo } from "./ui/stats-info";
 import { useDistanceStats } from "./model";

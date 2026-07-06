@@ -11,7 +11,7 @@ import {
 } from "@reatom/core";
 import type { RunEvent } from "@/entities/run-event/model/types";
 import { httpDelete, httpGet, httpPost, httpPut } from "@/lib/api";
-import { toast } from "sonner";
+import { toast } from "@/components/glass-notification";
 
 export const isEventFormOpen = reatomBoolean(false, "events.isFormOpen");
 
@@ -58,14 +58,13 @@ export const createEvent = action(async (input: Omit<RunEvent, "id">) => {
   );
   eventsResource.retry();
   closeEventForm();
-  toast.success("Событие создано!", { position: "top-right" });
+  toast.success("Событие создано!");
 }, "events.create").extend(withAsync(), withTransaction());
 
 createEvent.onReject.extend(
   withCallHook((error) => {
     toast.error("Ошибка создания!", {
       description: (error.error as Error).message,
-      position: "top-right",
     });
   }),
 );
@@ -76,14 +75,13 @@ export const updateEvent = action(async (input: RunEvent) => {
   );
   eventsResource.retry();
   closeEventForm();
-  toast.success("Событие обновлено!", { position: "top-right" });
+  toast.success("Событие обновлено!");
 }, "events.update").extend(withAsync(), withTransaction());
 
 updateEvent.onReject.extend(
   withCallHook((error) => {
     toast.error("Ошибка обновления!", {
       description: (error.error as Error).message,
-      position: "top-right",
     });
   }),
 );
@@ -96,14 +94,13 @@ export const deleteEvent = action(async (id: number) => {
   );
   eventsResource.retry();
   closeEventForm();
-  toast.success("Событие удалено!", { position: "top-right" });
+  toast.success("Событие удалено!");
 }, "events.delete").extend(withAsync(), withTransaction());
 
 deleteEvent.onReject.extend(
   withCallHook((error) => {
     toast.error("Ошибка удаления!", {
       description: (error.error as Error).message,
-      position: "top-right",
     });
   }),
 );

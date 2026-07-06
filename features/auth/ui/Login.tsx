@@ -1,8 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { GlassButton as Button } from "@/components/ui/glass-button";
+import { GlassInput as Input } from "@/components/ui/glass-input";
 import Link from "next/link";
 import { useState } from "react";
 import { useAuth } from "../model/useAuth";
@@ -19,16 +18,16 @@ export function Login() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="glass-bg flex items-center justify-center min-h-screen">
       <div className="flex flex-1 flex-col justify-center px-4 py-10 lg:px-6">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-          <h2 className="text-center text-xl font-semibold text-foreground">
+          <h2 className="text-center text-xl font-semibold text-white">
             Войти или создать аккаунт
           </h2>
           <form onSubmit={handleSubmit} className="mt-6">
-            <Label htmlFor="email" className="font-medium text-foreground">
+            <label htmlFor="email" className="font-medium text-white">
               Электронная почта
-            </Label>
+            </label>
             <Input
               type="email"
               id="email"
@@ -41,12 +40,12 @@ export function Login() {
               required
             />
 
-            <Label
+            <label
               htmlFor="password"
-              className="mt-4 block font-medium text-foreground"
+              className="mt-4 block font-medium text-white"
             >
               Пароль
-            </Label>
+            </label>
             <Input
               type="password"
               id="password"
@@ -65,11 +64,11 @@ export function Login() {
               {isLoading ? "Вход..." : "Войти"}
             </Button>
 
-            <p className="mt-6 text-sm text-muted-foreground text-center">
+            <p className="mt-6 text-sm text-white/60 text-center">
               Нет аккаунта?{" "}
               <Link
                 href="/register"
-                className="font-medium text-primary hover:text-primary/90 transition-colors"
+                className="font-medium text-cyan-300 hover:text-cyan-300/90 transition-colors"
               >
                 Регистрация
               </Link>

@@ -1,4 +1,5 @@
 {
+  "done": [],
   "programs": [
     {
       "date": "06.07.2026",
@@ -925,7 +926,6 @@
       "isDone": false
     }
   ],
-
   "users": {
     "14171462": {
       "email": "mazitov.dima@mail.ru",
@@ -951,6 +951,12 @@
       "userId": 14171462,
       "token": "283694bc92f3a3d60017a054f0a99b7f505249e21dff7a8fcb3b44357ef76ede",
       "expiresAt": 1783341495211,
+      "data": {}
+    },
+    "42e9525f3d10801a7ce2f6441abd9702ba4fe77382725b9bfc323dc1fc5d6c01": {
+      "userId": 14171462,
+      "token": "42e9525f3d10801a7ce2f6441abd9702ba4fe77382725b9bfc323dc1fc5d6c01",
+      "expiresAt": 1783367866189,
       "data": {}
     }
   },

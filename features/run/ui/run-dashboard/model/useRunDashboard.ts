@@ -17,10 +17,9 @@ import {
 import { useAtom } from "@reatom/react";
 
 export function useRunDashboard() {
-  const status = useAtom(programsStatus);
-  const isPending = status.isPending;
-  const programs = useAtom(programsAtom);
-  const doneList = useAtom(doneListAtom);
+  const [{ isPending }] = useAtom(programsStatus);
+  const [programs] = useAtom(programsAtom);
+  const [doneList] = useAtom(doneListAtom);
   const isDateDone = useDoneProgramLookup(doneList);
   const { today, todayRef } = useTodayProgramRef(isPending);
 

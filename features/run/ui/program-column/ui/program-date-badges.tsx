@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
+import { GlassBadge as Badge } from "@/components/ui/glass-badge";
 
 interface ProgramDateBadgesProps {
   fullDateLabel: string;

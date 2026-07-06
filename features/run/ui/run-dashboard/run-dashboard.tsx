@@ -3,7 +3,7 @@
 import React from "react";
 import { reatomComponent } from "@reatom/react";
 import { Spinner } from "@/components/ui/spinner";
-import { Button } from "@/components/ui/button";
+import { GlassButton as Button } from "@/components/ui/glass-button";
 import { LogOut } from "lucide-react";
 import type { TrainingItem } from "@/entities/workout/model/types";
 import { EditDialog } from "../edit-dialog/edit-dialog";
@@ -56,9 +56,9 @@ const RunDashboard = reatomComponent(() => {
   const currentSelectedCard = selectedCard();
 
   return (
-    <div className="flex min-h-screen items-center justify-center font-sans bg-[#070101]">
+    <div className="flex min-h-screen items-center justify-center font-sans glass-bg">
       {/* Fixed Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 rounded-b-md bg-[#252525]/95 backdrop-blur-sm border-b border-gray-800/50">
+      <header className="fixed top-0 left-0 right-0 z-50 rounded-b-md  backdrop-blur-sm border-b border-gray-800/50">
         <div className="flex items-center justify-between px-5 py-3">
           <CalendarButton onClick={isCalendarOpen.setTrue} />
           <Button

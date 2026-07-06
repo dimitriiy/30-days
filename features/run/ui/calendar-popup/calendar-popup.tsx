@@ -1,6 +1,6 @@
 "use client";
 
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { GlassDialog as Dialog, GlassDialogContent as DialogContent } from "@/components/ui/glass-dialog";
 import { EventFormPopup } from "../event-form/event-form";
 import { CalendarDialogHeader } from "./ui/dialog-header";
 import { EventList } from "./ui/event-list";

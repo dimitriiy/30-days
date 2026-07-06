@@ -1,9 +1,7 @@
 "use client";
 
-import { Field, FieldGroup } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { GlassInput as Input } from "@/components/ui/glass-input";
+import { GlassTextarea as Textarea } from "@/components/glass-textarea";
 
 interface EditFormFieldsProps {
   program: string;
@@ -17,26 +15,30 @@ export const EditFormFields = ({
   isPending,
 }: EditFormFieldsProps) => {
   return (
-    <FieldGroup>
-      <Field>
-        <Label htmlFor="program">План</Label>
+    <div className="flex w-full flex-col gap-6">
+      <div className="flex w-full flex-col gap-1.5">
+        <label htmlFor="program" className="text-sm font-bold text-white">
+          План
+        </label>
         <Textarea
           id="program"
           name="program"
           defaultValue={program}
           disabled={isPending}
         />
-      </Field>
+      </div>
 
-      <Field>
-        <Label htmlFor="distance">Дистанция</Label>
+      <div className="flex w-full flex-col gap-1.5">
+        <label htmlFor="distance" className="text-sm font-bold text-white">
+          Дистанция
+        </label>
         <Input
           id="distance"
           name="distance"
           defaultValue={distance}
           disabled={isPending}
         />
-      </Field>
-    </FieldGroup>
+      </div>
+    </div>
   );
 };

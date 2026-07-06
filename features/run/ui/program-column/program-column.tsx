@@ -8,6 +8,10 @@ import { ProgramDateBadges } from "./ui/program-date-badges";
 import { ProgramContent } from "./ui/program-content";
 import { ProgramCheckbox } from "./ui/program-checkbox";
 import { DistanceBadge } from "./ui/distance-badge";
+import {
+  GlassCard as Card,
+  GlassCardContent as CardContent,
+} from "@/components/ui/glass-card";
 
 interface ProgramColumnProps {
   data: TrainingItem;
@@ -41,36 +45,29 @@ export const ProgramColumn = ({
   );
 
   return (
-    <motion.div
-      initial={{ scale: 0.9 }}
-      whileInView={{ scale: 1 }}
-      animate={controls}
-      onClick={onClick}
-      ref={isToday ? todayRef : undefined}
-      className={`shadow-2xl min-h-[200px] min-w-[200px] rounded-xl flex-1 text-white  m-1 relative ${
-        !isRestDay ? "bg-[#252525]" : "bg-[#363636]"
-      } ${
-        isToday
-          ? "ring-1 ring-yellow-400 ring-offset-2 ring-offset-[#070101]"
-          : checked
-            ? "ring-[#00fb0042] ring-1 ring-offset-[#070101]"
-            : ""
-      }`}
-    >
-      <ProgramDateBadges
-        fullDateLabel={fullDateLabel}
-        shortDateLabel={shortDateLabel}
-      />
+    <div className="flex-1 h-full min-h-[200px] min-w-[200px] rounded-xl text-white m-1 relative">
+      <Card
+        onClick={onClick}
+        ref={isToday ? todayRef : undefined}
+        className="h-full min-h-[200px] min-w-[200px] flex flex-col"
+      >
+        <ProgramDateBadges
+          fullDateLabel={fullDateLabel}
+          shortDateLabel={shortDateLabel}
+        />
+        <div className="tbody p-2 flex-1 flex flex-col">
+          <div className="top flex justify-between mb-2">
+            <div className="tday font-bold">День {data.day}</div>
+            <ProgramCheckbox
+              checked={checked}
+              onChange={handleCheckboxChange}
+            />
+          </div>
 
-      <div className="tbody p-2">
-        <div className="top flex justify-between mb-2">
-          <div className="tday font-bold">День {data.day}</div>
-          <ProgramCheckbox checked={checked} onChange={handleCheckboxChange} />
+          <ProgramContent items={programItems} />
+          {!isRestDay && <DistanceBadge distance={data.distance} />}
         </div>
-
-        <ProgramContent items={programItems} />
-        {!isRestDay && <DistanceBadge distance={data.distance} />}
-      </div>
-    </motion.div>
+      </Card>
+    </div>
   );
 };

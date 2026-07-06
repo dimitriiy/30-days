@@ -10,11 +10,11 @@ import { useAtom } from "@reatom/react";
 
 export function useCalendarPopupData() {
   const events = useAtom(eventsAtom);
-  const status = useAtom(eventsResource.status);
+  const [{ isPending }] = useAtom(eventsResource.status);
 
   return {
     events,
-    isPending: status.isPending,
+    isPending,
     onCreate: openCreateForm,
     onEdit: openEditForm,
   };

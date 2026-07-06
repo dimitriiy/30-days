@@ -8,7 +8,7 @@ import { StatTrigger } from "./ui/stat-trigger";
 import { FlipTimer } from "./ui/flip-timer";
 import type { TrainingItem } from "@/entities/workout/model/types";
 
-const TARGET_DATE = new Date(2026, 6, 4);
+const TARGET_DATE = new Date(2026, 9, 27);
 
 interface ToolProps {
   topSlot?: React.ReactNode;
@@ -17,18 +17,13 @@ interface ToolProps {
   doneList: number[];
 }
 
-const Tool = ({
-  topSlot,
-  bottomSlot,
-  programs,
-  doneList,
-}: ToolProps) => {
+const Tool = ({ topSlot, bottomSlot, programs, doneList }: ToolProps) => {
   const { show, open, close } = useToolState();
 
   return (
     <>
       <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
-        <div className="m-3 bg-[#252525] p-2 rounded-2xl">
+        <div className="m-3  p-2 rounded-2xl">
           {topSlot}
           <FlipTimer targetDate={TARGET_DATE} />
           <StatTrigger onClick={open}>{bottomSlot}</StatTrigger>
@@ -36,11 +31,7 @@ const Tool = ({
       </motion.div>
 
       {show && (
-        <StatDesktop
-          doneList={doneList}
-          data={programs}
-          close={close}
-        />
+        <StatDesktop doneList={doneList} data={programs} close={close} />
       )}
     </>
   );

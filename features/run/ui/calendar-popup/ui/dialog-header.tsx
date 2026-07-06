@@ -1,11 +1,11 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { GlassButton as Button } from "@/components/ui/glass-button";
 import {
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  GlassDialogHeader as DialogHeader,
+  GlassDialogTitle as DialogTitle,
+} from "@/components/ui/glass-dialog";
 
 interface CalendarDialogHeaderProps {
   onCreate: () => void;

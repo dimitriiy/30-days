@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Plus, Trash2 } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
+import { GlassTabs as Tabs, GlassTabsList as TabsList, GlassTabsTrigger as TabsTrigger, GlassTabsContent as TabsContent } from "@/components/ui/glass-tabs";
+import { GlassButton as Button } from "@/components/ui/glass-button";
 import { MarkdownViewer } from "./components/MarkdownViewer";
 import { MarkdownEditor } from "./components/MarkdownEditor";
 import { EditToggle } from "./components/EditToggle";

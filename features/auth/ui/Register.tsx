@@ -1,8 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { GlassButton as Button } from "@/components/ui/glass-button";
+import { GlassInput as Input } from "@/components/ui/glass-input";
 import Link from "next/link";
 import React, { useState } from "react";
 
@@ -78,19 +77,19 @@ export function Register() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background">
+    <div className="glass-bg flex items-center justify-center min-h-screen">
       <div className="flex flex-1 flex-col justify-center px-4 py-10 lg:px-6">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-          <h2 className="text-center text-2xl font-bold text-foreground mb-2">
+          <h2 className="text-center text-2xl font-bold text-white mb-2">
             Создать аккаунт
           </h2>
-          <p className="text-center text-sm text-muted-foreground">
+          <p className="text-center text-sm text-white/60">
             Введите свои данные для регистрации
           </p>
 
           {success && (
-            <div className="mt-6 p-4 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg">
-              <p className="text-sm font-medium text-green-800 dark:text-green-200">
+            <div className="mt-6 p-4 bg-emerald-500/20 backdrop-blur-xl border border-emerald-400/30 rounded-lg">
+              <p className="text-sm font-bold text-white text-emerald-100">
                 ✓ Регистрация успешна! Вы можете войти в аккаунт.
               </p>
             </div>
@@ -98,12 +97,12 @@ export function Register() {
 
           <form onSubmit={handleSubmit} className="mt-6 space-y-5">
             <div>
-              <Label
+              <label
                 htmlFor="email"
-                className="text-sm font-medium text-foreground"
+                className="text-sm font-bold text-white text-white"
               >
                 Email
-              </Label>
+              </label>
               <Input
                 id="email"
                 type="email"
@@ -117,12 +116,12 @@ export function Register() {
             </div>
 
             <div>
-              <Label
+              <label
                 htmlFor="username"
-                className="text-sm font-medium text-foreground"
+                className="text-sm font-bold text-white text-white"
               >
                 Никнейм
-              </Label>
+              </label>
               <Input
                 id="username"
                 type="text"
@@ -135,12 +134,12 @@ export function Register() {
             </div>
 
             <div>
-              <Label
+              <label
                 htmlFor="password"
-                className="text-sm font-medium text-foreground"
+                className="text-sm font-bold text-white text-white"
               >
                 Пароль
-              </Label>
+              </label>
               <Input
                 id="password"
                 type="password"
@@ -154,10 +153,8 @@ export function Register() {
             </div>
 
             {error && (
-              <div className="p-3 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg">
-                <p className="text-sm text-red-800 dark:text-red-200">
-                  ⚠️ {error}
-                </p>
+              <div className="p-3 bg-red-500/20 backdrop-blur-xl border border-red-400/30 rounded-lg">
+                <p className="text-sm text-red-100">⚠️ {error}</p>
               </div>
             )}
 
@@ -170,11 +167,11 @@ export function Register() {
             </Button>
           </form>
 
-          <p className="mt-6 text-sm text-muted-foreground text-center">
+          <p className="mt-6 text-sm text-white/60 text-center">
             Уже есть аккаунт?{" "}
             <Link
               href="/login"
-              className="font-medium text-primary hover:text-primary/90 transition-colors"
+              className="font-medium text-cyan-300 hover:text-cyan-300/90 transition-colors"
             >
               Войти
             </Link>

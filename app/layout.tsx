@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "@/components/ui/sonner";
+import { GlassNotificationProvider } from "@/components/glass-notification";
 import { httpGet } from "@/lib/api";
 
 const geistSans = Geist({
@@ -30,8 +30,9 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
-        <Toaster />
+        <GlassNotificationProvider position="top-right">
+          {children}
+        </GlassNotificationProvider>
       </body>
     </html>
   );

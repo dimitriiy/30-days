@@ -1,12 +1,12 @@
 "use client";
 
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  GlassDialog as Dialog,
+  GlassDialogContent as DialogContent,
+  GlassDialogDescription as DialogDescription,
+  GlassDialogHeader as DialogHeader,
+  GlassDialogTitle as DialogTitle,
+} from "@/components/ui/glass-dialog";
 import type { TrainingItem } from "@/entities/workout/model/types";
 import { useEditForm } from "./model/useEditForm";
 import { EditFormFields } from "./ui/form-fields";

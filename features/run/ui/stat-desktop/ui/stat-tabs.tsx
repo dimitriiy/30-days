@@ -1,6 +1,6 @@
 "use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { GlassTabs as Tabs, GlassTabsContent as TabsContent, GlassTabsList as TabsList, GlassTabsTrigger as TabsTrigger } from "@/components/ui/glass-tabs";
 import { StatTable } from "../../stat-table/stat-table";
 import { WeeklyDistanceChart } from "../../weekly-chart/weekly-chart";
 import type { TrainingItem } from "@/entities/workout/model/types";

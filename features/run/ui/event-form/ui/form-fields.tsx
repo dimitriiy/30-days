@@ -1,7 +1,6 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { GlassInput as Input } from "@/components/ui/glass-input";
 
 interface FormFieldProps {
   id: string;
@@ -22,7 +21,9 @@ const FormField = ({
 }: FormFieldProps) => {
   return (
     <div className="flex flex-col gap-1.5">
-      <Label htmlFor={id}>{label}</Label>
+      <label htmlFor={id} className="text-sm font-bold text-white">
+        {label}
+      </label>
       <Input
         id={id}
         type={type}
