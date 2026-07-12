@@ -1,6 +1,9 @@
 import TelegramBot from "node-telegram-bot-api";
 
+import { getWeeklyVolumeSummary } from "@/server/application/use-cases/programs/getWeeklyVolumeSummary";
 import { jsonSubscriberRepository } from "@/server/bot/subscribers";
+import { jsonDoneRepository } from "@/server/infrastructure/repositories/programs/JsonDoneRepository";
+import { jsonProgramRepository } from "@/server/infrastructure/repositories/programs/JsonProgramRepository";
 import "dotenv/config";
 
 console.log(process.env);
@@ -56,7 +59,54 @@ export async function startBot(): Promise<void> {
   b.onText(/^\/help$/, async (msg) => {
     await b.sendMessage(
       msg.chat.id,
-      "/start, /subscribe — подписаться\n/stop, /unsubscribe — отписаться\n/help — это сообщение",
+      "/start, /subscribe — подписаться\n/stop, /unsubscribe — отписаться\n/stats — статистика по неделе\n/stats_current — текущая неделя\n/stats_previous — предыдущая неделя\n/help — это сообщение",
+    );
+  });
+
+  // /stats — показывает inline-кнопки выбора недели
+  b.onText(/^\/stats$/, async (msg) => {
+    await b.sendMessage(msg.chat.id, "📊 Выбери неделю:", {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            { text: "Текущая неделя", callback_data: "stats:0" },
+            { text: "Предыдущая неделя", callback_data: "stats:-1" },
+          ],
+        ],
+      },
+    });
+  });
+
+  async function sendStats(chatId: number, weekOffset: -1 | 0): Promise<void> {
+    const summary = await getWeeklyVolumeSummary({
+      programs: jsonProgramRepository,
+      done: jsonDoneRepository,
+      weekOffset,
+    });
+    await b.sendMessage(chatId, summary.text, { parse_mode: "HTML" });
+  }
+
+  b.onText(/^\/stats_current$/, (msg) =>
+    sendStats(msg.chat.id, 0).catch((err) =>
+      console.error("stats_current failed:", err),
+    ),
+  );
+
+  b.onText(/^\/stats_previous$/, (msg) =>
+    sendStats(msg.chat.id, -1).catch((err) =>
+      console.error("stats_previous failed:", err),
+    ),
+  );
+
+  // обработка нажатий inline-кнопок
+  b.on("callback_query", (query) => {
+    const data = query.data;
+    const chatId = query.message?.chat.id;
+    if (!chatId || !data?.startsWith("stats:")) return;
+    const offset = data === "stats:0" ? 0 : -1;
+    b.answerCallbackQuery(query.id).catch(() => {});
+    sendStats(chatId, offset as -1 | 0).catch((err) =>
+      console.error("stats callback failed:", err),
     );
   });
 

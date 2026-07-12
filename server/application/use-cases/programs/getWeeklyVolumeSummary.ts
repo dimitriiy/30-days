@@ -20,6 +20,8 @@ export interface WeeklyVolumeSummaryInput {
   done: DoneRepository;
   /** точка отсчёта «сегодня»; по умолчанию new Date() */
   now?: Date;
+  /** -1 = предыдущая неделя (по умолчанию), 0 = текущая */
+  weekOffset?: -1 | 0;
 }
 
 export interface WeeklyVolumeSummary {
@@ -35,7 +37,7 @@ export interface WeeklyVolumeSummary {
 export async function getWeeklyVolumeSummary(
   input: WeeklyVolumeSummaryInput,
 ): Promise<WeeklyVolumeSummary> {
-  const { programs, done, now = new Date() } = input;
+  const { programs, done, now = new Date(), weekOffset = -1 } = input;
 
   const [programList, doneIds] = await Promise.all([
     programs.getAll(),
@@ -47,12 +49,13 @@ export async function getWeeklyVolumeSummary(
   const dayOfWeek = (today.getDay() + 6) % 7; // 0=пн
   const mondayThisWeek = new Date(today);
   mondayThisWeek.setDate(today.getDate() - dayOfWeek);
-  const mondayLastWeek = new Date(mondayThisWeek);
-  mondayLastWeek.setDate(mondayThisWeek.getDate() - 7);
-  const sundayLastWeek = new Date(mondayThisWeek);
-  sundayLastWeek.setDate(mondayThisWeek.getDate() - 1);
 
-  const inRange = (d: Date) => d >= mondayLastWeek && d <= sundayLastWeek;
+  const rangeStart = new Date(mondayThisWeek);
+  rangeStart.setDate(mondayThisWeek.getDate() + weekOffset * 7);
+  const rangeEnd = new Date(mondayThisWeek);
+  rangeEnd.setDate(mondayThisWeek.getDate() + weekOffset * 7 + 6);
+
+  const inRange = (d: Date) => d >= rangeStart && d <= rangeEnd;
 
   const weekPrograms = programList.filter((p) => inRange(parseDate(p.date)));
   const planned = weekPrograms.reduce((s, p) => s + p.distance, 0);
@@ -60,8 +63,9 @@ export async function getWeeklyVolumeSummary(
     .filter((p) => doneSet.has(p.id))
     .reduce((s, p) => s + p.distance, 0);
 
+  const label = weekOffset === 0 ? "Текущая неделя" : "Итоги недели";
   const text = [
-    `📊 <b>Итоги недели ${fmt(mondayLastWeek)} — ${fmt(sundayLastWeek)}</b>`,
+    `📊 <b>${label} ${fmt(rangeStart)} — ${fmt(rangeEnd)}</b>`,
     ``,
     `Тренировок в плане: ${weekPrograms.length}`,
     `Запланированный объём: <b>${planned.toFixed(1)} км</b>`,
@@ -70,8 +74,8 @@ export async function getWeeklyVolumeSummary(
   ].join("\n");
 
   return {
-    rangeStart: mondayLastWeek,
-    rangeEnd: sundayLastWeek,
+    rangeStart,
+    rangeEnd,
     totalPrograms: weekPrograms.length,
     plannedKm: planned,
     doneKm,
