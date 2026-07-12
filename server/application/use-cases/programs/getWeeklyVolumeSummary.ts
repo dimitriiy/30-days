@@ -57,7 +57,9 @@ export async function getWeeklyVolumeSummary(
 
   const inRange = (d: Date) => d >= rangeStart && d <= rangeEnd;
 
-  const weekPrograms = programList.filter((p) => inRange(parseDate(p.date)));
+  const weekPrograms = programList.filter(
+    (p) => p.distance > 0 && inRange(parseDate(p.date)),
+  );
   const planned = weekPrograms.reduce((s, p) => s + p.distance, 0);
   const doneKm = weekPrograms
     .filter((p) => doneSet.has(p.id))

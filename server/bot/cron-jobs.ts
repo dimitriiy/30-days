@@ -4,6 +4,7 @@ import { getWeeklyVolumeSummary } from "@/server/application/use-cases/programs/
 import { broadcast } from "@/server/bot/telegram";
 import { jsonDoneRepository } from "@/server/infrastructure/repositories/programs/JsonDoneRepository";
 import { jsonProgramRepository } from "@/server/infrastructure/repositories/programs/JsonProgramRepository";
+import { backupDatabase } from "../application/backup";
 
 // ====== cron job registry ======
 // Каждый джоб: { name, schedule, description, run }.
@@ -33,6 +34,13 @@ export const jobs: ScheduledJob[] = [
     description: "Суммарный объём тренировок за предыдущую неделю",
     run: weeklyVolumeSummaryJob,
   },
+
+  {
+    name: "backup-bd",
+    schedule: "0 9 * * 1",
+    description: "Бекап БД",
+    run: backupDatabase,
+  },
 ];
 
 export function startScheduledJobs(): void {
@@ -44,6 +52,8 @@ export function startScheduledJobs(): void {
     cron.schedule(job.schedule, () => {
       job.run().catch((err) => console.error(`job ${job.name} failed:`, err));
     });
-    console.log(`scheduled: ${job.name} [${job.schedule}] — ${job.description}`);
+    console.log(
+      `scheduled: ${job.name} [${job.schedule}] — ${job.description}`,
+    );
   }
 }
