@@ -30,7 +30,7 @@ export const ProgramColumn = ({
   todayRef,
   onClick,
 }: ProgramColumnProps) => {
-  const { controls, animateCheck } = useProgramAnimation();
+  const { animateCheck } = useProgramAnimation();
   const { fullDateLabel, shortDateLabel, isRestDay, programItems } =
     useProgramColumnMeta(data);
 
@@ -54,6 +54,7 @@ export const ProgramColumn = ({
         <ProgramDateBadges
           fullDateLabel={fullDateLabel}
           shortDateLabel={shortDateLabel}
+          isRest={data.program.includes("Отдых")}
         />
         <div className="tbody p-2 flex-1 flex flex-col">
           <div className="top flex justify-between mb-2">

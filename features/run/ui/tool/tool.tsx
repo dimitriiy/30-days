@@ -8,7 +8,7 @@ import { StatTrigger } from "./ui/stat-trigger";
 import { FlipTimer } from "./ui/flip-timer";
 import type { TrainingItem } from "@/entities/workout/model/types";
 
-const TARGET_DATE = new Date(2026, 9, 27);
+const TARGET_DATE = new Date(2026, 8, 27);
 
 interface ToolProps {
   topSlot?: React.ReactNode;

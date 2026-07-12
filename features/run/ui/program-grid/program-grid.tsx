@@ -41,3 +41,5 @@ export const ProgramGrid = React.memo(
     );
   },
 );
+
+ProgramGrid.displayName = "ProgramGrid";

@@ -45,3 +45,5 @@ next-env.d.ts
 # local debug artifacts
 .check-*.png
 .dev.log
+
+db.json

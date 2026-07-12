@@ -10,7 +10,7 @@
       "distance": 8,
       "note": "Пульс 130-140, очень легко",
       "id": 1,
-      "isDone": false
+      "isDone": true
     },
     {
       "date": "07.07.2026",
@@ -21,18 +21,19 @@
       "distance": 0,
       "note": "",
       "id": 2,
-      "isDone": false
+      "isDone": true
     },
     {
       "date": "08.07.2026",
       "day": 3,
       "week": 1,
       "weekName": "Восстановление I",
-      "program": "Лёгкий бег 9 км",
-      "distance": 9,
+      "program": "Вело 12км",
+      "distance": 5,
       "note": "Лёгкий темп 6:00/км",
       "id": 3,
-      "isDone": false
+      "isDone": true,
+      "prevDistance": 0
     },
     {
       "date": "09.07.2026",
@@ -43,18 +44,19 @@
       "distance": 0,
       "note": "",
       "id": 4,
-      "isDone": false
+      "isDone": true
     },
     {
       "date": "10.07.2026",
       "day": 5,
       "week": 1,
       "weekName": "Восстановление I",
-      "program": "Лёгкий бег 8 км + ОФП/растяжка",
-      "distance": 8,
+      "program": "ОФП",
+      "distance": 0,
       "note": "Лёгкий темп + упражнения",
       "id": 5,
-      "isDone": false
+      "isDone": true,
+      "prevDistance": 8
     },
     {
       "date": "11.07.2026",
@@ -72,11 +74,12 @@
       "day": 7,
       "week": 1,
       "weekName": "Восстановление I",
-      "program": "Отдых (перенос)",
-      "distance": 0,
+      "program": "Кросс 10",
+      "distance": 10,
       "note": "⛔ Недоступно — Лонг перенесён на пн",
       "id": 7,
-      "isDone": false
+      "isDone": true,
+      "prevDistance": 0
     },
     {
       "date": "13.07.2026",
