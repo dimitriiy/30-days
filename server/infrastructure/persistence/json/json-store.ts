@@ -14,6 +14,7 @@ interface Data {
   events: RunEvent[];
   users: Record<string, User>;
   sessions: Record<string, Session>;
+  subscribers: number[];
 }
 
 const defaultData: Data = {
@@ -22,6 +23,7 @@ const defaultData: Data = {
   events: [],
   users: {},
   sessions: {},
+  subscribers: [],
 };
 
 export type JsonDb = Awaited<ReturnType<typeof JSONFilePreset<Data>>>;

@@ -7,6 +7,17 @@
       "cwd": "./",
       "instances": "max",
       "exec_mode": "cluster"
+    },
+    {
+      "name": "telegram-bot",
+      "script": "node_modules/tsx/dist/cli.mjs",
+      "args": "--tsconfig tsconfig.json server/bot/index.ts",
+      "cwd": "./",
+      "instances": 1,
+      "exec_mode": "fork",
+      "env": {
+        "TELEGRAM_BOT_TOKEN": ""
+      }
     }
   ]
 }

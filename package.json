@@ -8,7 +8,8 @@
     "start": "next start -p 8080",
     "lint": "eslint",
     "db:seed": "ts-node --require tsconfig-paths/register prisma/seed.ts",
-    "pm2": "pm2 start pm2.json"
+    "pm2": "pm2 start pm2.json",
+    "bot": "tsx --tsconfig tsconfig.json server/bot/index.ts"
   },
   "dependencies": {
     "@leenguyen/react-flip-clock-countdown": "^1.7.2",
@@ -41,6 +42,8 @@
     "motion": "^12.34.3",
     "next": "16.1.1",
     "next-themes": "^0.4.6",
+    "node-cron": "^4.6.0",
+    "node-telegram-bot-api": "^1.1.2",
     "pg": "^8.16.3",
     "prisma": "^7.2.0",
     "react": "19.2.3",
@@ -59,6 +62,8 @@
     "@tailwindcss/postcss": "^4",
     "@types/bcrypt": "^6.0.0",
     "@types/node": "^20",
+    "@types/node-cron": "^3.0.11",
+    "@types/node-telegram-bot-api": "^0.64.15",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
