@@ -11,7 +11,11 @@ function isPublicPath(pathname: string): boolean {
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (pathname === "/api/auth/login" || pathname === "/api/auth/register") {
+  if (
+    pathname === "/api/auth/login" ||
+    pathname === "/api/auth/register" ||
+    pathname === "/api/github-webhook"
+  ) {
     return NextResponse.next();
   }
   if (!isPublicPath(pathname)) {
