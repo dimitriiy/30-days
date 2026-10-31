@@ -10,9 +10,6 @@ for command in git yarn pm2; do
   fi
 done
 
-printf 'Stopping PM2 processes...\n'
-pm2 stop all
-
 printf 'Updating repository to origin/master...\n'
 git fetch origin master
 git reset --hard origin/master
@@ -26,10 +23,7 @@ yarn test:bot
 printf 'Building the website...\n'
 yarn build
 
-printf 'Starting project processes from pm2.json...\n'
-pm2 startOrRestart pm2.json --update-env
-
-printf 'Restarting all PM2 processes and saving the list...\n'
-pm2 restart all --update-env
+printf 'Reloading project processes from pm2.json...\n'
+pm2 startOrReload pm2.json --update-env
 pm2 save
 pm2 ls
