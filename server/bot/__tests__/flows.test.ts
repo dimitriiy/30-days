@@ -6,10 +6,11 @@ import test from "node:test";
 
 import type TelegramBot from "node-telegram-bot-api";
 
+import { dailyQuotes } from "../content";
 import { quoteTime } from "../domain";
 import { deliverDue, type SchedulerServices } from "../scheduler";
 import { createSubscriberStore } from "../store";
-import { registerBotHandlers, type BotServices } from "../telegram";
+import { BOT_COMMANDS, configureBotMenu, registerBotHandlers, type BotServices } from "../telegram";
 
 type Sent = { chatId: number; text: string; options?: unknown };
 
@@ -26,7 +27,7 @@ class FakeBot {
   }
 
   async sendMessage(chatId: number, text: string, options?: unknown): Promise<object> {
-    if (text === this.failText) throw new Error("Telegram unavailable");
+    if (this.failText && text.includes(this.failText)) throw new Error("Telegram unavailable");
     this.sent.push({ chatId, text, options });
     return {};
   }
@@ -92,6 +93,37 @@ test("onboarding defaults to Moscow, validates time, and persists the subscripti
   assert.equal((await reloaded.readSubscribers())[0].morningTime, "08:00");
 });
 
+test("/quote sends a random real quote immediately without changing the daily schedule", async (t) => {
+  const { bot, store } = await setup(t);
+  await bot.message("/quote");
+  const message = bot.sent.at(-1)!.text;
+  assert.ok(message.startsWith("💭 Мысль дня\n\n"));
+  assert.ok((await dailyQuotes()).includes(message.slice("💭 Мысль дня\n\n".length)));
+  assert.deepEqual(await store.readSubscribers(), []);
+});
+
+test("native Telegram menu exposes the bot commands in private chats", async () => {
+  let commands: typeof BOT_COMMANDS = [];
+  let scope: unknown;
+  let menuButton: unknown;
+  const bot = {
+    setMyCommands: async (items: typeof BOT_COMMANDS, options: unknown) => {
+      commands = items;
+      scope = options;
+      return true;
+    },
+    setChatMenuButton: async (options: unknown) => {
+      menuButton = options;
+      return true;
+    },
+  } as unknown as TelegramBot;
+  await configureBotMenu(bot);
+  assert.deepEqual(commands, BOT_COMMANDS);
+  assert.deepEqual(commands.map(({ command }) => command), ["start", "quote", "habit", "progress", "habits", "time", "timezone", "stop", "help"]);
+  assert.deepEqual(scope, { scope: { type: "all_private_chats" } });
+  assert.deepEqual(menuButton, { menu_button: { type: "commands" } });
+});
+
 test("stored subscribers without a timezone are migrated to the Moscow default", async (t) => {
   const folder = await mkdtemp(path.join(tmpdir(), "mark-bot-migration-"));
   t.after(() => rm(folder, { recursive: true, force: true }));
@@ -121,10 +153,12 @@ test("habit creation validates order, daily check can be corrected, progress is 
   assert.equal((await store.readSubscribers())[0].habits[0].results["2026-06-01"], false);
   await bot.callback(`habit:${habit.id}:2026-06-01:yes`);
   assert.equal((await store.readSubscribers())[0].habits[0].results["2026-06-01"], true);
-  assert.ok(bot.edited.at(-1)?.text.includes("выполнено ✅"));
+  assert.ok(bot.edited.at(-1)?.text.includes("☑️ Выполнено"));
   assert.ok(bot.edited.at(-1)?.options && JSON.stringify(bot.edited.at(-1)?.options).includes("callback_data"));
   await bot.message("/progress");
   assert.match(bot.sent.at(-1)!.text, /Выполнено: 1/);
+  assert.match(bot.sent.at(-1)!.text, /01–10  ☑️/);
+  assert.match(bot.sent.at(-1)!.text, /▫️ — будущие дни/);
   await bot.message("/stop");
   assert.equal((await store.readSubscribers())[0].active, false);
 });
@@ -180,23 +214,23 @@ test("scheduler sends local morning, daytime quote, habit reminder and check onl
   await deliverDue(telegram, new Date("2026-06-01T05:00:00Z"), scheduler);
   const restarted = createSubscriberStore(filePath);
   await deliverDue(telegram, new Date("2026-06-01T05:00:00Z"), { ...scheduler, ...restarted });
-  assert.equal(bot.sent.filter((message) => message.text === "Утренний настрой" && message.chatId === 1).length, 1);
-  assert.equal(bot.sent.filter((message) => message.text === "Утренний настрой" && message.chatId === 2).length, 0);
+  assert.equal(bot.sent.filter((message) => message.text.startsWith("🌅 Утренний настрой") && message.chatId === 1).length, 1);
+  assert.equal(bot.sent.filter((message) => message.text.startsWith("🌅 Утренний настрой") && message.chatId === 2).length, 0);
   await deliverDue(telegram, new Date("2026-06-01T06:00:00Z"), scheduler);
-  assert.equal(bot.sent.filter((message) => message.text === "Утренний настрой" && message.chatId === 2).length, 1);
+  assert.equal(bot.sent.filter((message) => message.text.startsWith("🌅 Утренний настрой") && message.chatId === 2).length, 1);
   await deliverDue(telegram, new Date("2026-06-01T07:00:00Z"), scheduler);
-  assert.equal(bot.sent.filter((message) => message.text.includes("Не забудь") && message.chatId === 1).length, 1);
+  assert.equal(bot.sent.filter((message) => message.text.startsWith("🔔 Привычка на сегодня") && message.chatId === 1).length, 1);
   const quote = quoteTime(1, "2026-06-01");
   const [hour, minute] = quote.split(":").map(Number);
   await deliverDue(telegram, new Date(Date.UTC(2026, 5, 1, hour - 3, minute)), scheduler);
-  assert.equal(bot.sent.filter((message) => message.text === "Дневная цитата" && message.chatId === 1).length, 1);
+  assert.equal(bot.sent.filter((message) => message.text === "💭 Мысль дня\n\nДневная цитата" && message.chatId === 1).length, 1);
   await deliverDue(telegram, new Date("2026-06-01T18:00:00Z"), scheduler);
-  assert.equal(bot.sent.filter((message) => message.text.includes("Удалось сегодня") && message.chatId === 1).length, 1);
+  assert.equal(bot.sent.filter((message) => message.text.startsWith("✅ Время отметить привычку") && message.chatId === 1).length, 1);
   await Promise.all([
     deliverDue(telegram, new Date("2026-06-01T18:00:00Z"), scheduler),
     deliverDue(telegram, new Date("2026-06-01T18:00:00Z"), scheduler),
   ]);
-  assert.equal(bot.sent.filter((message) => message.text.includes("Удалось сегодня") && message.chatId === 1).length, 1);
+  assert.equal(bot.sent.filter((message) => message.text.startsWith("✅ Время отметить привычку") && message.chatId === 1).length, 1);
 });
 
 test("failed morning delivery does not prevent a habit reminder", async (t) => {
@@ -217,11 +251,11 @@ test("failed morning delivery does not prevent a habit reminder", async (t) => {
   }
   assert.equal((await store.readSubscribers())[0].lastMorningDate, undefined);
   assert.equal((await store.readSubscribers())[0].habits[0].lastReminderDate, "2026-06-01");
-  assert.ok(bot.sent.some((message) => message.text.includes("Не забудь")));
+  assert.ok(bot.sent.some((message) => message.text.startsWith("🔔 Привычка на сегодня")));
   bot.failText = undefined;
   await deliverDue(bot as unknown as TelegramBot, new Date("2026-06-01T05:01:00Z"), scheduler);
   assert.equal((await store.readSubscribers())[0].lastMorningDate, "2026-06-01");
-  assert.equal(bot.sent.filter((message) => message.text === "Утренний настрой").length, 1);
+  assert.equal(bot.sent.filter((message) => message.text.startsWith("🌅 Утренний настрой")).length, 1);
 });
 
 test("stopped subscriptions and completed 30-day habits receive no reminders", async (t) => {

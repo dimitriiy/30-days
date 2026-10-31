@@ -1,16 +1,16 @@
-import { randomUUID } from "node:crypto";
+import { randomInt, randomUUID } from "node:crypto";
 import TelegramBot from "node-telegram-bot-api";
 
+import { dailyQuotes } from "./content";
 import {
   DEFAULT_TIME_ZONE,
-  habitDay,
   isActiveHabit,
   localDateTime,
   nextDate,
   parseTime,
   parseTimeZone,
-  progress,
 } from "./domain";
+import { habitProgress, habitResult, quoteNotification } from "./messages";
 import { readSubscribers as defaultReadSubscribers, updateSubscriber as defaultUpdateSubscriber } from "./store";
 
 export interface BotServices {
@@ -28,17 +28,38 @@ const defaultServices: BotServices = {
 };
 
 const HELP = [
-  "/start — подписаться и выбрать время утреннего сообщения (часовой пояс по умолчанию — Москва)",
-  "/timezone — изменить часовой пояс",
-  "/time — изменить время утреннего сообщения",
-  "/habit — создать привычку на 30 дней",
-  "/habits — список привычек и прогресс",
-  "/progress — прогресс по всем привычкам",
-  "/stop — отключить все уведомления",
-  "Все времена указывайте в своём часовом поясе, формат ЧЧ:ММ.",
+  "🤖 Что умеет бот",
+  "",
+  "🌅 /start — настроить утреннее сообщение",
+  "💭 /quote — получить случайную цитату сейчас",
+  "🎯 /habit — создать привычку на 30 дней",
+  "📊 /progress — посмотреть прогресс",
+  "🗂 /habits — посмотреть привычки",
+  "🕒 /time — изменить время утреннего сообщения",
+  "📍 /timezone — изменить часовой пояс",
+  "🔕 /stop — отключить уведомления",
+  "",
+  "Время указывай в формате ЧЧ:ММ по своему часовому поясу.",
 ].join("\n");
 
 const MAX_HABIT_TITLE_LENGTH = 180;
+
+export const BOT_COMMANDS: Array<{ command: string; description: string }> = [
+  { command: "start", description: "🌅 Настроить утренний настрой" },
+  { command: "quote", description: "💭 Получить случайную цитату" },
+  { command: "habit", description: "🎯 Создать привычку" },
+  { command: "progress", description: "📊 Посмотреть прогресс" },
+  { command: "habits", description: "🗂 Мои привычки" },
+  { command: "time", description: "🕒 Изменить время" },
+  { command: "timezone", description: "📍 Изменить часовой пояс" },
+  { command: "stop", description: "🔕 Отключить уведомления" },
+  { command: "help", description: "ℹ️ Помощь" },
+];
+
+export async function configureBotMenu(bot: TelegramBot): Promise<void> {
+  await bot.setMyCommands(BOT_COMMANDS, { scope: { type: "all_private_chats" } });
+  await bot.setChatMenuButton({ menu_button: { type: "commands" } });
+}
 
 const TIME_ZONE_KEYBOARD = {
   inline_keyboard: [
@@ -71,35 +92,14 @@ async function saveTimeZone(
   if (user.awaiting === "morning") {
     await bot.sendMessage(
       chatId,
-      `Часовой пояс: ${timeZone}. Во сколько каждый день присылать утренний настрой? Напиши местное время ЧЧ:ММ, например 08:30.`,
+      `📍 Часовой пояс: ${timeZone}\n\n🌅 Во сколько присылать утренний настрой каждый день?\nНапиши местное время в формате ЧЧ:ММ, например 08:30.`,
     );
   } else {
     await bot.sendMessage(
       chatId,
-      `Часовой пояс изменён на ${timeZone}. Все сообщения будут приходить по местному времени.`,
+      `✅ Часовой пояс изменён: ${timeZone}\n\nВсе сообщения будут приходить по местному времени.`,
     );
   }
-}
-
-function habitListText(
-  habits: Awaited<ReturnType<typeof defaultReadSubscribers>>[number]["habits"],
-  date: string,
-): string {
-  if (!habits.length)
-    return "Пока нет привычек. Создай первую командой /habit.";
-  return habits
-    .map((habit) => {
-      const stats = progress(habit, date);
-      const day = habitDay(habit, date);
-      const status =
-        day < 1
-          ? `начнётся ${habit.startDate}`
-          : day > 30
-            ? "завершена"
-            : `день ${day}/30`;
-      return `• ${habit.title} — ${status}\n  Выполнено: ${stats.done}; не выполнено: ${stats.missed}; без ответа: ${stats.unanswered}\n  Напоминание: ${habit.reminderTime}; отметка: ${habit.checkTime}`;
-    })
-    .join("\n\n");
 }
 
 export function registerBotHandlers(bot: TelegramBot, services: BotServices = defaultServices): void {
@@ -118,14 +118,14 @@ export function registerBotHandlers(bot: TelegramBot, services: BotServices = de
           user.awaiting = "morning";
           user.draft = undefined;
         });
-        await bot.sendMessage(chatId, "Во сколько каждый день присылать утренний настрой? Напиши местное время ЧЧ:ММ, например 08:30. Часовой пояс по умолчанию — Europe/Moscow; изменить его можно командой /timezone.");
+        await bot.sendMessage(chatId, "🌅 Утренний настрой\n\nВо сколько присылать его каждый день?\nНапиши местное время в формате ЧЧ:ММ, например 08:30.\n\n📍 Сейчас часовой пояс — Europe/Moscow. Изменить: /timezone");
         return;
       }
       if (text === "/timezone") {
         await updateSubscriber(chatId, (user) => { user.awaiting = "timezone"; user.draft = undefined; });
         await bot.sendMessage(
           chatId,
-          "Выбери свой часовой пояс или напиши его название, например Europe/Berlin. Можно также написать город: Москва, Екатеринбург, Новосибирск и другие.",
+          "📍 Твой часовой пояс\n\nВыбери город ниже или напиши название зоны, например Europe/Berlin или Москва.",
           { reply_markup: TIME_ZONE_KEYBOARD },
         );
         return;
@@ -137,7 +137,7 @@ export function registerBotHandlers(bot: TelegramBot, services: BotServices = de
         if (!user?.timeZone) {
           await bot.sendMessage(
             chatId,
-            "Сначала укажи часовой пояс через /start.",
+            "📍 Сначала укажи часовой пояс через /start.",
           );
           return;
         }
@@ -147,7 +147,7 @@ export function registerBotHandlers(bot: TelegramBot, services: BotServices = de
         });
         await bot.sendMessage(
           chatId,
-          `Во сколько присылать утренний настрой? Напиши ЧЧ:ММ по времени ${user.timeZone}.`,
+          `🕒 Новое время утреннего настроя\n\nНапиши ЧЧ:ММ по времени ${user.timeZone}.`,
         );
         return;
       }
@@ -159,7 +159,7 @@ export function registerBotHandlers(bot: TelegramBot, services: BotServices = de
         });
         await bot.sendMessage(
           chatId,
-          "Уведомления отключены. Чтобы вернуться, напиши /start.",
+          "🔕 Уведомления отключены.\n\nЧтобы вернуться, напиши /start.",
         );
         return;
       }
@@ -167,12 +167,21 @@ export function registerBotHandlers(bot: TelegramBot, services: BotServices = de
         await bot.sendMessage(chatId, HELP);
         return;
       }
+      if (text === "/quote") {
+        const quotes = await dailyQuotes();
+        if (!quotes.length) {
+          await bot.sendMessage(chatId, "⚠️ Цитаты пока недоступны. Попробуй позже.");
+          return;
+        }
+        await bot.sendMessage(chatId, quoteNotification(quotes[randomInt(quotes.length)]));
+        return;
+      }
       if (text === "/habit") {
         const user = (await readSubscribers()).find(
           (item) => item.chatId === chatId,
         );
         if (!user?.active) {
-          await bot.sendMessage(chatId, "Сначала подпишись через /start.");
+          await bot.sendMessage(chatId, "🎯 Сначала настрой бота через /start, затем создай привычку.");
           return;
         }
         await updateSubscriber(chatId, (current) => {
@@ -181,7 +190,7 @@ export function registerBotHandlers(bot: TelegramBot, services: BotServices = de
         });
         await bot.sendMessage(
           chatId,
-          `Как назвать привычку? Напиши название (до ${MAX_HABIT_TITLE_LENGTH} символов).`,
+          `🎯 Новая привычка\n\nКак она называется? Напиши название длиной до ${MAX_HABIT_TITLE_LENGTH} символов.`,
         );
         return;
       }
@@ -192,17 +201,18 @@ export function registerBotHandlers(bot: TelegramBot, services: BotServices = de
         if (!user?.timeZone) {
           await bot.sendMessage(
             chatId,
-            "Сначала укажи часовой пояс через /start.",
+            "📍 Сначала укажи часовой пояс через /start.",
           );
           return;
         }
-        await bot.sendMessage(
-          chatId,
-          habitListText(
-            user.habits,
-            localDateTime(now(), user.timeZone).date,
-          ),
-        );
+        if (!user.habits.length) {
+          await bot.sendMessage(chatId, "📊 Привычек пока нет.\n\nСоздать первую: /habit");
+          return;
+        }
+        const date = localDateTime(now(), user.timeZone).date;
+        for (const habit of user.habits) {
+          await bot.sendMessage(chatId, habitProgress(habit, date));
+        }
         return;
       }
       if (text.startsWith("/")) {
@@ -217,7 +227,7 @@ export function registerBotHandlers(bot: TelegramBot, services: BotServices = de
         if (!timeZone) {
           await bot.sendMessage(
             chatId,
-            "Не нашёл такой часовой пояс. Выбери кнопку выше или напиши, например, Europe/Berlin или Москва.",
+            "⚠️ Не нашёл этот часовой пояс.\n\nВыбери кнопку выше или напиши, например, Europe/Berlin или Москва.",
           );
           return;
         }
@@ -229,7 +239,7 @@ export function registerBotHandlers(bot: TelegramBot, services: BotServices = de
         if (!time) {
           await bot.sendMessage(
             chatId,
-            "Нужно время в формате ЧЧ:ММ, например 08:30.",
+            "⚠️ Время не распознано.\n\nНапиши ЧЧ:ММ, например 08:30.",
           );
           return;
         }
@@ -243,7 +253,7 @@ export function registerBotHandlers(bot: TelegramBot, services: BotServices = de
         });
         await bot.sendMessage(
           chatId,
-          `Готово. Утренний настрой будет приходить ежедневно в ${time}, а одна цитата — в случайное время с 12:00 до 21:00 по твоему местному времени (${user.timeZone}).\n\nСоздать привычку: /habit`,
+          `✅ Подписка настроена\n\n🌅 Утренний настрой — каждый день в ${time}\n💭 Цитата — один раз в случайное время с 12:00 до 21:00\n📍 Часовой пояс — ${user.timeZone}\n\n🎯 Создать привычку: /habit`,
         );
         return;
       }
@@ -251,7 +261,7 @@ export function registerBotHandlers(bot: TelegramBot, services: BotServices = de
         if (!text || Array.from(text).length > MAX_HABIT_TITLE_LENGTH) {
           await bot.sendMessage(
             chatId,
-            `Название должно быть от 1 до ${MAX_HABIT_TITLE_LENGTH} символов.`,
+            `⚠️ Название должно быть длиной от 1 до ${MAX_HABIT_TITLE_LENGTH} символов.\n\nПопробуй ещё раз.`,
           );
           return;
         }
@@ -261,7 +271,7 @@ export function registerBotHandlers(bot: TelegramBot, services: BotServices = de
         });
         await bot.sendMessage(
           chatId,
-          `Во сколько напоминать о привычке? Напиши ЧЧ:ММ по твоему местному времени (${user.timeZone}).`,
+          `🔔 Напоминание о привычке\n\nВо сколько напомнить о ней?\nНапиши ЧЧ:ММ по местному времени (${user.timeZone}).`,
         );
         return;
       }
@@ -270,7 +280,7 @@ export function registerBotHandlers(bot: TelegramBot, services: BotServices = de
         if (!time) {
           await bot.sendMessage(
             chatId,
-            "Нужно местное время ЧЧ:ММ, например 12:00.",
+            "⚠️ Время не распознано.\n\nНапиши местное время ЧЧ:ММ, например 12:00.",
           );
           return;
         }
@@ -280,7 +290,7 @@ export function registerBotHandlers(bot: TelegramBot, services: BotServices = de
         });
         await bot.sendMessage(
           chatId,
-          "Во сколько спрашивать, выполнена ли привычка? Укажи местное время позже напоминания, ЧЧ:ММ.",
+          "📝 Отметка результата\n\nВо сколько спросить, выполнил ли ты привычку?\nНапиши ЧЧ:ММ позже времени напоминания.",
         );
         return;
       }
@@ -293,7 +303,7 @@ export function registerBotHandlers(bot: TelegramBot, services: BotServices = de
         ) {
           await bot.sendMessage(
             chatId,
-            "Время отметки должно быть позже напоминания в тот же день. Напиши ЧЧ:ММ.",
+            "⚠️ Время отметки должно быть позже напоминания в тот же день.\n\nНапиши другое время в формате ЧЧ:ММ.",
           );
           return;
         }
@@ -315,7 +325,7 @@ export function registerBotHandlers(bot: TelegramBot, services: BotServices = de
         });
         await bot.sendMessage(
           chatId,
-          `Привычка «${title}» создана на 30 дней с ${startDate}. Напоминание: ${user.draft.reminderTime}; отметка: ${time}. Прогресс: /progress`,
+          `✅ Привычка создана\n\n🎯 ${title}\n📅 30 дней с ${startDate}\n🔔 Напоминание — ${user.draft.reminderTime}\n📝 Отметка результата — ${time}\n\nПосмотреть прогресс: /progress`,
         );
         return;
       }
@@ -332,14 +342,14 @@ export function registerBotHandlers(bot: TelegramBot, services: BotServices = de
         );
         if (user?.awaiting !== "timezone") {
           await bot.answerCallbackQuery(query.id, {
-            text: "Сначала используй /timezone.",
+            text: "📍 Сначала используй /timezone.",
           });
           return;
         }
         const timeZone = parseTimeZone(query.data.slice(3));
         if (!timeZone) {
           await bot.answerCallbackQuery(query.id, {
-            text: "Неверный часовой пояс.",
+            text: "⚠️ Неверный часовой пояс.",
           });
           return;
         }
@@ -363,7 +373,7 @@ export function registerBotHandlers(bot: TelegramBot, services: BotServices = de
         date > localDateTime(now(), user.timeZone).date
       ) {
         await bot.answerCallbackQuery(query.id, {
-          text: "Эта отметка недоступна.",
+          text: "⚠️ Эта отметка недоступна.",
         });
         return;
       }
@@ -372,11 +382,11 @@ export function registerBotHandlers(bot: TelegramBot, services: BotServices = de
         if (target) target.results[date] = value === "yes";
       });
       await bot.answerCallbackQuery(query.id, {
-        text: value === "yes" ? "Выполнение записано" : "Пропуск записан",
+        text: value === "yes" ? "☑️ Выполнение записано" : "❌ Пропуск записан",
       });
       if (query.message) {
         await bot.editMessageText(
-          `${habit.title}: ${value === "yes" ? "выполнено ✅" : "не выполнено ❌"} (${date})`,
+          habitResult(habit, date, value === "yes"),
           {
             chat_id: chatId,
             message_id: query.message.message_id,
@@ -401,5 +411,6 @@ export async function startBot(): Promise<TelegramBot> {
   if (!token) throw new Error("TELEGRAM_BOT_TOKEN not set");
   const bot = new TelegramBot(token, { polling: true });
   registerBotHandlers(bot);
+  await configureBotMenu(bot).catch((error) => console.error("bot menu setup failed:", error));
   return bot;
 }

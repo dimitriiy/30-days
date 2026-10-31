@@ -5,6 +5,7 @@ import { backupDatabase } from "../application/backup";
 
 import { dailyQuotes as defaultDailyQuotes, morningMessage as defaultMorningMessage } from "./content";
 import { dailyIndex, dueNotifications, localDateTime } from "./domain";
+import { habitCheck, habitReminder, morningNotification, quoteNotification } from "./messages";
 import { readSubscribers as defaultReadSubscribers, updateSubscriber as defaultUpdateSubscriber } from "./store";
 
 export interface SchedulerServices {
@@ -47,20 +48,20 @@ export function deliverDue(bot: TelegramBot, now = new Date(), services: Schedul
         const due = dueNotifications(subscriber, date, time, previous.date === date ? previous.time : undefined);
         if (due.morning) {
           await attempt(chatId, async () => {
-            await bot.sendMessage(chatId, await services.morningMessage());
+            await bot.sendMessage(chatId, morningNotification(await services.morningMessage()));
             await services.updateSubscriber(chatId, (user) => { user.lastMorningDate = date; });
           });
         }
         if (due.quote && quotes.length) {
           await attempt(chatId, async () => {
-            await bot.sendMessage(chatId, quotes[dailyIndex(chatId, date, quotes.length, "quote")]);
+            await bot.sendMessage(chatId, quoteNotification(quotes[dailyIndex(chatId, date, quotes.length, "quote")]));
             await services.updateSubscriber(chatId, (user) => { user.lastQuoteDate = date; });
           });
         }
         for (const habit of subscriber.habits) {
           if (due.reminders.includes(habit.id)) {
             await attempt(chatId, async () => {
-              await bot.sendMessage(chatId, `Не забудь сегодня: ${habit.title}`);
+              await bot.sendMessage(chatId, habitReminder(habit));
               await services.updateSubscriber(chatId, (user) => {
                 const current = user.habits.find((item) => item.id === habit.id);
                 if (current) current.lastReminderDate = date;
@@ -69,7 +70,7 @@ export function deliverDue(bot: TelegramBot, now = new Date(), services: Schedul
           }
           if (due.checks.includes(habit.id)) {
             await attempt(chatId, async () => {
-              await bot.sendMessage(chatId, `Удалось сегодня выполнить привычку «${habit.title}»?`, {
+              await bot.sendMessage(chatId, habitCheck(habit), {
                 reply_markup: { inline_keyboard: [[
                   { text: "✅ Выполнил", callback_data: `habit:${habit.id}:${date}:yes` },
                   { text: "❌ Не выполнил", callback_data: `habit:${habit.id}:${date}:no` },
