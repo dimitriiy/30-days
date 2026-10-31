@@ -2,7 +2,12 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import type { Habit } from "../domain";
-import { habitProgress, habitResult, quoteNotification } from "../messages";
+import { habitProgress, habitReminder, habitResult, quoteNotification } from "../messages";
+
+test("habit reminder contains only the title", () => {
+  const habit: Habit = { id: "one", title: "Читать", startDate: "2026-06-01", reminderTime: "09:00", checkTime: "21:00", results: {} };
+  assert.equal(habitReminder(habit), "🔔 Привычка на сегодня\n\nЧитать");
+});
 
 test("progress shows a 30-day checkbox grid and correct totals", () => {
   const habit: Habit = {

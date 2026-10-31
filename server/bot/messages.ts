@@ -11,7 +11,7 @@ export function quoteNotification(text: string): string {
 }
 
 export function habitReminder(habit: Habit): string {
-  return `🔔 Привычка на сегодня\n\n${habit.title}\n\nОтметка результата — в ${habit.checkTime}.`;
+  return `🔔 Привычка на сегодня\n\n${habit.title}`;
 }
 
 export function habitCheck(habit: Habit): string {

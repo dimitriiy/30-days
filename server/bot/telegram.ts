@@ -329,7 +329,7 @@ export function registerBotHandlers(bot: TelegramBot, services: BotServices = de
         });
         await bot.sendMessage(
           chatId,
-          `✅ Привычка создана\n\n🎯 ${title}\n📅 30 дней с ${startDate}\n🔔 Напоминание — ${user.draft.reminderTime}\n📝 Отметка результата — ${time}\n\nПосмотреть прогресс: /progress`,
+          `✅ Привычка создана\n\n🎯 ${title}\n\n📅 30 дней с ${startDate}\n\n🔔 Напоминание — ${user.draft.reminderTime}\n\n📝 Отметка результата — ${time}\n\nПосмотреть прогресс: /progress`,
         );
         return;
       }

@@ -161,6 +161,7 @@ test("habit creation validates order, daily check can be corrected, progress is 
   await bot.message("09:00");
   assert.equal((await store.readSubscribers())[0].awaiting, "habit-check");
   await bot.message("21:00");
+  assert.match(bot.sent.at(-1)!.text, /🎯 Читать\n\n📅 30 дней с 2026-06-01\n\n🔔 Напоминание — 10:00\n\n📝 Отметка результата — 21:00/);
   const habit = (await store.readSubscribers())[0].habits[0];
   assert.equal(habit.startDate, "2026-06-01");
   assert.equal(habit.checkTime, "21:00");
