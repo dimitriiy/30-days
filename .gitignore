@@ -47,3 +47,4 @@ next-env.d.ts
 .dev.log
 
 db.json
+bot-data.json

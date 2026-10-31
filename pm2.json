@@ -14,10 +14,7 @@
       "args": "--tsconfig tsconfig.json server/bot/index.ts",
       "cwd": "./",
       "instances": 1,
-      "exec_mode": "fork",
-      "env": {
-        "TELEGRAM_BOT_TOKEN": ""
-      }
+      "exec_mode": "fork"
     }
   ]
 }

@@ -3,14 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 8080",
+    "dev": "node server/bot/dev.mjs",
     "build": "next build",
     "start": "next start -p 8080",
     "lint": "eslint",
     "db:seed": "ts-node --require tsconfig-paths/register prisma/seed.ts",
     "deploy": "yarn build && pm2 reload pm2.json --update-env",
     "pm2": "pm2 start pm2.json",
-    "bot": "tsx --tsconfig tsconfig.json server/bot/index.ts"
+    "bot": "tsx --tsconfig tsconfig.json server/bot/index.ts",
+    "test:bot": "node --import tsx --test server/bot/__tests__/*.test.ts"
   },
   "dependencies": {
     "@leenguyen/react-flip-clock-countdown": "^1.7.2",
