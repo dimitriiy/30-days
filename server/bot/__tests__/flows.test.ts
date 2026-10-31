@@ -129,6 +129,21 @@ test("habit creation validates order, daily check can be corrected, progress is 
   assert.equal((await store.readSubscribers())[0].active, false);
 });
 
+test("habit title accepts 180 characters and rejects 181", async (t) => {
+  const { bot, store } = await setup(t);
+  await bot.message("/start");
+  await bot.message("08:00");
+  await bot.message("/habit");
+  assert.match(bot.sent.at(-1)!.text, /до 180 символов/);
+  await bot.message("а".repeat(181));
+  assert.equal((await store.readSubscribers())[0].awaiting, "habit-title");
+  assert.match(bot.sent.at(-1)!.text, /от 1 до 180 символов/);
+  await bot.message("а".repeat(180));
+  const user = (await store.readSubscribers())[0];
+  assert.equal(user.awaiting, "habit-reminder");
+  assert.equal(user.draft?.title.length, 180);
+});
+
 test("timezone and morning time can change without losing habits", async (t) => {
   const { bot, store } = await setup(t);
   await bot.message("/start");

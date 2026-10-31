@@ -38,6 +38,8 @@ const HELP = [
   "Все времена указывайте в своём часовом поясе, формат ЧЧ:ММ.",
 ].join("\n");
 
+const MAX_HABIT_TITLE_LENGTH = 180;
+
 const TIME_ZONE_KEYBOARD = {
   inline_keyboard: [
     [
@@ -179,7 +181,7 @@ export function registerBotHandlers(bot: TelegramBot, services: BotServices = de
         });
         await bot.sendMessage(
           chatId,
-          "Как назвать привычку? Напиши короткое название (до 80 символов).",
+          `Как назвать привычку? Напиши название (до ${MAX_HABIT_TITLE_LENGTH} символов).`,
         );
         return;
       }
@@ -246,10 +248,10 @@ export function registerBotHandlers(bot: TelegramBot, services: BotServices = de
         return;
       }
       if (user?.awaiting === "habit-title") {
-        if (!text || text.length > 80) {
+        if (!text || Array.from(text).length > MAX_HABIT_TITLE_LENGTH) {
           await bot.sendMessage(
             chatId,
-            "Название должно быть от 1 до 80 символов.",
+            `Название должно быть от 1 до ${MAX_HABIT_TITLE_LENGTH} символов.`,
           );
           return;
         }
