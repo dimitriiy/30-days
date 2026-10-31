@@ -15,10 +15,12 @@ export interface Habit {
 export interface Subscriber {
   chatId: number;
   active: boolean;
+  firstName?: string;
   timeZone?: string;
   morningTime?: string;
   awaiting?: "timezone" | "morning" | "habit-title" | "habit-reminder" | "habit-check";
   draft?: { title: string; reminderTime?: string };
+  pendingHabitDeletion?: { ids: string[]; requestedAt: string; token: string };
   habits: Habit[];
   lastMorningDate?: string;
   lastQuoteDate?: string;

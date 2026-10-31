@@ -45,15 +45,15 @@ const HELP = [
 const MAX_HABIT_TITLE_LENGTH = 180;
 
 export const BOT_COMMANDS: Array<{ command: string; description: string }> = [
-  { command: "start", description: "🌅 Настроить утренний настрой" },
-  { command: "quote", description: "💭 Получить случайную цитату" },
-  { command: "habit", description: "🎯 Создать привычку" },
-  { command: "progress", description: "📊 Посмотреть прогресс" },
-  { command: "habits", description: "🗂 Мои привычки" },
-  { command: "time", description: "🕒 Изменить время" },
-  { command: "timezone", description: "📍 Изменить часовой пояс" },
-  { command: "stop", description: "🔕 Отключить уведомления" },
-  { command: "help", description: "ℹ️ Помощь" },
+  { command: "start", description: "Настроить утренний настрой" },
+  { command: "quote", description: "Получить случайную цитату" },
+  { command: "habit", description: "Создать привычку" },
+  { command: "progress", description: "Посмотреть прогресс" },
+  { command: "habits", description: "Мои привычки" },
+  { command: "time", description: "Изменить время" },
+  { command: "timezone", description: "Изменить часовой пояс" },
+  { command: "stop", description: "Отключить уведомления" },
+  { command: "help", description: "Помощь" },
 ];
 
 export async function configureBotMenu(bot: TelegramBot): Promise<void> {
@@ -113,6 +113,7 @@ export function registerBotHandlers(bot: TelegramBot, services: BotServices = de
       if (text === "/start" || text === "/subscribe") {
         await updateSubscriber(chatId, (user) => {
           user.active = false;
+          user.firstName = message.from?.first_name?.trim() || user.firstName;
           user.morningTime = undefined;
           user.timeZone ??= DEFAULT_TIME_ZONE;
           user.awaiting = "morning";
@@ -210,8 +211,11 @@ export function registerBotHandlers(bot: TelegramBot, services: BotServices = de
           return;
         }
         const date = localDateTime(now(), user.timeZone).date;
-        for (const habit of user.habits) {
-          await bot.sendMessage(chatId, habitProgress(habit, date));
+        for (const [index, habit] of user.habits.entries()) {
+          const options = index === user.habits.length - 1
+            ? { reply_markup: { inline_keyboard: [[{ text: "🗑 Удалить все привычки", callback_data: "habits:delete:ask" }]] } }
+            : undefined;
+          await bot.sendMessage(chatId, habitProgress(habit, date), options);
         }
         return;
       }
@@ -336,6 +340,60 @@ export function registerBotHandlers(bot: TelegramBot, services: BotServices = de
   bot.on("callback_query", (query) => {
     return (async () => {
       const chatId = query.message?.chat.id;
+      if (query.data?.startsWith("habits:delete:") && chatId) {
+        const [action, token] = query.data.slice("habits:delete:".length).split(":");
+        const user = (await readSubscribers()).find((item) => item.chatId === chatId);
+        if (action === "ask") {
+          if (!user?.habits.length) {
+            await bot.answerCallbackQuery(query.id, { text: "Привычек уже нет." });
+            return;
+          }
+          const confirmationToken = newId();
+          await updateSubscriber(chatId, (current) => {
+            current.pendingHabitDeletion = {
+              ids: current.habits.map((habit) => habit.id),
+              requestedAt: now().toISOString(),
+              token: confirmationToken,
+            };
+          });
+          await bot.answerCallbackQuery(query.id);
+          await bot.sendMessage(chatId, `⚠️ Удалить все привычки (${user.habits.length})?\n\nОтметки прогресса тоже будут удалены.`, {
+            reply_markup: { inline_keyboard: [[
+              { text: "🗑 Да, удалить", callback_data: `habits:delete:confirm:${confirmationToken}` },
+              { text: "Отмена", callback_data: `habits:delete:cancel:${confirmationToken}` },
+            ]] },
+          });
+          return;
+        }
+        const pending = user?.pendingHabitDeletion;
+        const elapsed = pending ? now().getTime() - Date.parse(pending.requestedAt) : Infinity;
+        if (!pending || pending.token !== token || elapsed < 0 || elapsed > 10 * 60_000) {
+          await bot.answerCallbackQuery(query.id, { text: "Подтверждение устарело. Открой /habits ещё раз." });
+          return;
+        }
+        if (action !== "confirm" && action !== "cancel") return;
+        let count = 0;
+        let applied = false;
+        await updateSubscriber(chatId, (current) => {
+          if (current.pendingHabitDeletion?.token !== token) return;
+          applied = true;
+          if (action === "confirm") {
+            count = current.habits.filter((habit) => pending.ids.includes(habit.id)).length;
+            current.habits = current.habits.filter((habit) => !pending.ids.includes(habit.id));
+          }
+          current.pendingHabitDeletion = undefined;
+        });
+        if (!applied) {
+          await bot.answerCallbackQuery(query.id, { text: "Подтверждение уже использовано." });
+          return;
+        }
+        await bot.answerCallbackQuery(query.id);
+        await bot.editMessageText(action === "confirm" ? `🗑 Удалено привычек: ${count}.\n\nСоздать новую: /habit` : "✅ Удаление отменено. Привычки сохранены.", {
+          chat_id: chatId,
+          message_id: query.message!.message_id,
+        });
+        return;
+      }
       if (query.data?.startsWith("tz:") && chatId) {
         const user = (await readSubscribers()).find(
           (item) => item.chatId === chatId,

@@ -1,7 +1,9 @@
 import { dayNumber, habitDay, progress, type Habit } from "./domain";
 
-export function morningNotification(text: string): string {
-  return `🌅 Утренний настрой\n\n${text}`;
+export function morningNotification(text: string, firstName?: string): string {
+  const name = firstName?.trim().replace(/\s+/g, " ");
+  const greeting = name ? `Доброе утро, ${name}!` : "Доброе утро!";
+  return `🌅 Утренний настрой\n\n${greeting}\n\n${text}`;
 }
 
 export function quoteNotification(text: string): string {

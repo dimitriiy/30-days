@@ -48,8 +48,19 @@ export function deliverDue(bot: TelegramBot, now = new Date(), services: Schedul
         const due = dueNotifications(subscriber, date, time, previous.date === date ? previous.time : undefined);
         if (due.morning) {
           await attempt(chatId, async () => {
-            await bot.sendMessage(chatId, morningNotification(await services.morningMessage()));
-            await services.updateSubscriber(chatId, (user) => { user.lastMorningDate = date; });
+            let firstName = subscriber.firstName;
+            if (!firstName) {
+              try {
+                firstName = (await bot.getChat(chatId)).first_name?.trim();
+              } catch {
+                // A profile lookup must not prevent the morning message.
+              }
+            }
+            await bot.sendMessage(chatId, morningNotification(await services.morningMessage(), firstName));
+            await services.updateSubscriber(chatId, (user) => {
+              user.lastMorningDate = date;
+              if (firstName) user.firstName = firstName;
+            });
           });
         }
         if (due.quote && quotes.length) {

@@ -20,6 +20,7 @@ class FakeBot {
   edited: Array<{ text: string; options: unknown }> = [];
   answers: string[] = [];
   failText?: string;
+  profileName = "Дмитрий";
 
   on(event: string, handler: (value: never) => Promise<unknown>): this {
     this.handlers.set(event, handler);
@@ -42,10 +43,14 @@ class FakeBot {
     return {};
   }
 
-  async message(text: string, chatId = 1): Promise<void> {
+  async getChat(): Promise<{ first_name: string }> {
+    return { first_name: this.profileName };
+  }
+
+  async message(text: string, chatId = 1, firstName?: string): Promise<void> {
     const handler = this.handlers.get("message");
     assert.ok(handler);
-    await handler({ text, chat: { id: chatId, type: "private" } } as never);
+    await handler({ text, chat: { id: chatId, type: "private" }, from: firstName ? { first_name: firstName } : undefined } as never);
   }
 
   async callback(data: string, chatId = 1): Promise<void> {
@@ -62,7 +67,8 @@ async function setup(t: { after: (fn: () => Promise<void>) => void }) {
   const store = createSubscriberStore(filePath);
   const bot = new FakeBot();
   let now = new Date("2026-06-01T05:00:00Z");
-  const services: BotServices = { ...store, now: () => now, newId: () => "abc123" };
+  let idCounter = 0;
+  const services: BotServices = { ...store, now: () => now, newId: () => (++idCounter).toString(16).padStart(6, "0") };
   registerBotHandlers(bot as unknown as TelegramBot, services);
   const scheduler: SchedulerServices = {
     ...store,
@@ -72,10 +78,19 @@ async function setup(t: { after: (fn: () => Promise<void>) => void }) {
   return { bot, store, scheduler, filePath, setNow: (value: string) => { now = new Date(value); } };
 }
 
+function confirmationButtons(bot: FakeBot): { confirm: string; cancel: string } {
+  const options = bot.sent.at(-1)?.options as { reply_markup: { inline_keyboard: Array<Array<{ callback_data: string }>> } };
+  return {
+    confirm: options.reply_markup.inline_keyboard[0][0].callback_data,
+    cancel: options.reply_markup.inline_keyboard[0][1].callback_data,
+  };
+}
+
 test("onboarding defaults to Moscow, validates time, and persists the subscription", async (t) => {
   const { bot, store, filePath } = await setup(t);
-  await bot.message("/start");
+  await bot.message("/start", 1, "Марк");
   assert.equal((await store.readSubscribers())[0].awaiting, "morning");
+  assert.equal((await store.readSubscribers())[0].firstName, "Марк");
   assert.equal((await store.readSubscribers())[0].timeZone, "Europe/Moscow");
   await bot.message("/timezone");
   await bot.message("Invalid/Zone");
@@ -120,6 +135,7 @@ test("native Telegram menu exposes the bot commands in private chats", async () 
   await configureBotMenu(bot);
   assert.deepEqual(commands, BOT_COMMANDS);
   assert.deepEqual(commands.map(({ command }) => command), ["start", "quote", "habit", "progress", "habits", "time", "timezone", "stop", "help"]);
+  assert.ok(commands.every(({ description }) => !/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/u.test(description)));
   assert.deepEqual(scope, { scope: { type: "all_private_chats" } });
   assert.deepEqual(menuButton, { menu_button: { type: "commands" } });
 });
@@ -197,6 +213,65 @@ test("timezone and morning time can change without losing habits", async (t) => 
   assert.equal(user.active, true);
 });
 
+test("delete-all button requires confirmation and preserves subscription settings", async (t) => {
+  const { bot, store } = await setup(t);
+  await store.updateSubscriber(1, (user) => {
+    user.active = true;
+    user.timeZone = "Europe/Moscow";
+    user.morningTime = "08:00";
+    user.habits = [
+      { id: "a1", title: "Читать", startDate: "2026-06-01", reminderTime: "09:00", checkTime: "21:00", results: { "2026-06-01": true } },
+      { id: "b2", title: "Ходить", startDate: "2026-06-01", reminderTime: "10:00", checkTime: "22:00", results: {} },
+    ];
+  });
+  await bot.message("/habits");
+  assert.match(JSON.stringify(bot.sent.at(-1)?.options), /habits:delete:ask/);
+  await bot.callback("habits:delete:ask");
+  assert.match(bot.sent.at(-1)!.text, /Удалить все привычки \(2\)/);
+  assert.equal((await store.readSubscribers())[0].habits.length, 2);
+  await bot.callback(confirmationButtons(bot).cancel);
+  assert.equal((await store.readSubscribers())[0].habits.length, 2);
+  assert.match(bot.edited.at(-1)!.text, /Удаление отменено/);
+  await bot.callback("habits:delete:ask");
+  await bot.callback(confirmationButtons(bot).confirm);
+  const user = (await store.readSubscribers())[0];
+  assert.deepEqual(user.habits, []);
+  assert.equal(user.pendingHabitDeletion, undefined);
+  assert.equal(user.active, true);
+  assert.equal(user.morningTime, "08:00");
+  assert.match(bot.edited.at(-1)!.text, /Удалено привычек: 2/);
+});
+
+test("expired delete confirmation cannot remove habits", async (t) => {
+  const { bot, store, setNow } = await setup(t);
+  await store.updateSubscriber(1, (user) => {
+    user.timeZone = "Europe/Moscow";
+    user.habits = [{ id: "a1", title: "Читать", startDate: "2026-06-01", reminderTime: "09:00", checkTime: "21:00", results: {} }];
+  });
+  await bot.callback("habits:delete:ask");
+  const { confirm } = confirmationButtons(bot);
+  setNow("2026-06-01T05:11:00Z");
+  await bot.callback(confirm);
+  assert.equal((await store.readSubscribers())[0].habits.length, 1);
+});
+
+test("an older confirmation button cannot delete habits after a new prompt", async (t) => {
+  const { bot, store } = await setup(t);
+  await store.updateSubscriber(1, (user) => {
+    user.timeZone = "Europe/Moscow";
+    user.habits = [{ id: "a1", title: "Читать", startDate: "2026-06-01", reminderTime: "09:00", checkTime: "21:00", results: {} }];
+  });
+  await bot.callback("habits:delete:ask");
+  const oldConfirmation = confirmationButtons(bot).confirm;
+  await bot.callback("habits:delete:ask");
+  const currentConfirmation = confirmationButtons(bot).confirm;
+  assert.notEqual(oldConfirmation, currentConfirmation);
+  await bot.callback(oldConfirmation);
+  assert.equal((await store.readSubscribers())[0].habits.length, 1);
+  await bot.callback(currentConfirmation);
+  assert.equal((await store.readSubscribers())[0].habits.length, 0);
+});
+
 test("scheduler sends local morning, daytime quote, habit reminder and check only once", async (t) => {
   const { bot, store, scheduler, filePath } = await setup(t);
   await store.updateSubscriber(1, (user) => {
@@ -207,6 +282,7 @@ test("scheduler sends local morning, daytime quote, habit reminder and check onl
   });
   await store.updateSubscriber(2, (user) => {
     user.active = true;
+    user.firstName = "Марк";
     user.timeZone = "Europe/Berlin";
     user.morningTime = "08:00";
   });
@@ -215,9 +291,12 @@ test("scheduler sends local morning, daytime quote, habit reminder and check onl
   const restarted = createSubscriberStore(filePath);
   await deliverDue(telegram, new Date("2026-06-01T05:00:00Z"), { ...scheduler, ...restarted });
   assert.equal(bot.sent.filter((message) => message.text.startsWith("🌅 Утренний настрой") && message.chatId === 1).length, 1);
+  assert.ok(bot.sent.some((message) => message.chatId === 1 && message.text.includes("Доброе утро, Дмитрий!\n\nУтренний настрой")));
+  assert.equal((await store.readSubscribers()).find((user) => user.chatId === 1)?.firstName, "Дмитрий");
   assert.equal(bot.sent.filter((message) => message.text.startsWith("🌅 Утренний настрой") && message.chatId === 2).length, 0);
   await deliverDue(telegram, new Date("2026-06-01T06:00:00Z"), scheduler);
   assert.equal(bot.sent.filter((message) => message.text.startsWith("🌅 Утренний настрой") && message.chatId === 2).length, 1);
+  assert.ok(bot.sent.some((message) => message.chatId === 2 && message.text.includes("Доброе утро, Марк!\n\nУтренний настрой")));
   await deliverDue(telegram, new Date("2026-06-01T07:00:00Z"), scheduler);
   assert.equal(bot.sent.filter((message) => message.text.startsWith("🔔 Привычка на сегодня") && message.chatId === 1).length, 1);
   const quote = quoteTime(1, "2026-06-01");
