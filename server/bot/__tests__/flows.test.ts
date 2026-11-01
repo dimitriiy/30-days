@@ -180,6 +180,27 @@ test("habit creation validates order, daily check can be corrected, progress is 
   assert.equal((await store.readSubscribers())[0].active, false);
 });
 
+test("habit created after its reminder still gets today's check if check time is ahead", async (t) => {
+  const { bot, store, scheduler, setNow } = await setup(t);
+  await bot.message("/start");
+  await bot.message("08:00");
+  setNow("2026-06-01T09:00:00Z"); // 12:00 in Moscow
+  await bot.message("/habit");
+  await bot.message("Читать");
+  await bot.message("08:30");
+  await bot.message("22:00");
+  assert.equal((await store.readSubscribers())[0].habits[0].startDate, "2026-06-01");
+  await deliverDue(bot as unknown as TelegramBot, new Date("2026-06-01T19:00:00Z"), scheduler);
+  assert.equal(bot.sent.filter((message) => message.text.startsWith("✅ Время отметить привычку")).length, 1);
+
+  setNow("2026-06-01T19:15:00Z"); // 22:15 in Moscow
+  await bot.message("/habit");
+  await bot.message("Ходить");
+  await bot.message("08:30");
+  await bot.message("22:00");
+  assert.equal((await store.readSubscribers())[0].habits[1].startDate, "2026-06-02");
+});
+
 test("habit title accepts 180 characters and rejects 181", async (t) => {
   const { bot, store } = await setup(t);
   await bot.message("/start");
@@ -311,6 +332,20 @@ test("scheduler sends local morning, daytime quote, habit reminder and check onl
     deliverDue(telegram, new Date("2026-06-01T18:00:00Z"), scheduler),
   ]);
   assert.equal(bot.sent.filter((message) => message.text.startsWith("✅ Время отметить привычку") && message.chatId === 1).length, 1);
+});
+
+test("scheduler sends a missed 22:00 habit check later that local day", async (t) => {
+  const { bot, store, scheduler } = await setup(t);
+  await store.updateSubscriber(1, (user) => {
+    user.active = true;
+    user.timeZone = "Europe/Moscow";
+    user.habits = [{ id: "habit-1", title: "Читать", startDate: "2026-06-01", reminderTime: "10:00", checkTime: "22:00", results: {} }];
+  });
+  const telegram = bot as unknown as TelegramBot;
+  await deliverDue(telegram, new Date("2026-06-01T19:45:00Z"), scheduler);
+  await deliverDue(telegram, new Date("2026-06-01T20:00:00Z"), scheduler);
+  assert.equal(bot.sent.filter((message) => message.text.startsWith("✅ Время отметить привычку")).length, 1);
+  assert.equal((await store.readSubscribers())[0].habits[0].lastCheckDate, "2026-06-01");
 });
 
 test("failed morning delivery does not prevent a habit reminder", async (t) => {

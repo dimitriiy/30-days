@@ -116,7 +116,7 @@ export function dueNotifications(subscriber: Subscriber, date: string, time: str
     morning: Boolean(subscriber.morningTime && isDue(subscriber.morningTime)) && subscriber.lastMorningDate !== date,
     quote: Boolean(subscriber.morningTime) && time < "21:00" && isDue(quoteTime(subscriber.chatId, date)) && subscriber.lastQuoteDate !== date,
     reminders: habits.filter((habit) => isDue(habit.reminderTime) && time < habit.checkTime && habit.lastReminderDate !== date).map((habit) => habit.id),
-    checks: habits.filter((habit) => isDue(habit.checkTime) && habit.lastCheckDate !== date && habit.results[date] === undefined).map((habit) => habit.id),
+    checks: habits.filter((habit) => time >= habit.checkTime && habit.lastCheckDate !== date && habit.results[date] === undefined).map((habit) => habit.id),
   };
 }
 

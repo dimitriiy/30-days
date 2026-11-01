@@ -98,6 +98,15 @@ test("notifications are due once per day at their chosen times", () => {
   assert.deepEqual(dueNotifications(user, date, quote), { morning: false, quote: false, reminders: [], checks: [] });
 });
 
+test("habit check is still due later on the same day after a missed delivery window", () => {
+  const user: Subscriber = { chatId: 1, active: true, habits: [habit()] };
+  user.habits[0].checkTime = "22:00";
+  assert.deepEqual(dueNotifications(user, "2026-01-01", "21:59").checks, []);
+  assert.deepEqual(dueNotifications(user, "2026-01-01", "22:45").checks, ["one"]);
+  user.habits[0].lastCheckDate = "2026-01-01";
+  assert.deepEqual(dueNotifications(user, "2026-01-01", "23:59").checks, []);
+});
+
 test("progress separates completed, skipped and unanswered days", () => {
   const item = habit();
   item.results["2026-01-01"] = true;

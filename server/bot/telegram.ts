@@ -313,8 +313,7 @@ export function registerBotHandlers(bot: TelegramBot, services: BotServices = de
         }
         const title = user.draft.title;
         const current = localDateTime(now(), user.timeZone!);
-        const startDate =
-          current.time >= user.draft.reminderTime ? nextDate(current.date) : current.date;
+        const startDate = current.time >= time ? nextDate(current.date) : current.date;
         await updateSubscriber(chatId, (current) => {
           current.habits.push({
             id: newId(),
