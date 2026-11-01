@@ -90,7 +90,7 @@ export function MonolithCourse() {
       <h1>Как думать о системах</h1>
       <p>Подробные конспекты по 11 темам, проверка после каждой темы и сквозной стенд, где можно проследить запрос через CPU, процессы, потоки, пул соединений и I/O.</p>
     </header>
-    <nav className="course-sections" aria-label="Разделы курса"><a href="#course" aria-current={!sandbox ? "page" : undefined}>Конспекты и тесты</a><a href="#sandbox" aria-current={sandbox ? "page" : undefined}>Песочница</a></nav>
+    <nav className="course-sections" aria-label="Разделы курса"><a href="#course" aria-current={!sandbox ? "page" : undefined}>Конспекты и тесты</a><a href="#sandbox" aria-current={sandbox ? "page" : undefined}>Песочница</a><a href="/system-design/monolith/summary">Карта знаний</a></nav>
     {sandbox ? <div id="sandbox"><SimulationStand /></div> : <div className="course-layout" id="course">
       <nav className="course-nav" aria-label="Темы курса">
         <div className="course-nav-label">Темы {completed.length}/{lessons.length}</div>

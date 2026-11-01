@@ -1,0 +1,1421 @@
+[
+  {
+    "title": "Основы системного дизайна",
+    "topics": [
+      {
+        "title": "Анализ требований, оценка нагрузки и SRE-метрики",
+        "sections": [
+          {
+            "title": "Вопросы и ответы (Q&A)",
+            "items": [
+              {
+                "id": "l-8ljy9rA6EX6aJqsJCgb",
+                "text": "Вопрос: Как перевести 1M DAU в требования? Среднее - 50 запросов на пользователя. Помним про пиковые нагрузки (5x от среднего, 250 на пользователя).",
+                "answer": "Ответ: 1M DAU -> ~580 avg RPS, peak 3k RPS. Выдерживается 1 монолитом Go/Java + Postgres + Redis"
+              },
+              {
+                "id": "F2QtAJJj7kWXtEk6zDAVL",
+                "text": "Вопрос: Зачем Закон Литтла для DB pool?",
+                "answer": "Ответ: L = Lambda * W. 1000 RPS * 10ms = 10 параллельных запросов. Огромный пул создает CPU/Lock contention"
+              },
+              {
+                "id": "NawKuhsMkbayvyVoeAHh6",
+                "text": "Вопрос: Error budget в минутах vs запросах?",
+                "answer": "Ответ: Для API лучше по запросам: 1 мин полного отвала != 10 мин 1% ошибок"
+              },
+              {
+                "id": "SJrCRpEV-LMVB_CdsUXXh",
+                "text": "Вопрос: Как считать диск под БД?",
+                "answer": "Ответ: Row payload + tuple overhead (23B в PG) + индексы (30-50%) + WAL + Vacuum bloat (20%)"
+              },
+              {
+                "id": "M3YOIfcFpLcxnZjQmGHiA",
+                "text": "Вопрос: Действия при Burn Rate = 14.4?",
+                "answer": "Ответ: Бюджет сгорит за 2 дня. Триггер PagerDuty алерта и заморозка деплоев"
+              },
+              {
+                "id": "hy-N9i5sAL_0rOOAY0Vke",
+                "text": "Вопрос: Как закладывать Capacity Headroom?",
+                "answer": "Ответ: Оценивать 4 режима: Normal, Peak, N-1 (потеря ноды) и Recovery (холодный старт)"
+              }
+            ]
+          },
+          {
+            "title": "Ошибки и Сигналы интервьюера",
+            "items": [
+              {
+                "id": "jvbgUiiKfel60VRJurgR-",
+                "text": "⚠️ Подводные камни: Сведение DAU к среднему RPS, игнор оверхеда протоколов, завышение DB pool"
+              },
+              {
+                "id": "T-a8RfCjzR8Yg0r8Fqwg9",
+                "text": "🟢 Green Flags: Запрашивает p99/p99.9, закладывает index overhead, разделяет Read/Write"
+              },
+              {
+                "id": "xJ-JPR6P4A6OLEoEt7ult",
+                "text": "🔴 Red Flags: Цифры из головы, путает RPS и DAU, предлагает K8s + Cassandra для 100 RPS"
+              }
+            ]
+          },
+          {
+            "title": "SRE & DevOps Метрики",
+            "items": [
+              {
+                "id": "fs8D8N7zcUM1fcs430Uim",
+                "text": "SLI: Доля успешных ответов (<100ms) / Всего валидных запросов"
+              },
+              {
+                "id": "IKJBvi3QXFfiKTiHrHzV_",
+                "text": "SLO: 99.9% успешных запросов за 30 дней"
+              },
+              {
+                "id": "G8oRKulTAsM5WuJmx7C2m",
+                "text": "SLA: 99.5% юридический договор с финансовыми штрафами"
+              },
+              {
+                "id": "SrJPB4TqqsV7Bab72ZLr2",
+                "text": "Error Budget = 100% - SLO (43.2 мин простоя в месяц)"
+              },
+              {
+                "id": "lMHcZOKUnOsb5InflUeoJ",
+                "text": "Burn Rate = Текущий % ошибок / Допустимый % ошибок"
+              },
+              {
+                "id": "lrku6CycpJh-nqBDn-6wx",
+                "text": "PagerDuty Алерт: Бюджет сгорит за 2 дня!"
+              },
+              {
+                "id": "yEagU0ltrpnHNcbu2oiU0",
+                "text": "Burn Rate = 14.4"
+              }
+            ]
+          },
+          {
+            "title": "Расчёты Back-of-the-Envelope",
+            "items": [
+              {
+                "id": "QBDko2JQvY-cjAgdsiw_x",
+                "text": "1M DAU (уникальные активные пользователи/сут)"
+              },
+              {
+                "id": "HyJ4AlIzW5D8wCML0iene",
+                "text": "Анализ профиля нагрузки (Workload Mix)"
+              },
+              {
+                "id": "WCSp_yB2L0QZraM4_yqMv",
+                "text": "Средний RPS = (DAU * Запросов/С) / 86400 (~580 RPS)"
+              },
+              {
+                "id": "9wmEh4lYnvHHu1zug2G6t",
+                "text": "Пиковый RPS = Средний RPS * K_peak (~3,000 RPS)"
+              },
+              {
+                "id": "gOCeOgE9Ts8M_ktg42O7c",
+                "text": "Сетевая полоса = Пиковый RPS * Размер payload (~120 Mbps In/Out)"
+              },
+              {
+                "id": "j9M5sfWvdmTcgkWW0Nd6G",
+                "text": "Хранилище/сут = Записи * Размер строки * 1.4 (Оверхед индексов)"
+              },
+              {
+                "id": "vX5OnnE4V6jr_0IOPFLuu",
+                "text": "Кэш RAM = 0.2 * (Активные объекты * Размер) * 1.5 (Парето 80/20)"
+              },
+              {
+                "id": "anNJshpzH0PGZmne0aFtq",
+                "text": "Закон Литтла: L = Lambda * W (Конкурентность = RPS * Latency)"
+              },
+              {
+                "id": "DglF-08w6DF_61UT6M8Dj",
+                "text": "Оптимальный DB Pool = (Ядра CPU * 2) + effective IO source count (hdd, ssd, network disk)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Первая архитектура и критический путь",
+        "sections": [
+          {
+            "title": "Вопросы и ответы (Q&A)",
+            "items": [
+              {
+                "id": "bodhvtwzFptY3Gbvman46",
+                "text": "Вопрос: Что происходит повторе POST /trips с тем же Idempotency-Key?",
+                "answer": "Ответ: Возврат сохранённого результата из кэша/БД без повторного создания поездки"
+              },
+              {
+                "id": "jiLPaI8kmXenqDlWuzAyb",
+                "text": "Вопрос: Зачем Transactional Outbox?",
+                "answer": "Ответ: Исключает Dual Write: факт и событие пишутся в 1 транзакции PG, а relay публикует в фоне"
+              },
+              {
+                "id": "JwBvme38tWbCdT_0ju0up",
+                "text": "Вопрос: Accept Queue vs SYN Queue?",
+                "answer": "Ответ: SYN Queue хранит полуоткрытые TCP-соединения, Accept Queue - установленные handshake сокеты"
+              },
+              {
+                "id": "IH2OmcUzYbzWmSbmKQa3Z",
+                "text": "Вопрос: Почему нельзя держать HTTP открытым при поиске водителя?",
+                "answer": "Ответ: Блокирует сокеты и треды, растит tail latency. Поиск должен быть асинхронным (SEARCHING)"
+              },
+              {
+                "id": "5le0RcHuKRDZujiQiLDU4",
+                "text": "Вопрос: Как бороться с N+1 на критическом пути?",
+                "answer": "Ответ: Батчинг (IN queries), JOIN в СУБД, DataLoader паттерн или мульти-гет в Redis (MGET)"
+              },
+              {
+                "id": "sBLN-tu0hDmeh_fAcDPlb",
+                "text": "Вопрос: Context Deadline vs Timeout?",
+                "answer": "Ответ: Context Deadline пробрасывается сквозь все слои; при 0 оставшиеся вызовы сразу отменяются"
+              }
+            ]
+          },
+          {
+            "title": "Ошибки и Сигналы",
+            "items": [
+              {
+                "id": "7leJIwEMNqeOQaX3Z1IzM",
+                "text": "⚠️ Подводные камни: Синхронность асинхронных задач, отсутствие Idempotency-Key, сетевые вызовы под SQL-транзакцией"
+              },
+              {
+                "id": "S9ow8Px7G3NIrP7BuWZve",
+                "text": "🟢 Green Flags: Проектирует Idempotency-Key, выносит задачи в outbox, закладывает Latency Budget"
+              },
+              {
+                "id": "bKTtyqjthYD-35CDVBcRX",
+                "text": "🔴 Red Flags: Делает поиск водителя синхронным HTTP-вызовом, игнорирует сетевые RTT"
+              }
+            ]
+          },
+          {
+            "title": "Latency Budget (SLO p99 < 100ms)",
+            "items": [
+              {
+                "id": "bt5wgor2-zr2qxXp9R9P9",
+                "text": "Mobile RTT (30-50ms) + Nginx TLS (2-5ms) + App Routing (3-5ms) + Redis (1-3ms) + PG B-Tree (5-15ms) = 41-78ms (Запас 22-59ms)"
+              }
+            ]
+          },
+          {
+            "title": "Настройки ядра Linux (sysctl.conf & limits.conf)",
+            "items": [
+              {
+                "id": "DjO4CKnovXg8cNF-oY1GN",
+                "text": "net.core.somaxconn = 65535 (Лимит очереди accept)"
+              },
+              {
+                "id": "64SOq9BuCnhubT4Asjq8e",
+                "text": "net.ipv4.tcp_max_syn_backlog = 65535 (Защита от SYN-flood)"
+              },
+              {
+                "id": "yq2FksR2gVCbGNFHXLSAy",
+                "text": "net.ipv4.ip_local_port_range = 1024 65535 (Эфемерные порты)"
+              },
+              {
+                "id": "-3r8tdTTlPtFYy3FGKhCm",
+                "text": "net.ipv4.tcp_tw_reuse = 1 (Реюз сокетов в TIME_WAIT)"
+              },
+              {
+                "id": "PLwWiCPftBJajRpRwHXRQ",
+                "text": "vm.swappiness = 10 & vm.overcommit_memory = 1 (Защита от swap)"
+              },
+              {
+                "id": "gIlAsBGzOt_QaUwqD2wqw",
+                "text": "limits.conf: soft/hard nofile = 1048576, nproc = 65535"
+              }
+            ]
+          },
+          {
+            "title": "Сквозной путь запроса",
+            "items": [
+              {
+                "id": "mhn5VDbDvBiBgN-8EdJcf",
+                "text": "Мобильный клиент"
+              },
+              {
+                "id": "PLOdTcqz-sIswdSRH3hSh",
+                "text": "Cloudflare WAF / Anycast DNS"
+              },
+              {
+                "id": "BWiJS60D__jOkCPyGO6LI",
+                "text": "Ядро Linux (SYN Queue / Accept Queue)"
+              },
+              {
+                "id": "9yVgsfZcXg9vcPcVfq6dE",
+                "text": "Nginx L7 Reverse Proxy (epoll)"
+              },
+              {
+                "id": "XKdX8qINcSd1Lnkk539ei",
+                "text": "Монолит (Go / Java)"
+              },
+              {
+                "id": "cP_8GrdhC7odQHeLji35J",
+                "text": "L1 Кэш приложения"
+              },
+              {
+                "id": "mFW_sApLqt7Va56rr3dKP",
+                "text": "Redis L2 Кэш / Сессии / Блокировки"
+              },
+              {
+                "id": "RN2XYFZydv9Z2_umQBy8y",
+                "text": "PostgreSQL Primary DB"
+              },
+              {
+                "id": "jbR5YFdTDxtXoLMz68NJe",
+                "text": "TLS 1.3 / HTTPS"
+              },
+              {
+                "id": "_dxabLEKLJlPPBZq0NIrV",
+                "text": "TCP SYN"
+              },
+              {
+                "id": "Ui9b4iG6JVTaOA8gSrwO_",
+                "text": "accept Syscall"
+              },
+              {
+                "id": "NF8EEdNBiQFXOgJJeettB",
+                "text": "Keepalive HTTP/1.1"
+              },
+              {
+                "id": "nvaFwGZxfU0CpTl5E2z_2",
+                "text": "In-Memory"
+              },
+              {
+                "id": "sbzrj3I0G5HmvM9HeQjf9",
+                "text": "L2 Lookup"
+              },
+              {
+                "id": "izQWHdgsLrzPXg0d5Rg1B",
+                "text": "PgBouncer Pool"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Архитектура кодовой базы: Модульный монолит и DDD",
+        "sections": [
+          {
+            "title": "Вопросы и ответы (Q&A)",
+            "items": [
+              {
+                "id": "sITXW9s-T0eS61FJ1bMCi",
+                "text": "Вопрос: Когда пилить монолит на микросервисы?",
+                "answer": "Ответ: Когда у доменов разные профили масштабирования, независимый цикл релизов или разные команды"
+              },
+              {
+                "id": "jFo3QvLSeL8R3GLeVT9lF",
+                "text": "Вопрос: Чем грозит запись модуля A в таблицу B?",
+                "answer": "Ответ: Ломает инкапсуляцию, инварианты B могут быть нарушены, невозможно безопасно менять схему БД"
+              },
+              {
+                "id": "q9JWBpB0-0MmTmnD_vf3L",
+                "text": "Вопрос: Как связывать сущности разных модулей?",
+                "answer": "Ответ: Хранить только ID (UUID), а данные запрашивать через Go interface / Java port модуля-владельца"
+              },
+              {
+                "id": "ln576cyk4I8P7y6u9akIv",
+                "text": "Вопрос: Можно ли In-Memory Event Bus для интеграции?",
+                "answer": "Ответ: Можно для некритичных событий. Для критичных нужен Transactional Outbox"
+              },
+              {
+                "id": "1bVApBOVpV1b6yVyzMKqg",
+                "text": "Вопрос: Как защитить архитектуру кода на уровне сборки?",
+                "answer": "Ответ: Фейлим сборку, если domain_a импортирует пакеты domain_b напрямую"
+              }
+            ]
+          },
+          {
+            "title": "Ошибки и Сигналы",
+            "items": [
+              {
+                "id": "INx1DZqmUrR58JlFd0f2t",
+                "text": "⚠️ Подводные камни: Превращение монолита в распределённый монолит через общие таблицы, бизнес-логика в utils/storage"
+              },
+              {
+                "id": "9lcVT_u-GG5azRtk4dsxZ",
+                "text": "🟢 Green Flags: Четко выделяет Bounded Contexts, аргументирует монолит"
+              },
+              {
+                "id": "VCrWpY4HMVjezJro5FQLO",
+                "text": "🔴 Red Flags: Предлагает микросервисы для команды из 3 человек, допускает JOIN между таблицами разных доменов"
+              }
+            ]
+          },
+          {
+            "title": "Защита границ модулей",
+            "items": [
+              {
+                "id": "5x4Wa-A1p6q9hXYgTh4wI",
+                "text": "Strict In-Process Isolation: Запрет прямых SQL-запросов к чужим таблицам, вызовы только через публичные порты"
+              },
+              {
+                "id": "kuMA8F30EasPa5KA67CiE",
+                "text": "Инструменты: Go internal packages (/internal/domain_a/internal) & Java ArchUnit CI verification"
+              }
+            ]
+          },
+          {
+            "title": "Паттерн Modular Monolith",
+            "items": [
+              {
+                "id": "IuBc_pT9ad_8WK7jOqkT4",
+                "text": "Структура: /cmd/app/main.go | /internal/domain_a (User/Auth) | /internal/domain_b (Orders) | /pkg (утилиты)"
+              },
+              {
+                "id": "B2CYq2kT30nLu4HpyZmCb",
+                "text": "Слои модуля: /domain (Entities) -> /ports (Interfaces) -> /app (Use Cases) -> /adapters (PG/Redis/HTTP)"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "💾 БЛОК 2. Данные, оптимизация СУБД и специализированный поиск",
+    "topics": [
+      {
+        "title": "Core-модель, FSM и уровни изоляции транзакций",
+        "sections": [
+          {
+            "title": "Вопросы и ответы (Q&A)",
+            "items": [
+              {
+                "id": "NKAUrQmf5Q5TsInmfWnuy",
+                "text": "Вопрос: Почему CHECK (status IN (...)) не гарантирует FSM?",
+                "answer": "Ответ: CHECK проверяет само значение, но не порядок переходов из текущего статуса в новый"
+              },
+              {
+                "id": "_-y1w61uLYmhnkXsBRIJU",
+                "text": "Вопрос: Что происходит при Write Skew?",
+                "answer": "Ответ: Две параллельные транзакции читают общие данные, принимают решения и обновляют разные строки, нарушая инвариант"
+              },
+              {
+                "id": "cTMOZ30rxA-UBw1KR51kv",
+                "text": "Вопрос: Что такое xmin horizon?",
+                "answer": "Ответ: Минимальный xmin среди активных транзакций. Версии строк после xmin horizon VACUUM не может удалить"
+              },
+              {
+                "id": "VxauQrv1TTpTNDFiSQtas",
+                "text": "Вопрос: VACUUM vs VACUUM FULL?",
+                "answer": "Ответ: VACUUM помечает мертвые кортежи как свободное место без защелки. VACUUM FULL переписывает файл под замком"
+              },
+              {
+                "id": "WtHK8Vv8bXfINLs9zELaC",
+                "text": "Вопрос: Когда Optimistic, а когда Pessimistic Locking?",
+                "answer": "Ответ: Optimistic при низкой конкуренции (редкие конфликты). Pessimistic при высокой конкуренции за 1 объект"
+              },
+              {
+                "id": "oH_X_2Wmw62iG6q5W58N7",
+                "text": "Вопрос: Что делать при SQLSTATE 40001 в Serializable?",
+                "answer": "Ответ: Перехватить ошибку и повторить всю бизнес-транзакцию заново с экспоненциальным jitter"
+              }
+            ]
+          },
+          {
+            "title": "Ошибки и Сигналы",
+            "items": [
+              {
+                "id": "A-dsUPIe6MzcUB6dNoGy_",
+                "text": "⚠️ Подводные камни: Использование CHECK constraint как полной замены FSM кода, VACUUM FULL под нагрузкой"
+              },
+              {
+                "id": "KXBKQwuyOpohE3oxpvpul",
+                "text": "🟢 Green Flags: Использует частичные уникальные индексы, защищается от Race Conditions через CAS/FOR UPDATE, знает xmin/xmax"
+              },
+              {
+                "id": "8N9GN5Jw2nFi62WzKC1jF",
+                "text": "🔴 Red Flags: Выбирает Serializable для всех запросов, допускает 2 активные поездки у одного водителя"
+              }
+            ]
+          },
+          {
+            "title": "Изоляция транзакций и MVCC",
+            "items": [
+              {
+                "id": "oeIaZ4Xq-u74q0ABB8Fws",
+                "text": "Read Committed (Default PG): Dirty Read - Нет, Non-Repeatable Read - Да, Phantom Read - Да, Write Skew - Да"
+              },
+              {
+                "id": "74S4fg2x2Zhpoo4dECWhr",
+                "text": "Repeatable Read: Dirty Read - Нет, Non-Repeatable Read - Нет, Phantom Read - Нет (в PG), Write Skew - Да"
+              },
+              {
+                "id": "gxJ6LeQ61t7vNpYyxa8uX",
+                "text": "Serializable: Полная изоляция без аномалий (Serialization Failure 40001 требует полного retry)"
+              },
+              {
+                "id": "nNRtw_kZoLhkZnty-YmNa",
+                "text": "PostgreSQL MVCC: xmin/xmax поля. UPDATE = INSERT новой версии + xmax у старой"
+              },
+              {
+                "id": "3CNPZU-2X2WjxxPNMtt8K",
+                "text": "Table Bloat: Долгие SELECT удерживают xmin horizon, VACUUM не очищает dead tuples"
+              },
+              {
+                "id": "56QTDIUzUmq5TrRSmPmoV",
+                "text": "Transaction ID Wraparound: 32-битный xmin/xmax (4 млрд). Emergency read-only если autovacuum не успевает"
+              },
+              {
+                "id": "3DO2O0ELDFXU_PVtG4h7q",
+                "text": "Locking: Optimistic (CAS / version) vs Pessimistic (SELECT ... FOR UPDATE)"
+              }
+            ]
+          },
+          {
+            "title": "FSM и Модель поездки",
+            "items": [
+              {
+                "id": "tznCGBgWODuShskOaJF_3",
+                "text": "Таблица trips: status CHECK constraint + version + created_at/updated_at"
+              },
+              {
+                "id": "ldgoki93apD6HqxZglqD1",
+                "text": "Частичные уникальные индексы: uq_one_active_trip_per_passenger & uq_one_active_trip_per_driver"
+              },
+              {
+                "id": "20uBJvwKfjMl8V3wj8sST",
+                "text": "Переходы FSM: REQUESTED -> SEARCHING -> DRIVER_ASSIGNED -> DRIVER_ARRIVING -> IN_PROGRESS -> COMPLETED"
+              },
+              {
+                "id": "0nwGMZ3QoF9BYqtW004CT",
+                "text": "Атомарный UPDATE: UPDATE trips SET status='DRIVER_ASSIGNED', version=v+1 WHERE id=$1 AND status='SEARCHING' AND version=$3"
+              }
+            ]
+          },
+          {
+            "title": "Пример",
+            "items": [
+              {
+                "id": "HJLgXgVyYv4zqXZxAtMtx",
+                "text": "Пример write skew.\nдве параллельные транзакции читают одни и те же данные, каждая принимает решение на основе увиденного состояния, но записывают в разные строки.\n\nу водителя должна быть максимум одна активная поездка. Два запроса одновременно проверяют: «у водителя нет активных заказов», оба видят 0, затем каждый создаёт свою поездку. В итоге у водителя оказывается две активные поездки.\n\nПроблема в том, что при REPEATABLE READ/Snapshot Isolation транзакции пишут в разные строки, поэтому БД не видит конфликта записи. Решения: SERIALIZABLE с retry, блокировка строки водителя (SELECT ... FOR UPDATE) или частичный уникальный индекс, запрещающий более одной активной поездки на водителя."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Индексы и глубокая оптимизация PostgreSQL",
+        "sections": [
+          {
+            "title": "Вопросы и ответы (Q&A)",
+            "items": [
+              {
+                "id": "WdW1OHrDnyhTGOW4VjN9e",
+                "text": "Вопрос: Почему равенства идут перед диапазонами в индексе (A, B)?",
+                "answer": "Ответ: B-Tree быстро находит точную ветку по Equality, а затем сканирует узкий диапазон по Range"
+              },
+              {
+                "id": "tH9wH9klAVbl7enImoBwS",
+                "text": "Вопрос: Что такое Index Only Scan и от чего зависит?",
+                "answer": "Ответ: Данные берутся из B-Tree без Heap. Зависит от Visibility Map: если страница изменена, PG идет в Heap"
+              },
+              {
+                "id": "VgZYUiDHK2s3sywZ5OnNA",
+                "text": "Вопрос: Чем опасен слишком высокий work_mem?",
+                "answer": "Ответ: work_mem выделяется на каждую операцию сортировки каждого параллельного соединения. Вызывает OOM"
+              },
+              {
+                "id": "c74PerMvQcElZ9RIbaEC7",
+                "text": "Вопрос: Как fillfactor помогает ускорить UPDATE?",
+                "answer": "Ответ: Оставляет свободное место на Heap странице, позволяя выполнить HOT-update без обновления B-Tree"
+              },
+              {
+                "id": "Wxfqu8HBLnoAMpN3xGZTv",
+                "text": "Вопрос: Зачем нужен BRIN индекс?",
+                "answer": "Ответ: BRIN хранит min/max значения для блока страниц. Идеален для таймсерий/логов. Неэффективен на хаотичных данных"
+              },
+              {
+                "id": "pLhZF3f0EVg8cWqyCM6R0",
+                "text": "Вопрос: Почему EXPLAIN ANALYZE замедляет продакшн?",
+                "answer": "Ответ: Из-за тайминга каждого оператора и того, что EXPLAIN ANALYZE реально выполняет запросы"
+              }
+            ]
+          },
+          {
+            "title": "Ошибки и Сигналы",
+            "items": [
+              {
+                "id": "TSZgWw1toRFRrI-JHlSeN",
+                "text": "⚠️ Подводные камни: Индексы на каждую колонку 'на всякий случай', некорректный порядок в составном B-Tree (Equality до Range)"
+              },
+              {
+                "id": "0LmT9h2-7Wc3XwqPMQwnz",
+                "text": "🟢 Green Flags: Использует EXPLAIN (ANALYZE, BUFFERS), применяет Partial/Covering индексы, знает порядок колонок B-Tree"
+              },
+              {
+                "id": "9cz14MJT33TKfAkPAI40f",
+                "text": "🔴 Red Flags: Не знает разницу между Index Scan и Index Only Scan, путает shared_buffers и work_mem"
+              }
+            ]
+          },
+          {
+            "title": "EXPLAIN & postgresql.conf Tuning",
+            "items": [
+              {
+                "id": "a1nbB8LlVAVlNFkSHNBcl",
+                "text": "EXPLAIN (ANALYZE, BUFFERS): Seq Scan, Filter discard, shared hit/read, external merge Disk"
+              },
+              {
+                "id": "mXiaRRepbuCca7hcvEvVj",
+                "text": "postgresql.conf: shared_buffers=16GB (25% RAM), effective_cache_size=48GB, work_mem=64MB, random_page_cost=1.1 (NVMe), autovacuum_vacuum_scale_factor=0.05"
+              }
+            ]
+          },
+          {
+            "title": "Виды индексов и HOT-updates",
+            "items": [
+              {
+                "id": "_nRJ_RuU6SW8YkCecQQ0Y",
+                "text": "B-Tree: Точечные выборки, диапазоны (=, <, >, BETWEEN, LIKE prefix%), сортировка. Затратен на запись"
+              },
+              {
+                "id": "9WPV1Fm_p4gddxLrb-FQT",
+                "text": "BRIN (Block Range): Огромные append-only таблицы (логи, таймсерии) по времени. В 100-1000 раз меньше B-Tree"
+              },
+              {
+                "id": "szUswKTmKxRThyU9q5TvU",
+                "text": "GIN (Generalized Inverted): Полнотекстовый поиск, JSONB (@>), массивы. Медленная запись (pending list)"
+              },
+              {
+                "id": "5ZGm4XPkGyLIkLG-o92WR",
+                "text": "GiST: Геоданные (PostGIS), интервалы времени, полигоны"
+              },
+              {
+                "id": "8zXSzF7ms2xzmkCpLpL9G",
+                "text": "Covering Index (INCLUDE): CREATE INDEX idx_users ON users(email) INCLUDE(first_name) -> Index Only Scan"
+              },
+              {
+                "id": "IPvPFa_qBNND4eHpn_WLJ",
+                "text": "HOT (Heap-Only Tuple) Updates: UPDATE не меняет индексы + есть место на странице -> без обновления B-Tree (fillfactor=80)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Выбор хранилищ (Polyglot Persistence) & Storage Internals",
+        "sections": [
+          {
+            "title": "Вопросы и ответы (Q&A)",
+            "items": [
+              {
+                "id": "n_82Ue92dWdaZ-lNtkkXW",
+                "text": "Вопрос: Почему WAL пишется быстрее, чем страница в БД?",
+                "answer": "Ответ: WAL пишется strictly sequential (последовательно на диск), что требует минимума перемещений головки диска / NVMe"
+              },
+              {
+                "id": "AvZxrXdRhRyB-w5yKeUXJ",
+                "text": "Вопрос: Главный риск Polyglot Persistence?",
+                "answer": "Ответ: Операционная сложность, необходимость синхронизации данных (Eventual Consistency) и поддержка разных СУБД"
+              },
+              {
+                "id": "Uc84iC0M_Vya8he86LbNz",
+                "text": "Вопрос: Почему noatime важен для highload БД?",
+                "answer": "Ответ: По умолчанию ОС обновляет atime файла при каждом чтении, превращая чтение в запись. noatime отключает это"
+              },
+              {
+                "id": "fzzftvQiPQHDQfpqDSmGr",
+                "text": "Вопрос: Когда ClickHouse, а когда PostgreSQL?",
+                "answer": "Ответ: ClickHouse для колоночных сжатых OLAP-агрегатов над миллиардами строк. Postgres для точечных OLTP мутаций"
+              },
+              {
+                "id": "NilWZodVVJB-abSNAQxOX",
+                "text": "Вопрос: Какая модель согласованности у S3?",
+                "answer": "Ответ: В современном AWS S3 - Strong Read-After-Write Consistency для PUT и DELETE объектов"
+              },
+              {
+                "id": "nm3orWinHxaMOvbTfqXtO",
+                "text": "Вопрос: Опасность хранения данных только в Redis?",
+                "answer": "Ответ: При аварии питания или сбое инстанса асинхронный сброс AOF/RDB может привести к потере последних секунд данных"
+              }
+            ]
+          },
+          {
+            "title": "Ошибки и Сигналы",
+            "items": [
+              {
+                "id": "2Ulpk_gxOnXj6KKeJ3x53",
+                "text": "⚠️ Подводные камни: Выбор NoSQL 'потому что highload' там, где нужны жесткие ACID инварианты, S3 как транзакционная БД"
+              },
+              {
+                "id": "FuDHslTBjHbax5OA75z3a",
+                "text": "🟢 Green Flags: Выбирает СУБД под паттерн доступа, знает роль WAL, учитывает оперативную стоимость Polyglot Persistence"
+              },
+              {
+                "id": "1Gv7EgH0U4CfevO6caS-J",
+                "text": "🔴 Red Flags: Предлагает MongoDB вместо Postgres для финансовых данных, игнорирует RPO/RTO"
+              }
+            ]
+          },
+          {
+            "title": "SRE & Hardware Aspect",
+            "items": [
+              {
+                "id": "uBzclZEwUGLQdLIeXYDyk",
+                "text": "WAL (Write-Ahead Logging): Запись транзакции последовательно в WAL на диск до сброса в shared_buffers"
+              },
+              {
+                "id": "HliBxL_FrBSLOVTriE8dD",
+                "text": "Файловые системы: XFS / ext4 с монтированием noatime,nodiratime (отключает запись времени доступа)"
+              },
+              {
+                "id": "GLM-1eT0SEjqq4GwPbuRe",
+                "text": "Разделение дисков: Вынос WAL-логов на отдельный физический NVMe диск"
+              }
+            ]
+          },
+          {
+            "title": "Матрица хранилищ",
+            "items": [
+              {
+                "id": "RE-gvHEJqpRVBKQzEw3pC",
+                "text": "PostgreSQL: ACID, Relational/JSONB. Для: Финансы, заказы, core-сущности. НЕ для: гео-координаты, лог-стримы"
+              },
+              {
+                "id": "y1DRShOeveQH7OhDf1Ecg",
+                "text": "Redis: In-Memory Key-Value / Structures. Для: Кэши, сессии, Rate Limiting. НЕ для: ценные данные без бэкапа"
+              },
+              {
+                "id": "tAEtL15gCc0jL0cyC8jta",
+                "text": "S3 Object Storage: Blob / Flat Namespace. Для: Медиафайлы, PDF-отчеты, бэкапы, архивы. НЕ для: точечные правки < 10ms"
+              },
+              {
+                "id": "lnUtLFxeMo82eC1GLiQzT",
+                "text": "Search Engine (Elastic/OpenSearch): Inverted Index. Для: Полнотекстовый поиск, фасеты. НЕ как главный источник истины"
+              },
+              {
+                "id": "4CytjkIrktYNjSE2s0Rif",
+                "text": "Columnar / Time-Series (ClickHouse): Для: Аналитика, OLAP, миллиарды логов. НЕ для: OLTP транзакций"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Геопоиск и Полнотекстовый поиск",
+        "sections": [
+          {
+            "title": "Вопросы и ответы (Q&A)",
+            "items": [
+              {
+                "id": "qFUYn4txdXunLfbmn_JaF",
+                "text": "Вопрос: Почему Redis GEO EXPIRE удаляет весь набор?",
+                "answer": "Ответ: Redis GEO - это один ZSET ключ. TTL ставится на ключ целиком. Чистка делается Lua-скриптом или по last_seen"
+              },
+              {
+                "id": "_2o2r320W7bSggqaaDdlh",
+                "text": "Вопрос: Как решить проблему граничных эффектов в Geohash?",
+                "answer": "Ответ: Искать не только в целевом Geohash квадрате, но и во всех 8 соседних квадратах (Neighboring cells)"
+              },
+              {
+                "id": "t8JzO8VJhCg4GoJxgMdoX",
+                "text": "Вопрос: В чем преимущество Uber H3 перед квадратами?",
+                "answer": "Ответ: В H3 расстояние от центра ячейки до всех 6 соседей одинаково, что упрощает расчёт радиусов и тарифов"
+              },
+              {
+                "id": "eb68bFBJBq6FpZqSTRbs5",
+                "text": "Вопрос: Зачем Debezium при синхронизации с ES?",
+                "answer": "Ответ: Debezium читает WAL-логи Postgres и гарантирует асинхронную доставку событий без Dual Write аномалий"
+              },
+              {
+                "id": "3kuFY_BJo27HKTAcaYb91",
+                "text": "Вопрос: Как перестроить индекс в ES без простоя?",
+                "answer": "Ответ: Использовать Index Aliases: создать новый индекс, выполнить reindex/backfill, переключить алиас на новый"
+              },
+              {
+                "id": "JNAXUZnheCf4bkdvmRxSc",
+                "text": "Вопрос: Какова роль tsvector в PostgreSQL FTS?",
+                "answer": "Ответ: tsvector хранит отсортированный список лексем (нормализованных слов) с их позициями для быстрого GIN-поиска"
+              }
+            ]
+          },
+          {
+            "title": "Ошибки и Сигналы",
+            "items": [
+              {
+                "id": "nnAfBIMHSBudSnoMglbGr",
+                "text": "⚠️ Подводные камни: EXPIRE на весь Redis GEO ключ вместо чистки устаревших членов, Применение Dual Write Pattern (PG + ES параллельно)"
+              },
+              {
+                "id": "fMGMj7dgGh4DDCSk7ZoPg",
+                "text": "🟢 Green Flags: Разделяет эфемерные координаты (Redis) и историю поездки (PG), использует CDC/Debezium для ES, знает H3"
+              },
+              {
+                "id": "AOQMtI_0je1kpAFSPzTft",
+                "text": "🔴 Red Flags: Пишет 10,000 гео-хертбитов в секунду прямо в реляционную таблицу Postgres, делает Dual Write в Elastic"
+              }
+            ]
+          },
+          {
+            "title": "Полнотекстовый поиск (FTS)",
+            "items": [
+              {
+                "id": "Rf9rt7gKuRewlwyPgPWXb",
+                "text": "PostgreSQL FTS: tsvector + tsquery + GIN index. ACID, без доп инфраструктуры. Ограничение: CPU при Fuzzy Search"
+              },
+              {
+                "id": "ClodbCdV-eKrYssxy_Nti",
+                "text": "CDC & Elasticsearch Sync: Запрет Dual Write. Использование PG WAL -> Debezium -> Kafka -> Elasticsearch (Eventual Consistency)"
+              }
+            ]
+          },
+          {
+            "title": "Технологии геопоиска и поток координат",
+            "items": [
+              {
+                "id": "av6WEDeBLiqVNvEC5psud",
+                "text": "PostGIS (R-Tree / GiST): Bounding boxes. Точность и точные полигоны. Нагружает CPU/Disk при записи > 1000 RPS"
+              },
+              {
+                "id": "5uVHQitOrerotCiP_NO3e",
+                "text": "Uber H3 (Hexagonal Grid): Шестиугольники. Константное время поиска соседей, динамическое ценообразование"
+              },
+              {
+                "id": "MRwMPFiBfeURteCVMNixi",
+                "text": "Geohash (Base32): Lat/lon в строку (префикс = квадрат). Минус: граничные эффекты на стыках сетки"
+              },
+              {
+                "id": "2zUhP9jAuXCkuHWOLWUiB",
+                "text": "Redis GEO: ZSET поверх 52-битного Geohash. O(N + log M) в RAM, задержка < 2ms"
+              },
+              {
+                "id": "AcvSOYCh-bZ_elPNyOWoA",
+                "text": "Поток координат: Запись только в Redis GEO (GEOADD drivers:pos long lat driver_id) TTL 30s + трек в Redis Stream -> сброс в PG по завершении"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "🚀 БЛОК 3. Масштабирование, кэширование, сетевой слой и инфраструктура",
+    "topics": [
+      {
+        "title": "Горизонтальное масштабирование и балансировка (Nginx & Stateless App)",
+        "sections": [
+          {
+            "title": "Вопросы и ответы (Q&A)",
+            "items": [
+              {
+                "id": "KFAJpj-yqdi5asntT0QsQ",
+                "text": "Вопрос: Почему L4 балансировщик плохо работает с gRPC?",
+                "answer": "Ответ: gRPC использует HTTP/2 мультиплексирование поверх 1 TCP-соединения. L4 видит 1 сокет и шлет всё на 1 ноду"
+              },
+              {
+                "id": "Z8UCf8R8bmqCdoxnpEvjw",
+                "text": "Вопрос: Как работает Direct Server Return (DSR)?",
+                "answer": "Ответ: Запрос идет через L4 LB, а тяжелый ответ сервер отправляет клиенту напрямую, минуя LB и экономя Bandwidth"
+              },
+              {
+                "id": "bOKGg-5EC9Cun6IrSIWye",
+                "text": "Вопрос: Liveness vs Readiness пробы?",
+                "answer": "Ответ: Liveness проверяет жив ли процесс (restart при сбое). Readiness проверяет готовность принимать трафик"
+              },
+              {
+                "id": "X3Uyk1M53OOokmB5a4IgD",
+                "text": "Вопрос: Зачем пауза Drain Interval перед SIGTERM?",
+                "answer": "Ответ: Чтобы все внешние LB успели получить 503/unhealthy status и исключить ноду из списков до остановки"
+              },
+              {
+                "id": "a6IYQQEFcys1ns5U9bK8_",
+                "text": "Вопрос: Что такое Power of Two Choices (P2C)?",
+                "answer": "Ответ: Балансировщик выбирает 2 случайные ноды и отправляет запрос той, у которой меньше задержка/загрузка"
+              },
+              {
+                "id": "z2_mSedriMEl-oTPZbXYN",
+                "text": "Вопрос: Как предотвратить лавину запросов при Cold Start?",
+                "answer": "Ответ: Использовать Slow Start (постепенный прогрев ноды) и предпрогрев локальных кэшей перед включением Readiness"
+              }
+            ]
+          },
+          {
+            "title": "Ошибки и Сигналы",
+            "items": [
+              {
+                "id": "9LcNZ7NhLAaiDIrn7imy1",
+                "text": "⚠️ Подводные камни: Обрыв сокетов по SIGKILL, L4 балансировка gRPC (все запросы идут на 1 ноду)"
+              },
+              {
+                "id": "FJpPL4NUl0CSuNRsL36Rc",
+                "text": "🟢 Green Flags: Применяет Connection Draining, различает L4/L7, защищается от Throttling, настраивает L7 gRPC balancing"
+              },
+              {
+                "id": "ChiMO51nvfA2HPNET2K17",
+                "text": "🔴 Red Flags: Обрывает соединения при деплое (SIGKILL), путает L4 и L7, ставит round-robin на долгие gRPC стримы"
+              }
+            ]
+          },
+          {
+            "title": "Конфигурация Nginx & Graceful Shutdown",
+            "items": [
+              {
+                "id": "H_XiipaK1xbWZvujSxWku",
+                "text": "nginx.conf: worker_processes auto, worker_connections 65535, use epoll, least_conn, keepalive 64 к upstream"
+              },
+              {
+                "id": "bOv1nyYFZSRa-vlgRtEXH",
+                "text": "Graceful Shutdown (6 шагов): /healthz HTTP 503 -> Drain Interval (5-10s) -> SIGTERM -> Grace Period (30s) -> Close DB/Redis -> Exit 0"
+              }
+            ]
+          },
+          {
+            "title": "L3/L4 vs L7 Балансировка и алгоритмы",
+            "items": [
+              {
+                "id": "uSqSyVrtXnNvJN0UBGiD3",
+                "text": "L3/L4 (Transport): BGP Anycast + ECMP, IPVS, HAProxy TCP, Katran eBPF. Режим DSR (Direct Server Return) в обход LB на обратном пути"
+              },
+              {
+                "id": "Ec3C5mFhSxQ1qLB5n-f-5",
+                "text": "L7 (Application): Nginx, Envoy, HAProxy HTTP. HTTP/1.1 Keep-Alive, HTTP/2 Multiplexing, gRPC subchannel balancing"
+              },
+              {
+                "id": "6lRhvpa9Sd93HZTBPL25b",
+                "text": "Алгоритмы: Round Robin, Least Conn, Consistent Hashing (Ketama - перераспределяет 1/N ключей), P2C (power of 2 choices) & Peak EWMA (учитывает latency)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Кэширование и репликация (Redis & PG Read Replicas)",
+        "sections": [
+          {
+            "title": "Вопросы и ответы (Q&A)",
+            "items": [
+              {
+                "id": "yeDCBgKq7YSHIQrVO5sQY",
+                "text": "Вопрос: В чем разница между LRU и LFU в Redis?",
+                "answer": "Ответ: LRU вытесняет по времени последнего доступа. LFU - по частоте обращений, предотвращая вымывание кэша"
+              },
+              {
+                "id": "AXhybek74XYX4MZGo3VRW",
+                "text": "Вопрос: Как работает формула XFetch для защиты от Cache Stampede?",
+                "answer": "Ответ: currentTime - (Delta * Beta * ln(rand())) > TTL. Запрос вероятностно перевычисляет кэш в фоне"
+              },
+              {
+                "id": "L7hBl3JJSneDLbmqZZBYO",
+                "text": "Вопрос: Как Bloom Filter защищает от Cache Penetration?",
+                "answer": "Ответ: Bloom Filter с 0% false negative отвечает 'точно нет в БД', позволяя сразу отбросить невалидный ID"
+              },
+              {
+                "id": "2YIwwR3HOLmP_1uX3mvJ8",
+                "text": "Вопрос: Как обеспечить Read-After-Write с помощью LSN?",
+                "answer": "Ответ: Master возвращает LSN. При чтении реплика проверяет pg_last_wal_replay_lsn() >= LSN, иначе запрос идет на Master"
+              },
+              {
+                "id": "u-ohPRumhYNSh-EIBHLkg",
+                "text": "Вопрос: Чем опасен Copy-On-Write при снимке RDB в Redis?",
+                "answer": "Ответ: При fork() процессы делят память. Если идет много SET, CoW дублирует страницы, вызывая OOM"
+              },
+              {
+                "id": "i37HhMfuVO9m1wGUts-au",
+                "text": "Вопрос: Какова роль Patroni в кластере PostgreSQL?",
+                "answer": "Ответ: Patroni использует Etcd для консенсуса, управляет автоматическим failover, выбором Master и fencing старого"
+              }
+            ]
+          },
+          {
+            "title": "Ошибки и Сигналы",
+            "items": [
+              {
+                "id": "KG4vK3pjFeqj7x-fLXPF_",
+                "text": "⚠️ Подводные камни: Команда KEYS * на пророде, отсутствие Jitter, чтение с асинхронной реплики сразу после UPDATE"
+              },
+              {
+                "id": "tFuAm1HmFln_wfD3o8vrU",
+                "text": "🟢 Green Flags: Использует Singleflight/XFetch, настраивает LFU, знает LSN tracking для RAW consistency, закладывает Jitter"
+              },
+              {
+                "id": "cZqDua9-_wm-EnauAKbVm",
+                "text": "🔴 Red Flags: Использует KEYS * на продакшн Redis, не знает проблему Cache Stampede, считает асинхронную реплику мгновенной"
+              }
+            ]
+          },
+          {
+            "title": "PostgreSQL Репликация & Read-After-Write Consistency",
+            "items": [
+              {
+                "id": "pinyRIcB5iCOqNIujLKwF",
+                "text": "Streaming Replication (Physical WAL) vs Logical Replication (DML Events / CDC)"
+              },
+              {
+                "id": "MaaoqShSc5FM7JsniuWdz",
+                "text": "Sync vs Async Replication: synchronous_commit = on / remote_apply (RPO=0, задержка RTT) vs off"
+              },
+              {
+                "id": "zJnEMgVJbCoQu7dXtxNi5",
+                "text": "Read-After-Write: Sticky Sessions (маршрутизация на Master N сек) OR WAL LSN Tracking (Session Tokens X-Read-LSN)"
+              },
+              {
+                "id": "n4zrc4zXS7t4qBvPyltNO",
+                "text": "Failover & High Availability: Patroni + Etcd + Raft consensus. Защита от Split-Brain через Fencing / STONITH"
+              }
+            ]
+          },
+          {
+            "title": "Катастрофы кэширования",
+            "items": [
+              {
+                "id": "hovLeKHsoiqlE_eG8ceCQ",
+                "text": "Cache Stampede (Thundering Herd): Mutex / Singleflight OR Probabilistic Early Expiration (XFetch)"
+              },
+              {
+                "id": "QnZFYw_g_JFn09ZRT6wPT",
+                "text": "Cache Penetration: Negative Caching (NULL TTL 60s) OR Bloom Filter (вероятностная проверка существования ID)"
+              },
+              {
+                "id": "6LByGWnd39XlejCpl-dPJ",
+                "text": "Cache Avalanche: Добавление случайной энтропии (TTL Jitter = Base_TTL + rand(0, Window))"
+              },
+              {
+                "id": "lD2TWSQM5hGggyiJU0Wup",
+                "text": "Cache Breakdown (Hot Key): L1 Micro-caching (1-3s) OR Key Replication (hot_key:1..N)"
+              }
+            ]
+          },
+          {
+            "title": "Redis Architecture & Eviction",
+            "items": [
+              {
+                "id": "NO1g4hvss2Ee57PF2bSKH",
+                "text": "Single-Threaded Event Loop (epoll) + I/O Threads (Redis 6+). Запрет O(N) команд (KEYS *, FLUSHALL)"
+              },
+              {
+                "id": "jDqykYb6yKQNpSh-EQsM9",
+                "text": "maxmemory-policy: noeviction (OOM error), allkeys-lru / volatile-lru, allkeys-lfu / volatile-lfu (защита от сканирования)"
+              },
+              {
+                "id": "gNTlVZ1D5IHGIPlf116nk",
+                "text": "Persistence: RDB (Snapshotting + Copy-On-Write OOM risk) & AOF (Append-Only File, appendfsync everysec)"
+              }
+            ]
+          },
+          {
+            "title": "Паттерны кэширования и L1/L2",
+            "items": [
+              {
+                "id": "_GzllfJgXKugu0qPF4ZYr",
+                "text": "Паттерны: Cache-Aside (Lazy), Write-Through, Write-Behind (Async), Refresh-Ahead / Stale-While-Revalidate"
+              },
+              {
+                "id": "61raJP5YlYURL958Ccavc",
+                "text": "Двухуровневый кэш: L1 In-Memory (Caffeine/Go bigcache, <0.1ms) + L2 Redis (1-3ms) + Pub/Sub инвалидация"
+              }
+            ]
+          },
+          {
+            "title": "Дополнительно",
+            "items": [
+              {
+                "id": "BuOiTWKeiy5RfDPh2W7FI",
+                "text": "WAIT FOR LSN '0/1B2C3D40' TIMEOUT '2s' MODE standby_replay;\n\nДо 19-й версии postgres\n\n-- На primary после commit\nSELECT pg_current_wal_insert_lsn() AS write_lsn;\n\nSELECT pg_last_wal_replay_lsn() AS replay_lsn;\n\nif replay_lsn >= write_lsn:\n    читать с replica\nelse:\n    подождать и повторить проверку\n    или прочитать с primary\n\n"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Connection Pooling, управление ресурсами и фоновые задачи",
+        "sections": [
+          {
+            "title": "Вопросы и ответы (Q&A)",
+            "items": [
+              {
+                "id": "X6_ZW3ChLfv0s9dND95lV",
+                "text": "Вопрос: Почему transaction pooling эффективнее session pooling?",
+                "answer": "Ответ: В session клиент держит сокет БД всё время подключения. В transaction - только миллисекунды работы транзакции"
+              },
+              {
+                "id": "nWsfP8rkBOwa-BD6z4At_",
+                "text": "Вопрос: Зачем нужен GOMEMLIMIT в Go?",
+                "answer": "Ответ: Без GOMEMLIMIT GC Go ориентируется только на GOGC и может не успеть очистить память до OOMKilled cgroups"
+              },
+              {
+                "id": "gfrYDUW0PfXqbs5Kvn0oo",
+                "text": "Вопрос: Как GC pause может сломать Redis Lock?",
+                "answer": "Ответ: Узел берет lock на 10с, уходит в GC pause на 15с. Lock истекает, другой узел берет lock. Первый оживает и пишет параллельно"
+              },
+              {
+                "id": "PjoOhVpJ02Ks_rt4jZ1RR",
+                "text": "Вопрос: Как Fencing Token решает проблему зависшего узла?",
+                "answer": "Ответ: Каждому лидеру выдается монотонный токен (1, 2, 3...). Хранилище принимает записи только с токеном >= текущего максимального"
+              },
+              {
+                "id": "SuDEOethLB0ST-EF5f9oP",
+                "text": "Вопрос: В чем разница Prepared Statements в Session и Transaction pooling?",
+                "answer": "Ответ: В session statement фиксируется на сокете. В transaction сокеты меняются, поэтому PgBouncer  сам проксирует их подготовку"
+              }
+            ]
+          },
+          {
+            "title": "Ошибки и Сигналы",
+            "items": [
+              {
+                "id": "PZZgpfAWW2Q7oqsdZ9qNl",
+                "text": "⚠️ Подводные камни: Назначение max_connections=10000 в postgresql.conf, надежда на Redis lock без учёта длинных GC pauses"
+              },
+              {
+                "id": "O4T0swtlGCbk_Ks9oW_UP",
+                "text": "🟢 Green Flags: Настраивает GOMEMLIMIT, использует Transaction Pooling с умом, закладывает Fencing Token"
+              },
+              {
+                "id": "33wwuSfDPJg41IP6td_iV",
+                "text": "🔴 Red Flags: Назначает max_connections=10000 в postgresql.conf, надеется на Redis lock без учёта длинных GC pauses"
+              }
+            ]
+          },
+          {
+            "title": "Распределённые блокировки & Fencing Token",
+            "items": [
+              {
+                "id": "Ro0jpWZ1BatG5oKG6F8aW",
+                "text": "Redis Locks: SET lock_key node_uuid NX PX 15000 + Безопасное освобождение через Lua-скрипт (compare-and-delete)"
+              },
+              {
+                "id": "9xcVMmMFpPM-OUVvLIsXn",
+                "text": "Fencing Token: Монотонно растущий счетчик (epoch), передаваемый в целевую СУБД для отброса запоздавших запросов"
+              }
+            ]
+          },
+          {
+            "title": "SRE Runtime Tuning (Go & JVM)",
+            "items": [
+              {
+                "id": "1FR1M37GlevCZvxqetLxA",
+                "text": "Go Runtime: GOMEMLIMIT = 90% RAM cgroup limit (защита от OOMKilled), GOGC = 100"
+              },
+              {
+                "id": "OGUt85p2Oij38EjdnTjxN",
+                "text": "JVM (Java 21+): ZGC / Shenandoah (-XX:+UseZGC -XX:+ZGenerational), -Xms12g -Xmx12g, -XX:+AlwaysPreTouch"
+              }
+            ]
+          },
+          {
+            "title": "PgBouncer & Connection Pooling",
+            "items": [
+              {
+                "id": "zBl8fFIAlXAIodMun75lJ",
+                "text": "pgbouncer.ini: pool_mode = transaction (соединение выделяется только на время транзакции) - экономит 90% соединений PG"
+              },
+              {
+                "id": "RqV_PdH3q65iih8Eh5MeJ",
+                "text": "Ограничения Transaction Pooling: Запрещены PREPARE (без max_prepared_statements), LISTEN/NOTIFY, TEMP TABLE, SET LOCAL"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "📊 БЛОК 4. Нагрузочное тестирование, Observability и Zero-Downtime Operations",
+    "topics": [
+      {
+        "title": "Нагрузочное тестирование и поиск предела мощности",
+        "sections": [
+          {
+            "title": "Вопросы и ответы (Q&A)",
+            "items": [
+              {
+                "id": "4MKmeGP1AZpjVcpC3u6wS",
+                "text": "Вопрос: Open vs Closed модели генерации?",
+                "answer": "Ответ: Closed ждет ответа на предыдущий запрос. Open генерирует фиксированный поток RPS независимо от состояния сервера"
+              },
+              {
+                "id": "cqU_m1tIwtbkesOpibI-B",
+                "text": "Вопрос: Зачем Stress Test ПОСЛЕ точки Saturation?",
+                "answer": "Ответ: Чтобы проверить механизмы Load Shedding / Backpressure и убедиться, что система восстанавливается"
+              },
+              {
+                "id": "Yy14XZ7i-BuyGR-36YJSc",
+                "text": "Вопрос: Зачем Soak Test на 48 часов?",
+                "answer": "Ответ: Для поиска медленных утечек памяти, фрагментации, разрастания WAL/bloat и заполнения логов"
+              },
+              {
+                "id": "l3LTQqN0Qdj6TSgQ6Rkia",
+                "text": "Вопрос: Какая метрика в USE указывает на проблему ДО ошибок?",
+                "answer": "Ответ: Saturation (длина очередей к CPU, диску, сокетам или пулу соединений)"
+              },
+              {
+                "id": "_Qk-3riVZI_ktCntDBLeH",
+                "text": "Вопрос: Зачем нужен Baseline Test?",
+                "answer": "Ответ: Чтобы узнать идеальный Latency floor (минимальное время работы кода) без влияния очередей"
+              }
+            ]
+          },
+          {
+            "title": "Ошибки и Сигналы",
+            "items": [
+              {
+                "id": "56dmTKq7H620vDEIUw6FG",
+                "text": "⚠️ Подводные камни: Проведение нагрузочного теста на пустой БД, использование JMeter в closed loop без учёта задержек"
+              },
+              {
+                "id": "NEPhZs3g3tvmWVukE_c9w",
+                "text": "🟢 Green Flags: Использует Open Model генераторы, тестирует на датасетах с реальным объёмом и skew"
+              }
+            ]
+          },
+          {
+            "title": "Диагностика USE & RED",
+            "items": [
+              {
+                "id": "NJ9OX4jBFngMSXFtOOXJP",
+                "text": "Метод USE (Инфраструктура): Utilization (% использования), Saturation (длина очереди), Errors (количество сбоев)"
+              },
+              {
+                "id": "EEpuIaPmX6fgl0cfPd4zC",
+                "text": "🔴 Red Flags: Проводит нагрузочное тестирование на пустой БД, использует JMeter в closed loop без учёта задержек"
+              }
+            ]
+          },
+          {
+            "title": "Coordinated Omission & Open Models",
+            "items": [
+              {
+                "id": "UIwFaZfCTrQ1bKq3F3cvs",
+                "text": "Coordinated Omission: В закрытой модели (Closed) генератор ждет ответа перед следующим запросом, занижая p99 при зависании"
+              },
+              {
+                "id": "drRsliaI0rWB6aAHh-oC0",
+                "text": "Open Model Generators: k6, Locust, Vegetta, Yandex.Tank / Pandora (генерируют поток независимо от ответа)"
+              }
+            ]
+          },
+          {
+            "title": "Виды нагрузочного тестирования",
+            "items": [
+              {
+                "id": "w-g_DGPlHx_r102aR4aNG",
+                "text": "Baseline Testing: Минимальная нагрузка (10-50 RPS) для фиксации чистой задержки системы"
+              },
+              {
+                "id": "g-bG-qfPuKfUZwO_XaAr6",
+                "text": "Load Testing: Целевая нагрузка (150% Peak RPS) на длительное время для проверки SLO"
+              },
+              {
+                "id": "Pr5-CZdg2oVj4yTj3vKwH",
+                "text": "Stress Testing: Постепенный рост нагрузки до момента Saturation (отказа) для поиска «слабого звена»"
+              },
+              {
+                "id": "GmJWgfYvyCWEH150XHiC4",
+                "text": "Soak / Endurance Testing: 80% нагрузки в течение 24-48 часов для выявления утечек памяти"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Профилирование и Observability (APM, Metrics, Logs, Tracing)",
+        "sections": [
+          {
+            "title": "Вопросы и ответы (Q&A)",
+            "items": [
+              {
+                "id": "e6Ck1Yf6_iQsUb-Q-WQl2",
+                "text": "Вопрос: Чем опасна высокая кардинальность (High Cardinality) метрик?",
+                "answer": "Ответ: Добавление уникальных ID (user_id, trip_id) в labels создает миллионы временных рядов, приводя к OOM Prometheus/Thanos"
+              },
+              {
+                "id": "EWhuBVvecD_kRwMP01VYC",
+                "text": "Вопрос: На что указывает высокий Send-Q или Recv-Q в ss -ntlp?",
+                "answer": "Ответ: Recv-Q > 0 значит приложение не успевает вызывать accept(). Send-Q > 0 значит клиент не успевает вычитывать данные"
+              },
+              {
+                "id": "qRxDar9dvJkcNFZfbflTL",
+                "text": "Вопрос: Почему нельзя запускать strace на продакшн процессе под нагрузкой?",
+                "answer": "Ответ: strace перехватывает каждый ptrace системный вызов, внося огромный оверхед и замедняя процесс в 10-100 раз"
+              },
+              {
+                "id": "OvqVt7vJSyFQz-jD2AUd1",
+                "text": "Вопрос: Как читать Flamegraph?",
+                "answer": "Ответ: Ось X - доля CPU времени, ось Y - стек вызовов. Искать широкие 'плато' на верхушках стека - это CPU bottlenecks"
+              },
+              {
+                "id": "s35naqK9185c_GYJHUpg-",
+                "text": "Вопрос: Чем отличаются metrics и traces?",
+                "answer": "Ответ: Метрики - дешёвые числовые агрегаты за интервал времени. Трассировки - подробный граф задержек конкретного запроса"
+              },
+              {
+                "id": "v2MpMshHcIZppDv-BckDL",
+                "text": "Вопрос: Зачем нужен await в iostat -xz 1?",
+                "answer": "Ответ: await - среднее время выполнения I/O операции в мс. Рост await указывает на дисковое насыщение или сбои накопителя"
+              }
+            ]
+          },
+          {
+            "title": "Ошибки и Сигналы",
+            "items": [
+              {
+                "id": "EVp1oGXueZV7YklEdNfsj",
+                "text": "⚠️ Подводные камни: user_id в метриках Prometheus (High Cardinality OOM), использование strace под высокой нагрузкой"
+              },
+              {
+                "id": "C7PVLomr3KkC4ra25Ssxk",
+                "text": "🟢 Green Flags: Внедряет Trace ID, анализирует Flamegraphs, умеет читать iostat/ss, избегает высокой кардинальности"
+              },
+              {
+                "id": "X7zcJZYKGy2uPH6KgMAXm",
+                "text": "🔴 Red Flags: Добавляет user_id в метрики Prometheus (High Cardinality OOM), использует strace под высокой нагрузкой"
+              }
+            ]
+          },
+          {
+            "title": "Flamegraphs & 3 Pillars of Observability",
+            "items": [
+              {
+                "id": "7fszr0KoORPgVl5NThdan",
+                "text": "Flamegraphs: Ширина блока = % CPU времени. Поиск широких плато (json.Marshal, GC mark)"
+              },
+              {
+                "id": "Ec3zaRkcWpcHp5bFEkAKH",
+                "text": "3 Столпа Observability: Metrics (что происходит), Logs (события), Tracing (спаны задержек)"
+              },
+              {
+                "id": "Gwpgb3rmFrnhEAeT51PEd",
+                "text": "Trace ID & Correlation ID: Проброс сквозь HTTP headers, gRPC metadata и outbox события"
+              }
+            ]
+          },
+          {
+            "title": "Linux CLI Troubleshooting Checklist",
+            "items": [
+              {
+                "id": "04A4_n9mWZnuPU3zATN2F",
+                "text": "htop: CPU, Load Average, Memory, Processes"
+              },
+              {
+                "id": "YcfTevRWavys0UlgfLrI7",
+                "text": "iostat -xz 1: Дисковый I/O, await, %util"
+              },
+              {
+                "id": "T_NcNFRNmuY6fYjWKyYPm",
+                "text": "vmstat 1: Виртуальная память, контекстные переключения, runnable processes"
+              },
+              {
+                "id": "h1rVY0ZInQHDzoTK0pMXe",
+                "text": "ss -ntlp: Сокеты и очереди TCP (Send-Q / Recv-Q)"
+              },
+              {
+                "id": "9gNXyRmx4Yfyq57Qi_eKt",
+                "text": "sar -n DEV 1: Сетевой трафик по интерфейсам"
+              },
+              {
+                "id": "Uj6RX8XZF-wqLXIzRTWdE",
+                "text": "strace -p PID -c: Профилирование системных вызовов"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Zero-Downtime Migrations & Feature Toggles",
+        "sections": [
+          {
+            "title": "Вопросы и ответы (Q&A)",
+            "items": [
+              {
+                "id": "zb4zs2Kt-QUic8nWVO_yl",
+                "text": "Вопрос: Почему ALTER TABLE ADD DEFAULT ломает продакшн в старых PG?",
+                "answer": "Ответ: В PG < 11 это вызывает перезапись всех страниц таблицы на диске под ACCESS EXCLUSIVE LOCK"
+              },
+              {
+                "id": "YyoPQkTjZ2ei1hovi36qA",
+                "text": "Вопрос: Зачем lock_timeout перед DDL миграцией?",
+                "answer": "Ответ: Если DDL не может захватить замок за 2 секунды, он отвалится, не создавая очередь застрявших запросов"
+              },
+              {
+                "id": "NbBTBoYMapsj6vaiRFyJf",
+                "text": "Вопрос: В чем нюанс CREATE INDEX CONCURRENTLY?",
+                "answer": "Ответ: Он сканирует таблицу дважды без блокировки записи, но не может запускаться в транзакции и оставляет INVALID индекс при сбое"
+              },
+              {
+                "id": "9u_7ahWFpLa8RRzll5Niz",
+                "text": "Вопрос: Как правильно выполнять Backfill большого объема данных?",
+                "answer": "Ответ: Порциями (Batching по 1000 строк) по первичному ключу с задержками между батчами для предотвращения WAL IOPS шторма"
+              },
+              {
+                "id": "5X6jsIq4FmGN7Clyk3nfw",
+                "text": "Вопрос: Как переключить чтение в Expand & Contract с помощью Feature Flags?",
+                "answer": "Ответ: Выкатить код с флагом, плавно переключить проценты чтения на new_col, при аномалиях мгновенно откатить флаг"
+              },
+              {
+                "id": "3FSl57-FmWd_frDD5MU1c",
+                "text": "Вопрос: Зачем фаза ADD CONSTRAINT ... NOT VALID?",
+                "answer": "Ответ: NOT VALID мгновенно добавляет ограничение только для новых строк. Последующий VALIDATE CONSTRAINT проверяет старые"
+              }
+            ]
+          },
+          {
+            "title": "Ошибки и Сигналы",
+            "items": [
+              {
+                "id": "0rmfTdR4qFYvWGuEe332j",
+                "text": "⚠️ Подводные камни: ADD COLUMN DEFAULT NOT NULL на миллионной таблице без lock_timeout, блокирование DML"
+              },
+              {
+                "id": "JYgXgtmKLuL2nrr6a6Q6h",
+                "text": "🟢 Green Flags: Использует Expand & Contract, выставляет lock_timeout перед DDL, использует CREATE INDEX CONCURRENTLY"
+              },
+              {
+                "id": "R2feFg5qX78TgRnksQRxQ",
+                "text": "🔴 Red Flags: Выполняет ALTER TABLE ADD COLUMN DEFAULT 'ACTIVE' NOT NULL на миллионной таблице без lock_timeout"
+              }
+            ]
+          },
+          {
+            "title": "Безопасные DDL операции в PostgreSQL",
+            "items": [
+              {
+                "id": "Trhy-nKD5bx4JCZTqPOKK",
+                "text": "SET lock_timeout = '2s'; SET statement_timeout = '5s'; (Защита от ожидания ACCESS EXCLUSIVE lock)"
+              },
+              {
+                "id": "I75ZatSXxSZlw28L7ru_q",
+                "text": "Добавление колонки БЕЗ DEFAULT (в PG 11+ DEFAULT с константой выполняется мгновенно)"
+              },
+              {
+                "id": "gl7ZX4RqAHk07rncHLGks",
+                "text": "ADD CONSTRAINT ... NOT VALID -> фоновый ALTER TABLE ... VALIDATE CONSTRAINT (без защелки)"
+              },
+              {
+                "id": "IWl_YMoppCiWyQymPucte",
+                "text": "CREATE INDEX CONCURRENTLY (не блокирует DML, но не выполняется внутри транзакции)"
+              }
+            ]
+          },
+          {
+            "title": "Expand and Contract Pattern (5 этапов)",
+            "items": [
+              {
+                "id": "HM5RXWB_huM8ICSsNpkfQ",
+                "text": "Expand: Добавление new_col (ALTER TABLE ... ADD COLUMN new_col)"
+              },
+              {
+                "id": "B9OtAhJjbgn5qg4RwGSgu",
+                "text": "Dual Write: Приложение v2 пишет в old_col и new_col, читает из old_col"
+              },
+              {
+                "id": "ccftp2Rz-JVMDF7VhHy8_",
+                "text": "Backfill: Фоновый батчинг переносит старые данные с паузами (UPDATE ... WHERE new_col IS NULL)"
+              },
+              {
+                "id": "xE_C8GlI8xm0Jde7cCfRW",
+                "text": "Read Switch: Приложение v3 читает из new_col, пишет в оба"
+              },
+              {
+                "id": "xmc2e1GNUM7pT-IAt3Qzz",
+                "text": "Contract: Приложение v4 работает только с new_col + DROP COLUMN old_col"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

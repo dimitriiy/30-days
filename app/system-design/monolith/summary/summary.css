@@ -1,0 +1,38 @@
+.summary-page { min-height: 100vh; background: #f4f6f5; color: #20302c; font-family: Arial, sans-serif; padding: 44px max(24px, calc((100vw - 1440px) / 2)); }
+.summary-header { max-width: 1050px; margin: 0 auto 42px; }
+.summary-back { color: #3b7163; font-size: 14px; text-decoration: none; }
+.summary-kicker, .summary-block-number, .summary-nav-title { color: #578779; font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+.summary-kicker { margin-top: 38px; }
+.summary-header h1 { margin: 12px 0; font-size: clamp(38px, 5vw, 62px); letter-spacing: -.045em; }
+.summary-header > p { max-width: 650px; color: #677771; line-height: 1.6; }
+.summary-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-top: 28px; padding: 16px 20px; background: #e5efeb; border-radius: 14px; color: #49675e; font-size: 14px; }
+.summary-toolbar strong { color: #245a4b; font-size: 20px; }
+.summary-page button { cursor: pointer; border: 0; border-radius: 9px; padding: 11px 17px; background: #285e50; color: white; font-weight: 700; }
+.summary-page button:hover { background: #17493d; }
+.summary-modal-backdrop { position: fixed; z-index: 100; inset: 0; display: grid; place-items: center; padding: 20px; background: #142a22a8; }
+.summary-modal { box-sizing: border-box; width: min(760px, 100%); max-height: min(85vh, 900px); display: flex; flex-direction: column; padding: 24px; border-radius: 16px; background: white; box-shadow: 0 18px 70px #10251a40; }
+.summary-modal-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.summary-modal h2 { margin: 0; font-size: 22px; }
+.summary-page .summary-modal-header button { padding: 2px 10px; background: transparent; color: #425e52; font-size: 28px; }
+.summary-modal pre { overflow: auto; margin: 20px 0 0; padding: 16px; border-radius: 9px; background: #f6f9f7; color: #263c33; font: 14px/1.6 Arial, sans-serif; white-space: pre-wrap; overflow-wrap: anywhere; }
+.summary-layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 36px; align-items: start; }
+.summary-nav { position: sticky; top: 24px; display: grid; gap: 14px; }
+.summary-nav a { color: #62746c; font-size: 13px; line-height: 1.45; text-decoration: none; }
+.summary-nav a:hover { color: #245a4b; }
+.summary-block { margin-bottom: 50px; scroll-margin-top: 24px; }
+.summary-block h2 { max-width: 850px; margin: 10px 0 22px; font-size: clamp(24px, 3vw, 34px); line-height: 1.2; letter-spacing: -.025em; }
+.summary-topics { display: grid; gap: 16px; }
+.summary-topic { overflow: hidden; background: white; border: 1px solid #dfe8e3; border-radius: 16px; box-shadow: 0 4px 20px #294f3c08; }
+.summary-topic > summary { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 20px 24px; cursor: pointer; list-style: none; }
+.summary-topic > summary::-webkit-details-marker { display: none; }
+.summary-topic > summary span { font-size: 24px; color: #6b9385; }
+.summary-topic h3 { margin: 0; font-size: 19px; line-height: 1.35; }
+.summary-topic-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr)); gap: 14px; padding: 0 20px 20px; }
+.summary-section { min-width: 0; padding: 18px; border-radius: 11px; background: #f6f9f7; }
+.summary-section h4 { margin: 0 0 14px; color: #39725f; font-size: 14px; line-height: 1.4; }
+.summary-items { display: grid; gap: 10px; }
+.summary-item { border: 1px solid #e1eae5; border-radius: 9px; background: #fff; padding: 12px; font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
+.summary-item label { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; white-space: pre-wrap; }
+.summary-item input { flex: 0 0 auto; width: 17px; height: 17px; margin: 2px 0 0; accent-color: #397a64; }
+.summary-item p { margin: 10px 0 0 27px; padding-top: 10px; border-top: 1px solid #edf1ee; color: #65766f; white-space: pre-wrap; }
+@media (max-width: 760px) { .summary-page { padding: 28px 16px; } .summary-layout { grid-template-columns: 1fr; gap: 24px; } .summary-nav { position: static; padding: 16px; background: #fff; border-radius: 12px; } .summary-topic > summary { padding: 17px; } .summary-topic-content { padding: 0 12px 12px; } }
