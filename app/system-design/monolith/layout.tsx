@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Тест по системному дизайну монолита",
-  description: "Пятьдесят вопросов о проектировании монолитного приложения.",
+  title: "Системный дизайн — принципы и практика",
+  description: "Короткие уроки, тесты и интерактивные модели по системному дизайну.",
 };
 
 export default function MonolithLayout({

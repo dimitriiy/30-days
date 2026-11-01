@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import { MonolithCourse } from "./MonolithCourse";
 
 export default function MonolithPage() {
-  redirect("/system-design/monolith/test");
+  return <MonolithCourse />;
 }
