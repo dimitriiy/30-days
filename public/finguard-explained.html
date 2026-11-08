@@ -1,0 +1,2757 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FinGuard Flow — архитектура без магии</title>
+    <style>
+      /*
+  Учебный архитектурный атлас.
+  Направление: спокойный инженерный интерфейс, нейтральные поверхности,
+  teal — основной путь, красный — риск. Схема — не production-телеметрия.
+*/
+      :root {
+        color-scheme: light;
+        --bg: #f7f6f2;
+        --surface: #ffffff;
+        --surface2: #f0efea;
+        --text: #242822;
+        --muted: #566058;
+        --border: #d6dbd4;
+        --accent: #00696b;
+        --accent-bg: #e2efec;
+        --danger: #a83235;
+        --danger-bg: #fae9e7;
+        --code: #edf0eb;
+        --shadow: 0 8px 24px rgb(25 38 29 / 6%);
+        --font: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+        --xs: clamp(0.75rem, 0.73rem + 0.08vw, 0.8rem);
+        --sm: clamp(0.875rem, 0.85rem + 0.1vw, 0.95rem);
+        --base: clamp(1rem, 0.98rem + 0.1vw, 1.08rem);
+        --lg: clamp(1.15rem, 1.05rem + 0.35vw, 1.4rem);
+        --xl: clamp(1.6rem, 1.3rem + 0.8vw, 2rem);
+        --s1: 4px;
+        --s2: 8px;
+        --s3: 12px;
+        --s4: 16px;
+        --s5: 20px;
+        --s6: 24px;
+        --s8: 32px;
+        --s10: 40px;
+        --r: 12px;
+      }
+      [data-theme="dark"] {
+        color-scheme: dark;
+        --bg: #171c19;
+        --surface: #202722;
+        --surface2: #29332c;
+        --text: #e9eee9;
+        --muted: #b4c1b7;
+        --border: #435047;
+        --accent: #85d0c4;
+        --accent-bg: #263f39;
+        --danger: #ffaaa5;
+        --danger-bg: #482e2e;
+        --code: #18201b;
+        --shadow: 0 8px 24px rgb(0 0 0 / 15%);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font: var(--base)/1.6 var(--font);
+      }
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+        color: inherit;
+      }
+      button,
+      a,
+      input,
+      select,
+      summary {
+        transition:
+          background 0.18s,
+          color 0.18s,
+          border-color 0.18s;
+      }
+      button {
+        cursor: pointer;
+        min-height: 44px;
+        padding: var(--s2) var(--s4);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface);
+        font-size: var(--sm);
+      }
+      button:hover {
+        background: var(--surface2);
+      }
+      button:active {
+        transform: translateY(1px);
+      }
+      button:disabled {
+        cursor: default;
+        opacity: 0.45;
+        transform: none;
+      }
+      button.primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: var(--surface);
+      }
+      [data-theme="dark"] button.primary {
+        color: #12241e;
+      }
+      button.selected,
+      button[aria-selected="true"],
+      button[aria-pressed="true"] {
+        background: var(--accent-bg);
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      :focus-visible {
+        outline: 3px solid var(--accent);
+        outline-offset: 3px;
+      }
+      a {
+        color: var(--accent);
+        text-underline-offset: 3px;
+      }
+      h1,
+      h2,
+      h3,
+      h4,
+      p {
+        margin: 0 0 var(--s3);
+      }
+      h1 {
+        font-size: var(--xl);
+        line-height: 1.2;
+      }
+      h2 {
+        font-size: var(--lg);
+        line-height: 1.3;
+      }
+      h3,
+      h4 {
+        font-size: var(--base);
+        line-height: 1.4;
+      }
+      p {
+        max-width: 78ch;
+      }
+      small,
+      .small {
+        font-size: var(--sm);
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .mono,
+      code,
+      pre,
+      .metric-value {
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      }
+      code {
+        background: var(--code);
+        padding: 2px 4px;
+        border-radius: 4px;
+      }
+      pre {
+        padding: var(--s4);
+        background: var(--code);
+        border-radius: 8px;
+        overflow: auto;
+        font-size: var(--sm);
+        line-height: 1.6;
+        white-space: pre;
+        max-width: 100%;
+      }
+      ul,
+      ol {
+        padding-left: var(--s6);
+        margin: var(--s2) 0 var(--s4);
+      }
+      li {
+        margin-bottom: var(--s2);
+      }
+      header {
+        max-width: 1540px;
+        margin: auto;
+        padding: var(--s8) var(--s6) var(--s5);
+      }
+      .brand {
+        display: flex;
+        gap: var(--s3);
+        align-items: center;
+      }
+      .brand svg {
+        width: 40px;
+        height: 40px;
+        color: var(--accent);
+        flex-shrink: 0;
+      }
+      .header-line {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--s4);
+      }
+      .eyebrow {
+        color: var(--accent);
+        font-size: var(--xs);
+        font-weight: 750;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      .intro {
+        margin-top: var(--s5);
+        color: var(--muted);
+      }
+      main {
+        max-width: 1540px;
+        margin: auto;
+        padding: 0 var(--s6) var(--s10);
+      }
+      nav {
+        display: flex;
+        gap: var(--s2);
+        flex-wrap: wrap;
+        padding: var(--s4) 0;
+        border-top: 1px solid var(--border);
+      }
+      .panel {
+        display: none;
+      }
+      .panel.active {
+        display: block;
+        animation: enter 0.2s ease;
+      }
+      @keyframes enter {
+        from {
+          opacity: 0.4;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        padding: var(--s5);
+        box-shadow: var(--shadow);
+      }
+      .stack > * + * {
+        margin-top: var(--s4);
+      }
+      .row {
+        display: flex;
+        gap: var(--s2);
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .between {
+        justify-content: space-between;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: var(--s1) var(--s2);
+        border-radius: 6px;
+        background: var(--surface2);
+        font-size: var(--xs);
+        font-weight: 650;
+      }
+      .badge.good {
+        color: var(--accent);
+        background: var(--accent-bg);
+      }
+      .badge.bad {
+        color: var(--danger);
+        background: var(--danger-bg);
+      }
+      .notice {
+        border-radius: 8px;
+        padding: var(--s4);
+        background: var(--accent-bg);
+      }
+      .notice.danger {
+        background: var(--danger-bg);
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 350px;
+        gap: var(--s4);
+        margin-top: var(--s4);
+        align-items: start;
+      }
+      .map-card {
+        min-width: 0;
+        padding: var(--s4);
+      }
+      .map-viewport {
+        overflow: auto;
+        margin-top: var(--s3);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg);
+      }
+      .diagram {
+        width: 1280px;
+        height: 660px;
+        position: relative;
+        background-image: radial-gradient(
+          var(--border) 0.8px,
+          transparent 0.8px
+        );
+        background-size: 20px 20px;
+      }
+      .diagram svg {
+        position: absolute;
+        inset: 0;
+        width: 1280px;
+        height: 660px;
+        pointer-events: none;
+        overflow: visible;
+      }
+      .edge {
+        fill: none;
+        stroke: var(--muted);
+        stroke-width: 1.6;
+        opacity: 0.28;
+      }
+      .edge.async {
+        stroke-dasharray: 6 5;
+      }
+      .edge.main {
+        stroke: var(--accent);
+        opacity: 0.7;
+        stroke-width: 2;
+      }
+      .edge.active {
+        stroke: var(--accent);
+        opacity: 1;
+        stroke-width: 3;
+      }
+      .edge.danger {
+        stroke: var(--danger);
+        opacity: 0.8;
+      }
+      .node {
+        position: absolute;
+        width: 166px;
+        height: 86px;
+        text-align: left;
+        padding: var(--s3);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: var(--surface);
+        border-radius: 9px;
+        box-shadow: var(--shadow);
+        line-height: 1.3;
+      }
+      .node b {
+        font-size: var(--sm);
+      }
+      .node span {
+        display: block;
+        margin-top: var(--s1);
+        color: var(--muted);
+        font-size: var(--xs);
+      }
+      .node.chosen {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+      .node.traced {
+        background: var(--accent-bg);
+        border-color: var(--accent);
+      }
+      .node.risky {
+        border-style: dashed;
+      }
+      .map-caption {
+        position: absolute;
+        left: 20px;
+        font-size: var(--xs);
+        color: var(--muted);
+        letter-spacing: 0.03em;
+      }
+      .inspector {
+        position: sticky;
+        top: var(--s4);
+      }
+      .inspector h2 {
+        margin: var(--s3) 0;
+      }
+      .inspector .field {
+        margin-top: var(--s4);
+      }
+      .field-label {
+        display: block;
+        color: var(--muted);
+        font-size: var(--xs);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: var(--s1);
+      }
+      .trace {
+        margin-top: var(--s4);
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: var(--s4);
+      }
+      .step-number {
+        display: grid;
+        place-items: center;
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        background: var(--accent-bg);
+        color: var(--accent);
+        font-weight: 750;
+      }
+      .trace p {
+        margin-bottom: var(--s2);
+      }
+      .grid2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--s4);
+      }
+      .problem-list {
+        display: grid;
+        gap: var(--s3);
+        margin-top: var(--s4);
+      }
+      details {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        overflow: hidden;
+      }
+      summary {
+        cursor: pointer;
+        padding: var(--s4) var(--s5);
+        font-weight: 650;
+        min-height: 56px;
+      }
+      summary:hover {
+        background: var(--surface2);
+      }
+      .details-body {
+        padding: 0 var(--s5) var(--s5);
+      }
+      .table-wrap {
+        overflow: auto;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: var(--sm);
+      }
+      th,
+      td {
+        padding: var(--s3);
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+      }
+      th {
+        color: var(--muted);
+        font-size: var(--xs);
+      }
+      .scenario-steps {
+        display: grid;
+        gap: var(--s2);
+        margin-top: var(--s4);
+      }
+      .scenario-step {
+        display: grid;
+        grid-template-columns: 32px 1fr;
+        gap: var(--s3);
+        padding: var(--s3);
+        border-radius: 8px;
+        background: var(--surface2);
+      }
+      .scenario-step b {
+        color: var(--accent);
+      }
+      .state-strip {
+        display: flex;
+        gap: var(--s2);
+        flex-wrap: wrap;
+        margin: var(--s4) 0;
+      }
+      .state-label {
+        font-size: var(--lg);
+        overflow-wrap: anywhere;
+      }
+      label {
+        display: block;
+        font-size: var(--sm);
+        font-weight: 650;
+        margin-bottom: var(--s2);
+      }
+      input[type="range"] {
+        width: 100%;
+        accent-color: var(--accent);
+      }
+      input[type="search"],
+      select {
+        width: 100%;
+        min-height: 44px;
+        padding: var(--s2) var(--s3);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+      }
+      .control {
+        margin-bottom: var(--s5);
+      }
+      .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--s3);
+      }
+      .metric {
+        background: var(--surface2);
+        padding: var(--s4);
+        border-radius: 8px;
+      }
+      .metric-value {
+        font-size: var(--lg);
+        font-weight: 750;
+        display: block;
+        margin: var(--s2) 0;
+        font-variant-numeric: tabular-nums;
+      }
+      .metric.alert {
+        background: var(--danger-bg);
+      }
+      .glossary {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--s3);
+        margin-top: var(--s4);
+      }
+      .glossary article p {
+        margin-bottom: 0;
+      }
+      footer {
+        margin-top: var(--s8);
+        font-size: var(--sm);
+        color: var(--muted);
+      }
+      .source-link {
+        font-size: var(--xs);
+        margin-right: var(--s3);
+        display: inline-block;
+        padding-block: var(--s2);
+      }
+      .skip {
+        position: absolute;
+        left: -9999px;
+      }
+      .skip:focus {
+        left: 16px;
+        top: 16px;
+        padding: 12px;
+        z-index: 10;
+        background: var(--surface);
+      }
+      .hidden {
+        display: none !important;
+      }
+      @media (max-width: 1100px) {
+        .layout {
+          grid-template-columns: minmax(0, 1fr);
+        }
+        .inspector {
+          position: static;
+        }
+      }
+      @media (max-width: 650px) {
+        header {
+          padding: var(--s5) var(--s4);
+        }
+        main {
+          padding: 0 var(--s4) var(--s8);
+        }
+        .grid2,
+        .glossary,
+        .metric-grid {
+          grid-template-columns: 1fr;
+        }
+        .card {
+          padding: var(--s4);
+        }
+        nav button {
+          flex: 1 0 43%;
+        }
+        .brand {
+          align-items: flex-start;
+        }
+        .trace {
+          grid-template-columns: 1fr;
+        }
+        .header-line {
+          align-items: flex-start;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation: none !important;
+          transition: none !important;
+          scroll-behavior: auto !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip" href="#main">К содержимому</a>
+    <header>
+      <div class="header-line">
+        <div class="brand">
+          <svg viewBox="0 0 40 40" aria-label="FinGuard" fill="none">
+            <path
+              d="M20 3 34 9v11c0 8-7 14-14 17C13 34 6 28 6 20V9Z"
+              stroke="currentColor"
+              stroke-width="2"
+            />
+            <path
+              d="M12 21h6l3-8 4 14 3-6h5"
+              stroke="currentColor"
+              stroke-width="2"
+            />
+          </svg>
+          <div>
+            <div class="eyebrow">Архитектурный атлас / для фронтендера</div>
+            <h1>FinGuard Flow — без магии</h1>
+          </div>
+        </div>
+        <button id="theme" aria-label="Переключить светлую и тёмную тему">
+          Тема
+        </button>
+      </div>
+      <p class="intro">
+        Представьте платёж как запрос из браузера. Но здесь недостаточно
+        показать spinner и повторить fetch: ответ может потеряться уже после
+        выполнения операции. Разбираем, где ждать, где сохранять результат и
+        почему повтор не должен повторно двигать деньги.
+      </p>
+      <div class="row">
+        <span class="badge">По вашему ТЗ и board.excalidraw.svg</span>
+        <span class="badge">Не подключено к реальной системе</span>
+        <span class="badge">Предложения ≠ уже внедрённые решения</span>
+      </div>
+    </header>
+
+    <main id="main">
+      <nav aria-label="Разделы">
+        <button data-tab="map" class="selected" aria-pressed="true">
+          01 · Схема
+        </button>
+        <button data-tab="problems" aria-pressed="false">02 · Проблемы</button>
+        <button data-tab="scenarios" aria-pressed="false">03 · Отказы</button>
+        <button data-tab="states" aria-pressed="false">04 · Состояния</button>
+        <button data-tab="capacity" aria-pressed="false">
+          05 · Проверка чисел
+        </button>
+        <button data-tab="glossary" aria-pressed="false">06 · Словарь</button>
+      </nav>
+
+      <section id="map" class="panel active">
+        <div class="card">
+          <div class="row between">
+            <div class="row" role="group" aria-label="Вариант архитектуры">
+              <button id="as-is" class="selected" aria-pressed="true">
+                Сейчас · As-Is
+              </button>
+              <button id="to-be" aria-pressed="false">
+                Как исправить · To-Be
+              </button>
+            </div>
+            <button id="start-trace" class="primary">Провести платёж →</button>
+          </div>
+          <p
+            id="mode-description"
+            class="small muted"
+            style="margin-top: var(--s3)"
+          ></p>
+        </div>
+        <div class="layout">
+          <div class="card map-card">
+            <div class="row between">
+              <h2 id="map-title">Исходная архитектура</h2>
+              <span class="badge">Нажмите на любой блок</span>
+            </div>
+            <p class="small muted">
+              Сплошная линия — вызов/синхронная связь. Пунктир — передача
+              события. На узком экране схему можно прокручивать вправо. Точное
+              направление каждой связи описано под схемой.
+            </p>
+            <div
+              class="map-viewport"
+              tabindex="0"
+              aria-label="Интерактивная схема с горизонтальной прокруткой"
+            >
+              <div class="diagram" id="diagram"></div>
+            </div>
+            <div
+              id="connections"
+              class="small muted"
+              style="margin-top: var(--s3)"
+            ></div>
+            <div class="trace card hidden" id="trace-box" aria-live="polite">
+              <div class="step-number" id="trace-number"></div>
+              <div>
+                <h3 id="trace-title"></h3>
+                <p id="trace-text"></p>
+                <div class="row">
+                  <button id="prev-step">← Назад</button>
+                  <button id="next-step">Дальше →</button>
+                  <button id="close-trace">Закончить</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <aside
+            id="inspector"
+            class="card inspector"
+            aria-live="polite"
+          ></aside>
+        </div>
+        <div class="notice" style="margin-top: var(--s4)">
+          <b>Главное различие:</b> FinGuard выдаёт антифрод-вердикт, а не
+          автоматически списывает деньги. Approve означает «проверка разрешила
+          продолжить». Авторизация, capture/списание и возврат — отдельные
+          операции платёжной системы.
+        </div>
+      </section>
+
+      <section id="problems" class="panel">
+        <div class="card">
+          <div class="eyebrow">Причина → механизм → симптом → исправление</div>
+          <h2>Что ломается в исходной системе</h2>
+          <p>
+            Не сам монолит является ошибкой. Ошибка — общий ресурсный бюджет,
+            длинные транзакции, незащищённые повторы и отсутствие управления
+            перегрузкой. Можно начать исправления в одном репозитории, но с
+            раздельными процессами и пулами.
+          </p>
+        </div>
+        <div id="problem-list" class="problem-list"></div>
+
+        <div class="card stack" style="margin-top: var(--s5)">
+          <h2>Что схема не доказывает</h2>
+          <p>
+            В SVG показаны две реплики монолита, а в тексте встречается «один
+            сервер». Надёжность зависит от размещения: две реплики на одном
+            физическом узле не защищают от отказа этого узла.
+          </p>
+          <p>
+            Стрелка от фонового воркера к Bank Core не доказывает наличие
+            команды списания. Дубли антифрод-событий сами по себе не доказывают
+            двойное списание: нужен повтор неидемпотентной денежной команды в
+            платёжном контуре.
+          </p>
+          <p>
+            На SVG ML Engine показан без связи с обработчиком, не показана
+            вычитка Kafka, а ClickHouse отсутствует. В предлагаемой схеме эти
+            связи — явно обозначенные дополнения, не утверждение о текущей
+            реализации.
+          </p>
+          <p>
+            Один poison pill обычно стопорит затронутую партицию или обработчик.
+            Падение всей consumer group — возможный эффект конкретного
+            приложения, но не обязательное свойство Kafka.
+          </p>
+          <p>
+            Исчерпание connection pool означает недоступность соединений для
+            приложения, а не обязательный crash процесса PostgreSQL. Для
+            доказательства crash нужны логи БД.
+          </p>
+        </div>
+
+        <div class="card stack" style="margin-top: var(--s4)">
+          <h2>Что исправлять сначала</h2>
+          <ol>
+            <li>
+              <b>Защитить платёжный путь:</b> убрать внешние HTTP из
+              DB-транзакций, задать deadlines, ограничить очереди, разделить UI
+              и обработку платежей.
+            </li>
+            <li>
+              <b>Защитить повтор:</b> входная идемпотентность, Outbox, Inbox и
+              сверка неопределённого результата.
+            </li>
+            <li>
+              <b>Ограничить нагрузку:</b> глобальная квота AML, ограничение
+              конкурентности, pause/resume и DLQ.
+            </li>
+            <li>
+              <b>Проверить ёмкость:</b> исправление паттернов не превращает БД
+              на 2 500 TPS в БД на 12 000 TPS.
+            </li>
+            <li>
+              <b>Проверить бизнес-правила:</b> допустимость постфактум AML,
+              сегменты fail-open, реальные возможности void/refund у каждого
+              провайдера.
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section id="scenarios" class="panel">
+        <div class="card stack">
+          <h2>Разберите отказ по шагам</h2>
+          <p class="muted">
+            Это причинные сценарии, а не измерение production. «Безопасно» не
+            означает «все платежи обязательно проходят».
+          </p>
+          <div id="scenario-buttons" class="row"></div>
+        </div>
+        <div id="scenario-content" style="margin-top: var(--s4)"></div>
+        <div class="card stack" style="margin-top: var(--s4)">
+          <h2>Политика деградации</h2>
+          <p class="small muted">
+            Предлагаемый пример. Порог 50 000 ₽ взят из задания, а не из
+            нормативного требования. Реальные лимиты согласуют риск-команда и
+            compliance.
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Недоступно</th>
+                  <th>Что делаем</th>
+                  <th>Чего не обещаем</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Redis</td>
+                  <td>
+                    Короткий timeout → circuit breaker → локальный ограниченный
+                    кэш правил. Low-risk/малые суммы — возможен fail-open;
+                    high-risk/крупные — Challenge или Reject.
+                  </td>
+                  <td>
+                    Локальный LRU не заменяет глобальные счётчики и остатки
+                    лимитов. Он может быть устаревшим.
+                  </td>
+                </tr>
+                <tr>
+                  <td>PostgreSQL</td>
+                  <td>
+                    Не подтверждаем новый успешный durable-вердикт без надёжной
+                    фиксации. Возвращаем согласованный временный
+                    отказ/Challenge. Повтор — с прежним ключом.
+                  </td>
+                  <td>
+                    Нельзя «просто разрешить», если результат и событие нигде
+                    надёжно не сохранены. Альтернативный durable log — отдельный
+                    дизайн.
+                  </td>
+                </tr>
+                <tr>
+                  <td>AML</td>
+                  <td>
+                    Fast Path независим. Slow Path: deadline, breaker,
+                    ограниченная очередь, приоритеты, TEMPORARY_ERROR или сверка
+                    — по типу вызова.
+                  </td>
+                  <td>
+                    При ответе AML за 4 с невозможно выполнить полную эту
+                    проверку за 1,5 с.
+                  </td>
+                </tr>
+                <tr>
+                  <td>Kafka / CDC</td>
+                  <td>
+                    События остаются в Outbox; контролируем возраст Outbox, WAL
+                    и свободный диск. После восстановления дочитываем с
+                    ограниченной скоростью.
+                  </td>
+                  <td>
+                    Outbox не бесконечен. При превышении допустимого окна риска
+                    ограничиваем приём новых платежей.
+                  </td>
+                </tr>
+                <tr>
+                  <td>ClickHouse</td>
+                  <td>
+                    Платежи не зависят от аналитики. На UI — «данные устарели»,
+                    время обновления, повтор загрузки.
+                  </td>
+                  <td>Нельзя выдавать старый экран за live-состояние.</td>
+                </tr>
+                <tr>
+                  <td>Redis rate limiter</td>
+                  <td>
+                    Останавливаем внешние AML-вызовы либо используем заранее
+                    распределённые консервативные квоты.
+                  </td>
+                  <td>
+                    Локальные bucket по 300 RPS на каждый pod нарушат глобальную
+                    квоту.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card stack" style="margin-top: var(--s4)">
+          <h2>Как работает отзыв после фрода</h2>
+          <ol>
+            <li>
+              Сохраняем FraudDetected и уникальную команду действия в БД/Outbox.
+            </li>
+            <li>
+              Получаем актуальный статус платежа у провайдера. При
+              неопределённом результате сначала делаем reconciliation.
+            </li>
+            <li>
+              Если средства только авторизованы и API позволяет отмену —
+              void/cancel. Если уже списаны — инициируем refund. Блокировка
+              карты ограничивает будущие операции, но не возвращает прошлые.
+            </li>
+            <li>
+              Внешнюю команду отправляем со стабильным Idempotency-Key для
+              конкретного действия, а не с новым ключом на каждый retry.
+            </li>
+            <li>
+              Timeout после отправки → UNKNOWN_RESULT. Проверяем статус через
+              API/вебхук, не объявляем возврат завершённым заранее.
+            </li>
+            <li>
+              На UI отдельно показываем «возврат запрошен», «возврат
+              подтверждён», «результат уточняется», «нужна ручная проверка».
+            </li>
+          </ol>
+          <p class="small muted">
+            Универсальной команды «заморозить уже ушедшие деньги» здесь нет. Для
+            СБП, карт, разных банков и шлюзов возможности и сроки отличаются.
+            Обязательные предварительные санкционные проверки нельзя переносить
+            на постфактум только ради latency.
+          </p>
+          <a
+            class="source-link"
+            target="_blank"
+            rel="noopener noreferrer"
+            href="https://docs.stripe.com/api/idempotent_requests"
+            >Stripe: идемпотентные запросы ↗</a
+          >
+          <a
+            class="source-link"
+            target="_blank"
+            rel="noopener noreferrer"
+            href="https://docs.stripe.com/refunds"
+            >Stripe: отмены и возвраты ↗</a
+          >
+        </div>
+      </section>
+
+      <section id="states" class="panel">
+        <div class="card stack">
+          <div class="eyebrow">
+            Как useReducer, только состояние переживает падение сервера
+          </div>
+          <h2>Transactional Inbox и машина состояний</h2>
+          <p>
+            Inbox — долговечная запись «это событие уже принято, вот его
+            статус». Не путайте её с Redis-флажком. Для финансовой команды нужны
+            уникальность бизнес-операции, история попыток и связь с ответом
+            провайдера.
+          </p>
+          <div class="notice">
+            «Двухфазная обработка» здесь означает короткий захват задачи,
+            внешний вызов без DB-транзакции и короткую фиксацию результата. Это
+            <b>не протокол распределённого коммита 2PC</b>.
+          </div>
+          <div class="state-strip" id="state-strip"></div>
+          <div class="grid2">
+            <div class="card stack">
+              <span class="field-label"
+                >Текущее состояние учебной операции</span
+              >
+              <h3 class="state-label" id="current-state"></h3>
+              <p id="state-explanation"></p>
+              <div id="state-actions" class="row"></div>
+              <button id="reset-state">Сбросить пример</button>
+            </div>
+            <div class="card">
+              <h3>Журнал переходов</h3>
+              <ol id="state-log"></ol>
+              <p class="small muted">
+                Демонстрация в браузере. Здесь нет настоящего Inbox, БД или
+                вызовов банков.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <details style="margin-top: var(--s4)">
+          <summary>Таблица допустимых переходов</summary>
+          <div class="details-body table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Из</th>
+                  <th>В</th>
+                  <th>Условие</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>NEW</td>
+                  <td>PROCESSING</td>
+                  <td>Атомарный захват, новый fencing token, lease_until.</td>
+                </tr>
+                <tr>
+                  <td>PROCESSING</td>
+                  <td>COMPLETED</td>
+                  <td>
+                    Подтверждён результат; запись результата и локального
+                    эффекта в одной DB-транзакции.
+                  </td>
+                </tr>
+                <tr>
+                  <td>PROCESSING</td>
+                  <td>TEMPORARY_ERROR</td>
+                  <td>
+                    Известно, что действие не выполнено, ошибка повторяемая.
+                  </td>
+                </tr>
+                <tr>
+                  <td>PROCESSING</td>
+                  <td>UNKNOWN_RESULT</td>
+                  <td>
+                    Вызов мог выполниться, но подтверждения нет. Также
+                    консервативный исход после истечения lease, если вызов мог
+                    начаться.
+                  </td>
+                </tr>
+                <tr>
+                  <td>TEMPORARY_ERROR</td>
+                  <td>PROCESSING</td>
+                  <td>
+                    Настало next_retry_at, есть квота и retry budget, новый
+                    token.
+                  </td>
+                </tr>
+                <tr>
+                  <td>UNKNOWN_RESULT</td>
+                  <td>COMPLETED</td>
+                  <td>Сверка подтвердила выполнение.</td>
+                </tr>
+                <tr>
+                  <td>UNKNOWN_RESULT</td>
+                  <td>TEMPORARY_ERROR</td>
+                  <td>
+                    Сверка надёжно подтвердила отсутствие эффекта; повтор
+                    разрешён.
+                  </td>
+                </tr>
+                <tr>
+                  <td>PROCESSING</td>
+                  <td>FAILED</td>
+                  <td>
+                    Окончательный известный отказ. Не путать с неизвестным
+                    исходом.
+                  </td>
+                </tr>
+                <tr>
+                  <td>COMPLETED / FAILED</td>
+                  <td>Тот же статус</td>
+                  <td>
+                    Дубликат: возвращаем сохранённый результат, не выполняем
+                    эффект ещё раз.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
+
+        <details style="margin-top: var(--s3)">
+          <summary>Как выглядит атомарный захват в SQL</summary>
+          <div class="details-body stack">
+            <p>
+              Упрощённый пример для PostgreSQL. Уникальность Inbox:
+              <code>(tenant_id, consumer_name, event_id)</code>. Отдельно нужна
+              уникальность денежной команды:
+              <code>(tenant_id, operation_id, action_type)</code>.
+            </p>
+            <pre>
+-- 1. Регистрация события. Короткая транзакция.
+INSERT INTO inbox (tenant_id, consumer_name, event_id,
+                   status, fencing_token)
+VALUES (:tenant, :consumer, :event, 'NEW', 0)
+ON CONFLICT (tenant_id, consumer_name, event_id)
+DO NOTHING;
+
+-- 2. Атомарный захват только готовой к работе записи.
+UPDATE inbox
+SET status = 'PROCESSING',
+    fencing_token = fencing_token + 1,
+    lease_until = clock_timestamp() + :lease_interval,
+    attempt = attempt + 1
+WHERE tenant_id = :tenant
+  AND consumer_name = :consumer
+  AND event_id = :event
+  AND (
+    status = 'NEW'
+    OR (
+      status = 'TEMPORARY_ERROR'
+      AND next_retry_at &lt;= clock_timestamp()
+    )
+  )
+RETURNING fencing_token;
+
+-- COMMIT. Никакого открытого DB BEGIN на время HTTP.
+-- Если RETURNING не вернул строку, задача не захвачена.
+-- Внешний вызов — со стабильным ключом бизнес-команды.
+
+-- 3. Фиксация ответа только актуальным владельцем.
+BEGIN;
+UPDATE inbox
+SET status = 'COMPLETED', result = :result, lease_until = NULL
+WHERE tenant_id = :tenant
+  AND consumer_name = :consumer
+  AND event_id = :event
+  AND status = 'PROCESSING'
+  AND fencing_token = :my_token
+  AND lease_until &gt; clock_timestamp();
+
+-- Проверить affected_rows = 1.
+-- Только тогда записать локальный эффект и Outbox в этой же TX.
+-- При affected_rows = 0 — ROLLBACK и сверка результата.
+COMMIT;</pre
+            >
+            <p>
+              Просроченный PROCESSING нельзя безусловно заново отправлять в
+              банк. Если предыдущий воркер успел отправить команду, новый
+              сначала переводит запись в UNKNOWN_RESULT и сверяет результат.
+              Lease должен покрывать deadline вызова и фиксацию либо безопасно
+              продлеваться.
+            </p>
+            <p>
+              <b>Граница fencing:</b> token защищает наши условные обновления
+              БД. Он не отменяет запрос старого воркера в чужом банке. Внешний
+              эффект защищают Idempotency-Key, статус API и reconciliation.
+            </p>
+          </div>
+        </details>
+
+        <details style="margin-top: var(--s3)">
+          <summary>Порядок событий: T2 пришло раньше T1</summary>
+          <div class="details-body stack">
+            <p>
+              Базовый ключ — <code>tenant_id + account_id</code>, если
+              инварианты действительно относятся к аккаунту. Это не ID мерчанта
+              и не обязательно ID карты: границу порядка нужно выбрать из
+              бизнес-правила.
+            </p>
+            <ol>
+              <li>
+                Храним последнюю применённую версию аккаунта <code>v</code>.
+              </li>
+              <li>
+                Повтор уже известного event_id отсекает Inbox. Старую версию не
+                применяем повторно; конфликтующие данные проверяем.
+              </li>
+              <li>
+                <code>event_version = v + 1</code>: применяем переход FSM и
+                обновляем версию атомарно.
+              </li>
+              <li>
+                <code>event_version &gt; v + 1</code>: сохраняем событие в
+                ограниченный долговечный буфер. Это пропуск версии, а не повод
+                немедленно применить T2.
+              </li>
+              <li>
+                Ждём ограниченное время, запрашиваем недостающее состояние; при
+                превышении срока — сверка/ручное разрешение.
+              </li>
+              <li>
+                Для оконных антифрод-правил используем event time, watermarks и
+                политику late events. Это отдельная задача от последовательного
+                применения финансовых команд.
+              </li>
+            </ol>
+            <p>
+              Внешние вебхуки могут не иметь account-wide event_version. Его
+              нельзя выдумать из timestamp. Тогда нужны правила переходов,
+              версия внутреннего агрегата и чтение актуального статуса у
+              провайдера.
+            </p>
+            <p>
+              Random salt разрушает группировку аккаунта. Выделенная очередь
+              изолирует горячий ключ, но не делает одну строго последовательную
+              цепочку бесконечно параллельной. Предварительная агрегация
+              допустима для объединяемых метрик, а не для произвольных денежных
+              команд.
+            </p>
+            <a
+              class="source-link"
+              target="_blank"
+              rel="noopener noreferrer"
+              href="https://docs.stripe.com/webhooks"
+              >Stripe: дубли и порядок событий ↗</a
+            >
+            <a
+              class="source-link"
+              target="_blank"
+              rel="noopener noreferrer"
+              href="https://nightlies.apache.org/flink/flink-docs-stable/docs/concepts/time/"
+              >Flink: event time и watermarks ↗</a
+            >
+          </div>
+        </details>
+      </section>
+
+      <section id="capacity" class="panel">
+        <div class="card stack">
+          <div class="eyebrow">Расчёты по вводным, не бенчмарк</div>
+          <h2>Где числа не сходятся</h2>
+          <p>
+            Асинхронность убирает ожидание из HTTP-ответа, но не создаёт
+            пропускную способность. Если очередь получает больше работы, чем
+            обработчик успевает делать, она растёт.
+          </p>
+        </div>
+        <div class="grid2" style="margin-top: var(--s4)">
+          <div class="card">
+            <h3>Измените нагрузку</h3>
+            <div class="control">
+              <label for="rps"
+                >Первичные авторизации:
+                <output id="rps-label"></output> RPS</label
+              >
+              <input
+                id="rps"
+                type="range"
+                min="800"
+                max="12000"
+                step="100"
+                value="12000"
+              />
+            </div>
+            <div class="control">
+              <label for="share"
+                >Доля операций с новым AML-вызовом:
+                <output id="share-label"></output>%</label
+              >
+              <input
+                id="share"
+                type="range"
+                min="1"
+                max="100"
+                step="1"
+                value="2"
+              />
+            </div>
+            <div class="control">
+              <label for="latency">Задержка AML</label>
+              <select id="latency">
+                <option value="0.05">50 мс — штатная</option>
+                <option value="2">2 секунды</option>
+                <option value="3">3 секунды</option>
+                <option value="4">4 секунды — инцидент</option>
+              </select>
+            </div>
+            <div class="control">
+              <label for="concurrency"
+                >Лимит одновременно ожидающих AML-вызовов:
+                <output id="concurrency-label"></output
+              ></label>
+              <input
+                id="concurrency"
+                type="range"
+                min="15"
+                max="1500"
+                step="15"
+                value="195"
+              />
+            </div>
+            <p class="small muted">
+              Внешняя квота: 300 RPS глобально. Упрощение: один вызов на
+              отобранную операцию, без retry, без burst, без дополнительных квот
+              и tail latency.
+            </p>
+          </div>
+          <div class="card stack">
+            <h3>Результат</h3>
+            <div class="metric-grid" id="capacity-metrics"></div>
+            <div
+              id="capacity-explanation"
+              class="notice"
+              aria-live="polite"
+            ></div>
+            <p class="small muted">
+              Расчётная производительность = min(300, конкурентность / время
+              ответа). Это верхняя оценка, а не гарантия. Для стабильной очереди
+              нужен запас, а не равенство входа и выхода.
+            </p>
+          </div>
+        </div>
+        <div id="number-checks" class="problem-list"></div>
+      </section>
+
+      <section id="glossary" class="panel">
+        <div class="card">
+          <h2>Бэкенд на языке фронтенда</h2>
+          <p class="muted">
+            Аналогии помогают понять идею, но не заменяют гарантии реализации.
+          </p>
+          <label for="glossary-search">Найти термин</label>
+          <input
+            id="glossary-search"
+            type="search"
+            placeholder="Например: offset, Outbox, p99"
+          />
+        </div>
+        <div id="glossary-items" class="glossary"></div>
+        <div class="card stack" style="margin-top: var(--s4)">
+          <h2>Что это меняет во фронтенде</h2>
+          <ol>
+            <li>
+              <b>Не генерируйте новый ключ на retry.</b> Одна пользовательская
+              операция — один стабильный ключ. Новый осознанный платёж — новая
+              операция.
+            </li>
+            <li>
+              <b>Timeout не равен «платёж не прошёл».</b> Покажите «уточняем
+              статус» и запросите результат по operation_id.
+            </li>
+            <li>
+              <b>Не сводите всё к success/error.</b> Отдельно моделируйте
+              Challenge, Processing, Unknown Result, Refund Pending и
+              подтверждённые результаты.
+            </li>
+            <li>
+              <b>Не делайте optimistic success для денег.</b> Можно оптимистично
+              показать получение команды, но не факт списания или завершённого
+              возврата.
+            </li>
+            <li>
+              <b>Учитывайте версии обновлений.</b> Поздний ответ старого запроса
+              или старое SSE-событие не должны перезаписывать более новое
+              состояние.
+            </li>
+            <li>
+              <b>Показывайте свежесть аналитики.</b> «Данные на 12:04:03»
+              точнее, чем вечный зелёный индикатор Live.
+            </li>
+            <li>
+              <b>Challenge — не технический retry.</b> Это отдельный
+              согласованный шаг подтверждения, например через провайдера.
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <footer>
+        Материалы: пользовательское ТЗ и SVG; ссылки на документацию встроены в
+        объяснения. Все режимы, переходы и расчёты работают только в памяти
+        страницы. Обновление страницы сбрасывает демонстрацию.
+      </footer>
+    </main>
+
+    <script>
+      "use strict";
+
+      const $ = (id) => document.getElementById(id);
+      const esc = (s) =>
+        String(s).replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c],
+        );
+      const nf = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 1 });
+      const fmt = (n) => nf.format(n);
+
+      const docs = {
+        kafka: [
+          "Kafka: consumer, offset и потоки",
+          "https://kafka.apache.org/24/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html",
+        ],
+        poll: [
+          "Kafka: max.poll.interval.ms",
+          "https://kafka.apache.org/43/configuration/consumer-configs/",
+        ],
+        outbox: [
+          "Debezium: Outbox Event Router",
+          "https://debezium.io/documentation/reference/stable/transformations/outbox-event-router.html",
+        ],
+        redis: [
+          "Redis: кластер и гарантии",
+          "https://redis.io/docs/latest/operate/oss_and_stack/management/scaling/",
+        ],
+        pg: [
+          "PostgreSQL: блокировки",
+          "https://www.postgresql.org/docs/current/explicit-locking.html",
+        ],
+        stripe: [
+          "Stripe: идемпотентность",
+          "https://docs.stripe.com/api/idempotent_requests",
+        ],
+        webhook: ["Stripe: вебхуки", "https://docs.stripe.com/webhooks"],
+        time: [
+          "Flink: время событий",
+          "https://nightlies.apache.org/flink/flink-docs-stable/docs/concepts/time/",
+        ],
+      };
+      function refs(keys = []) {
+        return keys
+          .map(
+            (k) => `<a class="source-link" href="${docs[k][1]}"
+    target="_blank" rel="noopener noreferrer">${docs[k][0]} ↗</a>`,
+          )
+          .join("");
+      }
+
+      const components = {
+        merchant: {
+          title: "Мерчант",
+          sub: "POST /authorize",
+          what: "Бэкенд магазина или финтех-клиента отправляет запрос: можно ли продолжать этот платёж?",
+          analogy:
+            "Похож на ваш frontend-клиент API, но запрос идёт сервер → сервер.",
+          input:
+            "tenant_id, operation_id, account_id, сумма, валюта, контекст риска.",
+          output:
+            "Антифрод-вердикт Approve / Reject / Challenge и идентификатор операции.",
+          danger:
+            "Повтор с новым operation_id может выглядеть как новый платёж. Таймаут не доказывает, что первый запрос не обработан.",
+          fix: "Стабильный Idempotency-Key; проверка совпадения payload; получение сохранённого результата при повторе.",
+          sources: ["stripe"],
+        },
+        gateway: {
+          title: "Платёжные шлюзы",
+          sub: "Stripe · Adyen · СБП",
+          what: "Сообщают об изменении статуса платежей через вебхуки. На вашей SVG указан отдельный поток до 5 000 RPS.",
+          analogy:
+            "Серверный push, только входящий HTTP-запрос получает ваш бэкенд, а не браузер.",
+          input:
+            "События авторизации, завершения, возврата и другие статусы — по контракту провайдера.",
+          output:
+            "Повторяемые уведомления; их порядок не обязательно совпадает с порядком создания.",
+          danger:
+            "Нельзя считать любое полученное тело доверенным и нельзя ожидать доставку ровно один раз.",
+          fix: "Проверять подпись raw body; durable-приём; дедупликация provider event_id; быстро отвечать 2xx после сохранения.",
+          sources: ["webhook"],
+        },
+        officer: {
+          title: "Риск-офицер",
+          sub: "Пользователь Dashboard",
+          what: "Сотрудник клиента наблюдает аномалии, расследует платежи и запускает разрешённые действия.",
+          analogy: "Обычный пользователь вашего административного фронтенда.",
+          input: "Фильтры, поиск, действия по кейсам.",
+          output: "Аналитические экраны и команды через защищённый API.",
+          danger:
+            "Дашборд может запаздывать; доступ одного tenant не должен раскрывать данные другого.",
+          fix: "RBAC, tenant isolation, аудит действий, показ времени свежести данных.",
+        },
+        edge: {
+          title: "Nginx / API edge",
+          sub: "Маршрутизация и входные лимиты",
+          what: "Принимает HTTP и направляет запрос подходящему экземпляру приложения.",
+          analogy: "Reverse proxy перед вашим Next.js/API.",
+          input: "/authorize, /webhooks, /api/dashboard.",
+          output:
+            "Запросы в раздельные upstream и согласованные ошибки перегрузки.",
+          danger:
+            "Балансировщик не создаёт CPU и DB connections. Общий upstream позволяет тяжёлым задачам мешать платежам.",
+          fix: "Раздельные upstream/бюджеты для платежей и UI; per-tenant лимиты; deadlines. Это предложение, не то, что уже есть на SVG.",
+        },
+        mono1: {
+          title: "Монолит · реплика 1",
+          sub: "API + UI + workers + scheduler",
+          what: "Один процесс обслуживает авторизацию, API дашборда, фоновые задачи и локальный планировщик.",
+          analogy:
+            "Как если SSR, API routes, сборка большого отчёта и тяжёлая обработка жили в одном Node.js-процессе.",
+          input: "Платежи, запросы UI, фоновые задания.",
+          output: "SQL, внешние HTTP и прямые публикации в Redis/Kafka.",
+          danger:
+            "Общие CPU, heap, thread pools и подключения БД. Долгое ожидание AML удерживает ресурсы других запросов.",
+          fix: "Выделить Fast Path, UI API и workers в процессы с раздельными лимитами. Кодовая база при этом может остаться общей.",
+          sources: ["pg"],
+        },
+        mono2: {
+          title: "Монолит · реплика 2",
+          sub: "Те же общие зависимости",
+          what: "Ещё один экземпляр такого же монолита; в SVG к нему направлены dashboard-запросы и Redis-задачи.",
+          analogy:
+            "Вторая реплика контейнера. Это не отдельная отказоустойчивая подсистема.",
+          input: "Запросы UI и задачи из общей Redis-очереди — по рисунку.",
+          output: "Фоновые действия, включая вызов Bank Core.",
+          danger:
+            "Общие Redis/БД остаются общими точками отказа. Локальный scheduler в каждой реплике может дублировать задания без координации.",
+          fix: "Разделить роли, координировать scheduler или сделать задания идемпотентными; проверять физическое размещение реплик.",
+        },
+        pg: {
+          title: "PostgreSQL",
+          sub: "OLTP · durable state",
+          what: "Основной долговечный реестр операций, результатов, Inbox и Outbox в предлагаемом варианте.",
+          analogy:
+            "Не useState и не браузерный cache: после перезапуска процесса именно здесь остаётся подтверждённая история.",
+          input:
+            "Короткие атомарные SQL-транзакции; уникальные ключи и условные обновления.",
+          output: "Сохранённый вердикт, статус обработки и события для CDC.",
+          danger:
+            "200 connections — не 200 RPS. HTTP внутри BEGIN занимает connection и может удерживать row lock до конца транзакции.",
+          fix: "Без внешней сети внутри TX; отдельные бюджеты соединений; тестирование записи, HA, backups/PITR. 2 500 TPS требует отдельного решения ёмкости.",
+          sources: ["pg"],
+        },
+        redis: {
+          title: "Redis",
+          sub: "Кэш · счётчики · TTL",
+          what: "Быстрые правила и временное состояние в памяти. В As-Is дополнительно используется как очередь LPUSH/RPOP без подтверждения.",
+          analogy:
+            "Общий быстрый cache для всех серверных реплик, а не отдельный cache каждой вкладки.",
+          input: "Правила, риск-признаки, ограниченные окна счётчиков.",
+          output: "Быстрые проверки для Fast Path.",
+          danger:
+            "RPOP удаляет задачу до завершения работы: crash после RPOP может потерять её. Без TTL память растёт. Redis не должен быть единственным Inbox.",
+          fix: "Убрать ненадёжный второй транспорт; TTL/размеры/очистка; fallback правил. Топология 1 primary + 2 replicas — не полноценный шардированный OSS Cluster.",
+          sources: ["redis"],
+        },
+        kafka: {
+          title: "Kafka",
+          sub: "Долговечный журнал событий",
+          what: "Хранит последовательности событий в партициях. Несколько независимых consumer groups читают одни данные для разных задач.",
+          analogy:
+            "Не EventEmitter в памяти, а сохраняемый журнал с отдельным курсором каждой группы.",
+          input: "События из Outbox через CDC, ключ tenant_id + account_id.",
+          output: "Поток в scoring workers и отдельно в аналитику.",
+          danger:
+            "Порядок есть внутри партиции, но не автоматически в бизнес-эффектах thread pool. Country_code создаёт горячие партиции.",
+          fix: "Стабильный ключ, последовательная обработка по ключу, ручной commit безопасного offset, bounded queues и retention.",
+          sources: ["kafka", "outbox"],
+        },
+        aml: {
+          title: "Внешний AML API",
+          sub: "Квота 300 RPS глобально",
+          what: "Проверяет AML/санкционные признаки по контракту внешнего поставщика.",
+          analogy:
+            "Медленный сторонний API, у которого собственные лимиты и аварии.",
+          input:
+            "Отобранные запросы на проверку, а не автоматически все 12 000 RPS.",
+          output:
+            "Результат проверки, ошибка или неизвестный результат по deadline.",
+          danger:
+            "300 RPS не покрывают 12 000 новых проверок/с. При задержке 4 с растёт число ожидающих вызовов; больше workers не увеличивают квоту.",
+          fix: "Глобальный limiter + concurrency limit + deadline + breaker; согласованный выбор операций/кэш. Нельзя обходить обязательные compliance-проверки.",
+        },
+        ml: {
+          title: "ML Scoring Engine",
+          sub: "Глубокий скоринг",
+          what: "Рассчитывает риск по признакам и модели. В SVG блок есть, но его входящая связь не нарисована.",
+          analogy:
+            "Тяжёлая удалённая функция, которую нельзя считать быстрым синхронным вычислением.",
+          input: "TransactionEvent и подготовленные признаки.",
+          output:
+            "Score, версия модели, объяснимые факторы и итог для политики риска.",
+          danger:
+            "Timeout, деградация модели и устаревшие признаки. Лимиты ML в задании не указаны — их нельзя выдумать.",
+          fix: "Отдельный ресурсный бюджет, мониторинг качества/latency, версионирование модели, fallback и async-выполнение.",
+        },
+        bank: {
+          title: "Bank / PSP API",
+          sub: "Void · Refund · Card block",
+          what: "Исполняет только доступные по договору финансовые действия. API эмитента и API эквайера могут быть разными.",
+          analogy:
+            "Не локальный reducer: вызов может необратимо изменить состояние во внешней системе.",
+          input:
+            "Уникальная команда действия с provider payment_id и ключом идемпотентности.",
+          output:
+            "Подтверждение, окончательный отказ или результат, который нужно уточнять.",
+          danger:
+            "Timeout не означает отсутствие эффекта. Блокировка карты не равна возврату уже списанных средств.",
+          fix: "Outbox команд, стабильный ключ, reconciliation; различать requested и confirmed.",
+
+          sources: ["stripe"],
+        },
+        fast: {
+          title: "Fast Path API",
+          sub: "p99 < 100 мс · граница < 150 мс",
+          what: "Изолированный обработчик быстрых правил. Не ждёт внешние AML/ML.",
+          analogy:
+            "Короткий request handler, который не делает await долгой фоновой работы перед ответом.",
+          input: "Валидированный запрос с tenant и idempotency key.",
+          output:
+            "Вердикт после надёжного сохранения операции и Outbox в одной короткой DB-транзакции.",
+          danger:
+            "Approve до глубокого скоринга — окно бизнес-риска. Целевое время не гарантировано без capacity и нагрузочного теста.",
+          fix: "Deadline всего пути, входная идемпотентность, Redis/LRU, короткий durable commit; отдельная политика Challenge/Reject.",
+        },
+        hook: {
+          title: "Webhook Receiver",
+          sub: "Проверить → сохранить → 2xx",
+          what: "Отдельно принимает уведомления провайдеров, проверяет подпись и надёжно фиксирует событие для фоновой обработки.",
+          analogy:
+            "Тонкий API route; не запускает тяжёлую бизнес-цепочку перед ответом.",
+          input: "Raw body, подпись и provider event_id.",
+          output:
+            "Durable Inbox/входная запись + Outbox; затем быстрый HTTP 2xx.",
+          danger:
+            "Если ответить 2xx до сохранения, событие может потеряться. Если ждать ML — получите повторы и перегрузку.",
+          fix: "Дедупликация по tenant/provider/event_id; короткая запись. При отказе durable storage не подтверждать успешный приём.",
+          sources: ["webhook"],
+        },
+        cdc: {
+          title: "Debezium / CDC",
+          sub: "Outbox → Kafka",
+          what: "Читает изменения PostgreSQL и публикует зафиксированные Outbox-события в Kafka.",
+          analogy:
+            "Долговечная доставка effect после сохранённого изменения, а не ненадёжный callback после commit.",
+          input:
+            "Outbox с event_id, aggregate key, payload, version, occurred_at.",
+          output: "События в Kafka; event_id нужен для дедупликации.",
+          danger:
+            "Повторы возможны. Застрявший replication slot может удерживать WAL и заполнять диск.",
+          fix: "Мониторить CDC lag, Outbox age, WAL и диск; задать cleanup/retention и аварийные пороги.",
+          sources: ["outbox"],
+        },
+        worker: {
+          title: "Scoring Workers",
+          sub: "Inbox · FSM · bounded queue",
+          what: "Читают события, сохраняют работу в Inbox, применяют правила порядка и выполняют глубокие проверки без открытой DB-транзакции.",
+          analogy:
+            "Фоновый job runner, чей прогресс записан в БД, а не только в Promise.",
+          input: "Kafka-события и устойчивые задачи Inbox.",
+          output:
+            "Результат скоринга в PostgreSQL/Outbox; команды recall при необходимости.",
+          danger:
+            "Автокоммит до сохранения работы теряет задачи. Неуправляемый thread pool ломает порядок и память.",
+          fix: "Poll на одном потоке, pause/resume, лимиты очереди и in-flight, fencing, safe offset. Durable Inbox-dispatcher завершает уже принятые задачи.",
+          sources: ["kafka", "poll"],
+        },
+        limiter: {
+          title: "Глобальный limiter",
+          sub: "≤ 300 RPS · bounded in-flight",
+          what: "Общий пропускной пункт перед AML для всех workers и retries.",
+          analogy:
+            "Не debounce одной кнопки, а общий бюджет запросов для всех вкладок и серверов сразу.",
+          input: "Каждая попытка внешнего AML-вызова.",
+          output: "Разрешение отправки либо отложенная обработка.",
+          danger:
+            "300 RPS на pod превратятся в 3 000 RPS при десяти pod. Слишком большой burst bucket также может нарушить контракт провайдера.",
+          fix: "Атомарный Redis Lua/bucket или строгий pacing по контракту, серверное время, retries в той же квоте, отдельный concurrency semaphore.",
+          sources: ["redis"],
+        },
+        dlq: {
+          title: "DLQ",
+          sub: "Карантин проблемных событий",
+          what: "Хранит событие и контекст ошибки отдельно, чтобы неисправимое сообщение не блокировало обычный поток.",
+          analogy:
+            "Очередь разбирательства ошибок, не console.error и не корзина.",
+          input:
+            "Исходные bytes/payload, error code, topic/partition/offset и число попыток.",
+          output:
+            "Контролируемый replay после исправления причины и проверки Inbox.",
+          danger:
+            "Пропустить событие и забыть — не решение. Replay не должен повторно списывать или возвращать деньги.",
+          fix: "Durable DLQ перед commit; оповещение операторов, доступы, retention, маскирование PII; сохранение исходного event_id.",
+        },
+        recall: {
+          title: "Recall Orchestrator",
+          sub: "Команда → вызов → сверка",
+          what: "Переводит подтверждённый FraudDetected в доступные действия у банка или PSP.",
+          analogy:
+            "Saga из нескольких сохранённых шагов; не один длинный try/catch вокруг HTTP.",
+          input: "FraudDetected, статус платежа, политика клиента.",
+          output:
+            "VoidRequested / RefundRequested / BlockRequested и подтверждённые результаты.",
+          danger:
+            "Вердикт фрода не гарантирует возврат. Действие могло выполниться, даже если ответ потерян.",
+          fix: "Durable command state, Idempotency-Key, reconciliation, аудит, ручной путь для неразрешимых исходов.",
+          sources: ["stripe"],
+        },
+        analytics: {
+          title: "ClickHouse / OLAP",
+          sub: "Отдельная аналитическая ветка",
+          what: "Получает события своей consumer group и строит аналитическую проекцию для дашборда. Добавлен в To-Be; в исходной SVG его нет.",
+          analogy:
+            "Read model для экранов и графиков, а не источник истины для команды возврата.",
+          input: "Поток событий и результаты обработки.",
+          output: "Агрегаты, аномалии, отчёты; свежесть < 1 с — цель задания.",
+          danger:
+            "Eventual consistency, дубли и лаг. Свежесть аналитики не равна завершённости AML.",
+          fix: "Отдельный pipeline, event_id/version-aware проекция, измерение end-to-end freshness. Операционные статусы — из PostgreSQL.",
+        },
+        dashboard: {
+          title: "Dashboard API",
+          sub: "UI отдельно от платежей",
+          what: "Собирает аналитические данные и актуальные операционные статусы для риск-офицера.",
+          analogy: "BFF вашего фронтенда: API под нужды экрана.",
+          input:
+            "Фильтры/запросы UI, аналитика из OLAP, детали операции из OLTP.",
+          output:
+            "REST и при необходимости SSE/WebSocket с version и временем актуальности.",
+          danger:
+            "Визуально live-экран может показывать старые данные; старое событие может перетереть новое.",
+          fix: "Раздельный pool/процесс, пагинация, freshness marker, защита от старых версий, RBAC и аудит команд.",
+        },
+      };
+
+      const asNodes = [
+        ["merchant", 20, 55],
+        ["gateway", 230, 55],
+        ["officer", 650, 55],
+        ["edge", 440, 205],
+        ["mono1", 650, 205],
+        ["mono2", 650, 510],
+        ["pg", 860, 205],
+        ["redis", 1070, 205],
+        ["kafka", 1070, 360],
+        ["aml", 440, 510],
+        ["ml", 230, 510],
+        ["bank", 860, 510],
+      ];
+      const toNodes = [
+        ["merchant", 20, 55],
+        ["edge", 230, 55],
+        ["fast", 440, 55],
+        ["redis", 650, 55],
+        ["pg", 860, 55],
+        ["cdc", 1070, 55],
+        ["gateway", 20, 225],
+        ["hook", 230, 225],
+        ["ml", 440, 225],
+        ["limiter", 650, 225],
+        ["worker", 860, 225],
+        ["kafka", 1070, 225],
+        ["aml", 650, 395],
+        ["dlq", 860, 395],
+        ["analytics", 1070, 395],
+        ["officer", 20, 565],
+        ["dashboard", 230, 565],
+        ["recall", 860, 565],
+        ["bank", 1070, 565],
+      ];
+      // [source, target, label, kind]
+      // Только нарисованные связи включены в As-Is.
+      // Отсутствующие связи ML/Kafka consumer обсуждаются в объяснениях.
+      const asEdges = [
+        ["merchant", "edge", "синхронный /authorize", "main"],
+        ["gateway", "edge", "вебхуки", "async"],
+        ["officer", "edge", "/api/dashboard", ""],
+        ["edge", "mono1", "авторизации", "main"],
+        ["edge", "mono2", "dashboard-запросы", ""],
+        ["mono1", "pg", "BEGIN / SELECT FOR UPDATE", "main"],
+        ["mono1", "aml", "HTTP внутри DB-транзакции", "danger"],
+        ["mono1", "redis", "прямая запись; dual write", "async"],
+        ["mono1", "kafka", "прямая публикация; country_code", "async"],
+        ["redis", "mono2", "RPOP задачи без ack", "async"],
+        ["mono2", "bank", "неконтролируемый внешний вызов", "danger"],
+      ];
+      const toEdges = [
+        ["merchant", "edge", "POST /authorize", "main"],
+        ["edge", "fast", "изолированный upstream", "main"],
+        ["fast", "redis", "быстрые правила / TTL", "main"],
+        ["fast", "pg", "короткая TX: операция + Outbox", "main"],
+        ["gateway", "hook", "вебхук с подписью", ""],
+        ["hook", "pg", "durable приём + Outbox до 2xx", ""],
+        ["pg", "cdc", "зафиксированные изменения", "async"],
+        ["cdc", "kafka", "Outbox → события", "async"],
+        ["kafka", "worker", "consumer group: scoring", "async"],
+        ["worker", "pg", "Inbox / состояния / результаты / Outbox", ""],
+        ["worker", "limiter", "каждая AML-попытка", ""],
+        ["limiter", "aml", "квота + in-flight limit", ""],
+        ["worker", "ml", "глубокий скоринг", ""],
+        ["worker", "dlq", "неисправимое событие в карантин", "async"],
+        ["worker", "recall", "durable команда через Outbox/Inbox", "async"],
+        ["recall", "bank", "void / refund / block + сверка", ""],
+        ["kafka", "analytics", "отдельная analytics group", "async"],
+        ["officer", "dashboard", "UI-запросы", ""],
+        ["dashboard", "analytics", "аналитические запросы", ""],
+        ["dashboard", "pg", "операционный статус; отдельный бюджет", ""],
+      ];
+
+      const traces = {
+        as: [
+          [
+            "merchant",
+            "Запрос на платёж",
+            "Мерчант отправляет /authorize. До ответа он не знает антифрод-вердикт.",
+          ],
+          [
+            "edge",
+            "Балансировщик выбирает реплику",
+            "Nginx распределяет трафик, но ресурсы UI и платежей по-прежнему не изолированы.",
+          ],
+          [
+            "mono1",
+            "Монолит открывает транзакцию",
+            "Обработчик берёт DB connection и выполняет SELECT FOR UPDATE. Блокировка строки держится до завершения транзакции.",
+          ],
+          [
+            "aml",
+            "Ожидание внешнего AML",
+            "Запрос зависает на 4 секунды. Соединение БД занято всё это время; другие операции на тех же строках могут ждать.",
+          ],
+          [
+            "pg",
+            "Пул становится узким местом",
+            "При 200 соединениях и удержании каждого 4 с грубая верхняя оценка — 50 операций/с. Это не доказательство crash БД, но приложение начинает ждать соединения.",
+          ],
+          [
+            "merchant",
+            "Клиент получил timeout",
+            "Повтор без стабильного ключа выглядит новой операцией. Возникает retry storm — дополнительная нагрузка, а не новая бизнес-активность.",
+          ],
+          [
+            "kafka",
+            "Даже успешный commit не гарантирует событие",
+            "Приложение могло сохранить операцию, а затем упасть до kafkaProducer.send. Это окно dual write.",
+          ],
+          [
+            "redis",
+            "Фоновая задача тоже уязвима",
+            "RPOP удаляет задачу из списка до окончания обработки. Crash после чтения может потерять её без протокола ack.",
+          ],
+          [
+            "bank",
+            "Повтор внешнего действия опасен",
+            "Если воркер действительно отправляет денежную команду, нужен отдельный ключ идемпотентности. Сам дубль антифрод-события ещё не равен двойному списанию.",
+          ],
+        ],
+        to: [
+          [
+            "merchant",
+            "Одна операция — один ключ",
+            "Мерчант присылает стабильные tenant_id, operation_id и Idempotency-Key. Повтор возвращает тот же сохранённый результат.",
+          ],
+          [
+            "fast",
+            "Только быстрые проверки",
+            "Fast Path не ждёт AML/ML. Проверяет доступные правила и применяет согласованную risk-policy.",
+          ],
+          [
+            "redis",
+            "Кэш с ограничениями",
+            "Redis хранит быстрые данные с TTL. При сбое есть ограниченный локальный fallback, но он не заменяет глобальные лимиты.",
+          ],
+          [
+            "pg",
+            "Короткий durable commit",
+            "Операция, вердикт и Outbox фиксируются атомарно. Только после этого возвращаем ответ. Approve — разрешение продолжить, не доказательство списания.",
+          ],
+          [
+            "cdc",
+            "Фоновая публикация",
+            "Debezium переносит Outbox-событие в Kafka. При временном сбое событие может прийти повторно; Inbox обязан это выдержать.",
+          ],
+          [
+            "kafka",
+            "Поток разделён по бизнес-ключу",
+            "Ключ tenant_id + account_id группирует аккаунт. Порядок бизнес-обработки дополнительно защищён версиями и последовательным исполнением.",
+          ],
+          [
+            "worker",
+            "Сначала сохраняем работу",
+            "Inbox надёжно регистрирует событие. После durable приёма offset можно продвинуть только при наличии отдельного возобновляемого Inbox-dispatcher; иначе — после завершения эффекта.",
+          ],
+          [
+            "limiter",
+            "Не превышаем возможности AML",
+            "Глобальная квота учитывает все workers и retries. Отдельно ограничено количество одновременно ожидающих вызовов.",
+          ],
+          [
+            "aml",
+            "Глубокая проверка не блокирует HTTP",
+            "Вызов работает вне DB-транзакции. При 4 с полное AML не укладывается в 1,5 с: нужен явно видимый degraded/pending-режим.",
+          ],
+          [
+            "recall",
+            "Если найден фрод — отдельная команда",
+            "Сохраняем запрос доступного действия: void, refund или блокировка дальнейших операций. Не обещаем мгновенно вернуть уже ушедшие деньги.",
+          ],
+          [
+            "bank",
+            "Результат нужно подтвердить",
+            "Timeout после отправки → UNKNOWN_RESULT и сверка. Нельзя вслепую повторить действие с новым ключом.",
+          ],
+          [
+            "analytics",
+            "Аналитика живёт отдельно",
+            "Собственная consumer group наполняет ClickHouse. Dashboard не отнимает ресурсы Fast Path и показывает фактическую свежесть данных.",
+          ],
+        ],
+      };
+
+      let mode = "as",
+        selectedNode = "mono1",
+        traceIndex = -1;
+
+      function graphData() {
+        return mode === "as" ? [asNodes, asEdges] : [toNodes, toEdges];
+      }
+      function drawMap() {
+        const [nodes, edges] = graphData();
+        const pos = Object.fromEntries(
+          nodes.map(([id, x, y]) => [id, { x, y }]),
+        );
+        const marker = `<defs><marker id="arrow" markerWidth="8" markerHeight="8"
+    refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z"
+    fill="var(--muted)"/></marker></defs>`;
+        const paths = edges
+          .map(([a, b, label, kind]) => {
+            const p = pos[a],
+              q = pos[b];
+            let x1, y1, x2, y2, d;
+            if (Math.abs(p.y - q.y) < 100) {
+              const right = q.x > p.x;
+              x1 = p.x + (right ? 166 : 0);
+              y1 = p.y + 43;
+              x2 = q.x + (right ? 0 : 166);
+              y2 = q.y + 43;
+              const bend =
+                Math.max(30, Math.abs(x2 - x1) * 0.45) * (right ? 1 : -1);
+              d = `M ${x1} ${y1} C ${x1 + bend} ${y1}, ${x2 - bend} ${y2}, ${x2} ${y2}`;
+            } else {
+              const down = q.y > p.y;
+              x1 = p.x + 83;
+              y1 = p.y + (down ? 86 : 0);
+              x2 = q.x + 83;
+              y2 = q.y + (down ? 0 : 86);
+              const mid = (y1 + y2) / 2;
+              d = `M ${x1} ${y1} C ${x1} ${mid}, ${x2} ${mid}, ${x2} ${y2}`;
+            }
+            const active = a === selectedNode || b === selectedNode;
+            return `<path class="edge ${kind} ${active ? "active" : ""}"
+      d="${d}" marker-end="url(#arrow)"><title>${esc(label)}</title></path>`;
+          })
+          .join("");
+        const captions =
+          mode === "as"
+            ? [
+                [20, "ИСТОЧНИКИ И ПОЛЬЗОВАТЕЛИ"],
+                [170, "ОБЩИЙ РЕСУРСНЫЙ КОНТУР"],
+                [475, "ВНЕШНИЕ СИСТЕМЫ / ВТОРАЯ РЕПЛИКА"],
+              ]
+            : [
+                [20, "FAST PATH — БЕЗ ВНЕШНЕГО AML / ML"],
+                [190, "ПРИЁМ СОБЫТИЙ И ФОНОВАЯ ОБРАБОТКА"],
+                [360, "КВОТЫ, КАРАНТИН И АНАЛИТИКА"],
+                [530, "UI И КОМПЕНСИРУЮЩИЕ ДЕЙСТВИЯ"],
+              ];
+        $("diagram").innerHTML =
+          `<svg viewBox="0 0 1280 660" aria-hidden="true">${marker}${paths}</svg>` +
+          captions
+            .map(
+              ([y, t]) =>
+                `<div class="map-caption" style="top:${y}px">${t}</div>`,
+            )
+            .join("") +
+          nodes
+            .map(([id, x, y]) => {
+              const c = components[id];
+              const traced =
+                traceIndex >= 0 && traces[mode][traceIndex][0] === id;
+              return `<button class="node ${id === selectedNode ? "chosen" : ""} ${traced ? "traced" : ""}
+        ${mode === "as" && ["mono1", "mono2", "redis"].includes(id) ? "risky" : ""}"
+        style="left:${x}px;top:${y}px" data-node="${id}"
+        aria-pressed="${id === selectedNode}"><b>${esc(c.title)}</b><span>${esc(c.sub)}</span></button>`;
+            })
+            .join("");
+        document.querySelectorAll("[data-node]").forEach((b) =>
+          b.addEventListener("click", () => {
+            selectedNode = b.dataset.node;
+            drawMap();
+            inspect();
+          }),
+        );
+        const related = edges.filter(
+          ([a, b]) => a === selectedNode || b === selectedNode,
+        );
+        $("connections").innerHTML =
+          "<b>Связи выбранного блока:</b>" +
+          (related.length
+            ? `<ul>${related
+                .map(
+                  ([a, b, l]) => `<li>${esc(components[a].title)}
+      → ${esc(components[b].title)}: ${esc(l)}</li>`,
+                )
+                .join("")}</ul>`
+            : "<p>На исходной SVG связь этого блока не показана. Это пробел документации, а не доказательство отсутствия интеграции.</p>");
+      }
+      function inspect() {
+        const c = components[selectedNode];
+        $("inspector").innerHTML = `
+    <span class="badge ${mode === "as" ? "bad" : "good"}">${mode === "as" ? "Контекст As-Is" : "Предлагаемый To-Be"}</span>
+    <h2>${esc(c.title)}</h2><p>${esc(c.what)}</p>
+    <div class="field"><span class="field-label">Аналогия для фронтендера</span>${esc(c.analogy)}</div>
+    <div class="field"><span class="field-label">Получает</span>${esc(c.input)}</div>
+    <div class="field"><span class="field-label">Отдаёт</span>${esc(c.output)}</div>
+    <div class="field notice danger"><b>Что может пойти не так</b><br>${esc(c.danger)}</div>
+    <div class="field"><span class="field-label">Как защищать</span>${esc(c.fix)}</div>
+    <div class="field">${refs(c.sources)}</div>`;
+      }
+      function setMode(m) {
+        mode = m;
+        traceIndex = -1;
+        selectedNode = m === "as" ? "mono1" : "fast";
+        $("as-is").classList.toggle("selected", m === "as");
+        $("to-be").classList.toggle("selected", m === "to");
+        $("as-is").setAttribute("aria-pressed", String(m === "as"));
+        $("to-be").setAttribute("aria-pressed", String(m === "to"));
+        $("map-title").textContent =
+          m === "as"
+            ? "Исходная архитектура"
+            : "Предлагаемое разделение потоков";
+        $("mode-description").textContent =
+          m === "as"
+            ? "Перерисовка предоставленной SVG: две реплики монолита, общие зависимости, HTTP внутри DB-транзакции и прямые публикации. Ненарисованные связи не добавлены как факт."
+            : "Архитектурное предложение: короткий Fast Path, durable Outbox/Inbox, отдельные scoring и аналитика. Эта схема не доказывает достижение 12 000 RPS: ёмкость PostgreSQL нужно решить отдельно.";
+        $("trace-box").classList.add("hidden");
+        drawMap();
+        inspect();
+      }
+      function renderTrace() {
+        const t = traces[mode][traceIndex];
+        selectedNode = t[0];
+        drawMap();
+        inspect();
+        $("trace-box").classList.remove("hidden");
+        $("trace-number").textContent = `${traceIndex + 1}`;
+        $("trace-title").textContent = t[1];
+        $("trace-text").textContent = t[2];
+        $("prev-step").disabled = traceIndex === 0;
+        $("next-step").disabled = traceIndex === traces[mode].length - 1;
+        const node = document.querySelector(`[data-node="${t[0]}"]`);
+        const viewport = document.querySelector(".map-viewport");
+        if (node && viewport)
+          viewport.scrollLeft = Math.max(
+            0,
+            node.offsetLeft - viewport.clientWidth / 2 + 83,
+          );
+      }
+
+      const problems = [
+        [
+          "01",
+          "Общий процесс и общие ресурсы",
+          "UI, REST, workers и scheduler конкурируют за CPU, память, потоки и connection pool.",
+          "Тяжёлая фоновая задача замедляет даже обычную загрузку Dashboard.",
+          "Не «срочно переписать всё в микросервисы», а изолировать процессы, пулы и лимиты. Монолитный репозиторий допустим.",
+          [],
+        ],
+        [
+          "02",
+          "HTTP внутри DB-транзакции",
+          "Connection и row locks могут удерживаться всё время ожидания AML. SELECT FOR UPDATE блокирует конфликтующие операции до конца TX.",
+          "Запросы висят; после timeout пользователь нажимает повторно и создаёт больше нагрузки.",
+          "Короткая TX захвата → commit → HTTP → короткая TX результата. В Fast Path вообще не ждать AML/ML.",
+          ["pg"],
+        ],
+        [
+          "03",
+          "Dual write и отсутствие защиты повторов",
+          "Commit PostgreSQL и send в Kafka — две отдельные операции. Между ними возможен crash. Повтор сообщения также возможен.",
+          "UI видит «операция сохранена», но фоновое действие не происходит; либо повторно запускается одна команда.",
+          "Операция + Outbox атомарно; CDC; на входе Inbox/FSM и уникальный бизнес-ключ. Outbox не гарантирует exactly-once для банка.",
+          ["outbox", "stripe"],
+        ],
+        [
+          "04",
+          "Poison pill без DLQ",
+          "Неисправимый payload повторно ломает обработчик. При прежнем committed offset сообщение читается снова.",
+          "Часть платежей долго остаётся без глубокого результата; дашборд перестаёт обновлять соответствующий поток.",
+          "Классифицировать ошибки, ограничить retry, надёжно сохранить в DLQ до продвижения offset; назначить процедуру разбора.",
+          ["kafka"],
+        ],
+        [
+          "05",
+          "Неконтролируемая параллельность",
+          "Kafka отдаёт сообщения по порядку, но thread pool может завершить второе раньше первого.",
+          "Статус прыгает назад; действие применяется к неактуальному состоянию.",
+          "Последовательное выполнение по account key, версии агрегата и FSM. Commit — только безопасного непрерывного префикса.",
+          ["kafka"],
+        ],
+        [
+          "06",
+          "Processing time вместо event time",
+          "События, созданные в разное время, могут прийти пачкой после сетевой задержки.",
+          "График показывает ложный всплеск, правило ошибочно принимает задержку за атаку.",
+          "Для бизнес-окон — проверенный event timestamp, watermarks и bounded lateness. Часы устройства недоверенные: хранить и проверять также received_at.",
+          ["time"],
+        ],
+        [
+          "07",
+          "Country_code как ключ партиции",
+          "Все события популярной страны попадают в один сегмент нагрузки; свободные partitions не ускоряют горячую.",
+          "Часть клиентов ждёт, хотя суммарные ресурсы кластера кажутся свободными.",
+          "Ключ tenant_id + account_id при соответствующей границе порядка. Горячие ключи изолировать; random salt для строгого порядка не использовать.",
+          ["outbox", "kafka"],
+        ],
+        [
+          "08",
+          "Неограниченное состояние",
+          "Без TTL, удаления окон и лимита reorder-буфера память и объём восстановления растут.",
+          "После сбоя сервис долго восстанавливается; отдельные экраны и проверки недоступны.",
+          "TTL по смыслу данных, ограниченные окна/буферы, retention и контроль восстановления. Вечные дедуп-записи не заменять бездумно TTL 24 ч.",
+          ["redis"],
+        ],
+        [
+          "09",
+          "Дополнительно: нет backpressure и graceful shutdown",
+          "Приложение читает быстрее, чем обрабатывает; очередь задач бесконечно растёт. Poll блокируется или offset подтверждается слишком рано.",
+          "OOM, перераспределения партиций, задержки и повторы после каждого деплоя.",
+          "Bounded queue; pause/resume в consumer thread; продолжать poll; ручной commit; drain либо durable handoff перед остановкой.",
+          ["kafka", "poll"],
+        ],
+      ];
+      $("problem-list").innerHTML = problems
+        .map(
+          ([n, title, mechanism, ui, fix, sources]) => `
+  <details>
+    <summary>${n} · ${title}</summary>
+    <div class="details-body stack">
+      <p><b>Механика:</b> ${mechanism}</p>
+      <p><b>Что заметит фронтенд:</b> ${ui}</p>
+      <p><b>Исправление:</b> ${fix}</p>
+      ${refs(sources)}
+    </div>
+  </details>`,
+        )
+        .join("");
+
+      const scenarios = [
+        {
+          id: "aml",
+          name: "AML стал отвечать 4 с",
+          bad: [
+            "Монолит ждёт AML внутри открытой DB-транзакции.",
+            "Connection остаётся занятым; очередь на пул растёт.",
+            "Новые авторизации не укладываются в deadline; клиенты повторяют запросы.",
+            "UI и фоновые задачи страдают от тех же ресурсов.",
+            "Если consumer долго не вызывает poll, возможен rebalance. Один вызов 4 с ещё не доказывает превышение max.poll.interval.ms.",
+          ],
+          good: [
+            "Fast Path не вызывает AML и использует изолированные ресурсы.",
+            "Slow Path сохраняет работу в Inbox и применяет deadline/circuit breaker.",
+            "Глобальный limiter ограничивает частоту, concurrency limit — ожидающие вызовы.",
+            "Очередь ограничена; consumer делает pause, но продолжает poll.",
+            "Если проверка обязательна до платежа — Challenge/Reject/hold по допустимому контракту, а не автоматический fail-open.",
+          ],
+          lesson:
+            "Нельзя одновременно обещать завершение внешнего вызова за 1,5 с и принимать его ответ через 4 с. Нужно различать успешный SLO и явно видимую деградацию.",
+          sources: ["poll", "kafka"],
+        },
+        {
+          id: "duplicate",
+          name: "Пришёл дубль",
+          bad: [
+            "Воркер видит событие и ставит SETNX «processing».",
+            "Процесс падает до сохранения результата.",
+            "Повтор блокируется флажком, хотя работа не сделана: phantom processing.",
+            "Либо флажок истёк, и команда исполняется повторно без проверки внешнего результата.",
+          ],
+          good: [
+            "Уникальная запись Inbox регистрирует событие в PostgreSQL.",
+            "NEW → PROCESSING происходит атомарно с lease и новым fencing token.",
+            "Результат фиксируется условно актуальным владельцем.",
+            "COMPLETED возвращает сохранённый результат. Просроченный PROCESSING при возможном внешнем эффекте идёт на сверку.",
+          ],
+          lesson:
+            "Redis-кэш дедупликации — ускоритель. Источник истины о том, что произошло с операцией, должен переживать падение воркера.",
+          sources: ["stripe"],
+        },
+        {
+          id: "order",
+          name: "T2 пришло раньше T1",
+          bad: [
+            "События разбросаны random salt или обрабатываются разными потоками без контроля порядка.",
+            "Вторая операция применяется раньше зависимой первой.",
+            "Event timestamp сам по себе не устраняет конкурирующие изменения.",
+          ],
+          good: [
+            "Группируем события по выбранному account aggregate key.",
+            "Версия v+1 применяется атомарно, v+2 ожидает в ограниченном durable-буфере.",
+            "При пропуске версии запрашиваем источник или актуальный статус.",
+            "Late events для окон обрабатываем отдельной политикой: не смешиваем watermark с бизнес-версией.",
+          ],
+          lesson:
+            "Kafka сохраняет порядок записи в партиции, а не порядок реального совершения событий до их попадания в Kafka.",
+          sources: ["kafka", "time", "webhook"],
+        },
+        {
+          id: "poison",
+          name: "Битый JSON и DLQ",
+          bad: [
+            "Десериализация выбрасывает исключение.",
+            "Обработчик рестартует; committed offset остаётся прежним.",
+            "То же сообщение снова блокирует прогресс.",
+          ],
+          good: [
+            "Принимаем bytes или используем error-handling deserializer, чтобы сохранить исходный payload.",
+            "Невалидное сообщение помещаем в durable DLQ с контекстом.",
+            "Только после подтверждения DLQ продвигаем безопасный offset; при Kafka transactions можно атомарно связать DLQ-write и offsets в Kafka.",
+            "Replay после исправления сохраняет event_id и проверяет Inbox; UNKNOWN_RESULT сначала сверяется.",
+          ],
+          lesson:
+            "Если ошибка возникает ещё до создания TransactionEvent, нельзя строить DLQ только из уже успешно распарсенных объектов.",
+          sources: ["kafka"],
+        },
+        {
+          id: "redis",
+          name: "Redis недоступен",
+          bad: [
+            "Каждый запрос ждёт длинный timeout Redis.",
+            "Повторы забивают Fast Path.",
+            "Без общей политики система либо блокирует всё, либо небезопасно разрешает всё.",
+          ],
+          good: [
+            "Короткий timeout и circuit breaker не дают ждать Redis бесконечно.",
+            "Локальный LRU хранит ограниченный versioned-бандл базовых правил.",
+            "Низкий риск/малая сумма могут получить fail-open только по согласованной политике.",
+            "Глобальные счётчики считаются недоступными, а не волшебно восстановленными в каждом pod.",
+          ],
+          lesson:
+            "Fallback уменьшает ущерб, но меняет качество проверки. Это должно быть видно в audit, метриках и причине вердикта.",
+          sources: ["redis"],
+        },
+        {
+          id: "unknown",
+          name: "Банк выполнил, ответ потерялся",
+          bad: [
+            "Внешняя команда отправлена.",
+            "Провайдер выполнил действие, но TCP/HTTP-ответ не дошёл.",
+            "Приложение считает timeout окончательным отказом.",
+            "Retry с новым ключом создаёт риск второго действия.",
+          ],
+          good: [
+            "Сохраняем UNKNOWN_RESULT и идентификатор команды.",
+            "Проверяем provider status API, подписанный webhook или reconciliation report.",
+            "Если эффект подтверждён — COMPLETED без повторной отправки.",
+            "Если отсутствие эффекта подтверждено — контролируемый retry с тем же бизнес-ключом; неразрешимый случай — оператору.",
+          ],
+          lesson:
+            "Отсутствие ответа — это отсутствие знания, а не знание об отсутствии операции.",
+          sources: ["stripe", "webhook"],
+        },
+      ];
+      function showScenario(id) {
+        const s = scenarios.find((x) => x.id === id);
+        document.querySelectorAll("[data-scenario]").forEach((b) => {
+          b.classList.toggle("selected", b.dataset.scenario === id);
+          b.setAttribute("aria-pressed", String(b.dataset.scenario === id));
+        });
+        const steps = (list) =>
+          `<div class="scenario-steps">${list
+            .map(
+              (t, i) =>
+                `<div class="scenario-step"><b>${i + 1}</b><div>${t}</div></div>`,
+            )
+            .join("")}</div>`;
+        $("scenario-content").innerHTML = `
+    <div class="grid2">
+      <article class="card"><span class="badge bad">As-Is</span><h2>${s.name}</h2>${steps(s.bad)}</article>
+      <article class="card"><span class="badge good">Предлагаемая защита</span><h2>Как ограничить ущерб</h2>${steps(s.good)}</article>
+    </div>
+    <div class="notice" style="margin-top:var(--s4)"><b>Запомнить:</b> ${s.lesson}<div>${refs(s.sources)}</div></div>
+    ${id === "poison" ? dlqDetails() : ""}`;
+      }
+      $("scenario-buttons").innerHTML = scenarios
+        .map(
+          (s) =>
+            `<button data-scenario="${s.id}" aria-pressed="false">${s.name}</button>`,
+        )
+        .join("");
+      document
+        .querySelectorAll("[data-scenario]")
+        .forEach((b) =>
+          b.addEventListener("click", () => showScenario(b.dataset.scenario)),
+        );
+
+      function dlqDetails() {
+        const envelope = {
+          schema_version: 1,
+          event_id: "original-event-id-or-null",
+          tenant_id: "tenant-id-if-known",
+          payload_encoding: "base64",
+          payload: "original-bytes-base64",
+          error_code: "INVALID_PAYLOAD",
+          stack_trace: "sanitized; no secrets",
+          retry_count: 3,
+          timestamp: "2026-11-08T12:00:00Z",
+          original: {
+            topic: "transactions",
+            partition: 7,
+            offset: 103,
+            key: "original-key-if-readable",
+          },
+          original_offset: 103,
+          trace_id: "trace-id",
+          replay_of: null,
+        };
+        return `<details style="margin-top:var(--s4)"><summary>Пример DLQEnvelope и регламент Replay</summary>
+    <div class="details-body stack">
+    <p class="small muted">Иллюстративная структура, не данные production.
+    Для непарсируемого сообщения event_id может отсутствовать;
+    транспортный идентификатор — topic + partition + offset.</p>
+    <pre>${esc(JSON.stringify(envelope, null, 2))}</pre>
+    <ol>
+      <li>Назначить владельца инцидента; проверить причину, tenant и права доступа.</li>
+      <li>Исправить обработчик/схему. Не делать автоматический бесконечный replay.</li>
+      <li>Проверить Inbox: COMPLETED — пропуск; UNKNOWN_RESULT — сверка;
+        PROCESSING с действующим lease — не перехватывать.</li>
+      <li>Для строгого порядка проверить пропуски версии и события того же аккаунта.</li>
+      <li>Публиковать в отдельный replay topic с исходным event_id, ключом аккаунта
+        и ссылкой на original offset. Новое денежное действие не создавать.</li>
+      <li>Повышать скорость только после проверки ошибок, lag и квоты.
+        Лимитер общий с обычным потоком.</li>
+      <li>Сохранить аудит: кто, почему, что переиграно и каков результат.
+        Удалять DLQ-записи по retention только после надёжного учёта.</li>
+    </ol></div></details>`;
+      }
+
+      const stateInfo = {
+        NEW: "Событие зарегистрировано, но ещё не взято в работу.",
+        PROCESSING:
+          "Воркер получил временное право обработки: lease и fencing token. Внешний вызов идёт без открытого DB BEGIN.",
+        COMPLETED:
+          "Результат надёжно сохранён. Дубликат должен вернуть этот результат, не повторять эффект.",
+        TEMPORARY_ERROR:
+          "Известная повторяемая ошибка без неопределённого внешнего эффекта. Повтор — по расписанию и в пределах бюджета.",
+        UNKNOWN_RESULT:
+          "Внешний эффект мог случиться. Нельзя автоматически считать операцию неуспешной или отправлять новую команду.",
+        FAILED:
+          "Известный окончательный отказ. Для UNKNOWN_RESULT этот статус нельзя использовать просто из-за исчерпания retry.",
+      };
+      const transitions = {
+        NEW: [["Взять в работу", "PROCESSING"]],
+        PROCESSING: [
+          ["Ответ подтверждён", "COMPLETED"],
+          ["Известная временная ошибка", "TEMPORARY_ERROR"],
+          ["Ответ потерян / lease истёк", "UNKNOWN_RESULT"],
+          ["Окончательный отказ", "FAILED"],
+        ],
+        TEMPORARY_ERROR: [["Retry разрешён, время наступило", "PROCESSING"]],
+        UNKNOWN_RESULT: [
+          ["Сверка: выполнено", "COMPLETED"],
+          ["Сверка: точно не выполнено", "TEMPORARY_ERROR"],
+        ],
+        COMPLETED: [],
+        FAILED: [],
+      };
+      let currentState = "NEW",
+        token = 0,
+        stateHistory = ["NEW — событие надёжно зарегистрировано."];
+      function renderState() {
+        $("state-strip").innerHTML = Object.keys(stateInfo)
+          .map(
+            (s) =>
+              `<span class="badge ${s === currentState ? "good" : ""}">${s}</span>`,
+          )
+          .join("");
+        $("current-state").textContent = currentState;
+        $("state-explanation").textContent = stateInfo[currentState];
+        $("state-log").innerHTML = stateHistory
+          .map((t) => `<li>${esc(t)}</li>`)
+          .join("");
+        $("state-actions").innerHTML =
+          transitions[currentState]
+            .map(
+              ([label, to]) =>
+                `<button data-transition="${to}">${label}</button>`,
+            )
+            .join("") +
+          (currentState === "COMPLETED"
+            ? `<button id="duplicate-state">Получить дубль</button>`
+            : "");
+        document.querySelectorAll("[data-transition]").forEach((b) =>
+          b.addEventListener("click", () => {
+            const to = b.dataset.transition,
+              from = currentState;
+            if (to === "PROCESSING") token++;
+            currentState = to;
+            stateHistory.push(
+              `${from} → ${to}; token=${token}. ${b.textContent}`,
+            );
+            renderState();
+          }),
+        );
+        if ($("duplicate-state"))
+          $("duplicate-state").addEventListener("click", () => {
+            stateHistory.push(
+              "Дубликат: COMPLETED → COMPLETED. Возвращён сохранённый результат; внешнего вызова нет.",
+            );
+            renderState();
+          });
+      }
+      $("reset-state").addEventListener("click", () => {
+        currentState = "NEW";
+        token = 0;
+        stateHistory = ["NEW — событие надёжно зарегистрировано."];
+        renderState();
+      });
+
+      function updateCapacity() {
+        const r = Number($("rps").value),
+          share = Number($("share").value);
+        const t = Number($("latency").value),
+          c = Number($("concurrency").value);
+        const demand = (r * share) / 100,
+          cap = Math.min(300, c / t),
+          growth = Math.max(0, demand - cap);
+        const required = Math.ceil(Math.min(demand, 300) * t);
+        $("rps-label").textContent = fmt(r);
+        $("share-label").textContent = share;
+        $("concurrency-label").textContent = fmt(c);
+        const values = [
+          [
+            "Спрос на AML",
+            `${fmt(demand)} /с`,
+            "Авторизации × выбранная доля",
+            demand > 300,
+          ],
+          [
+            "Верхняя оценка выхода",
+            `${fmt(cap)} /с`,
+            "min(300, in-flight / latency)",
+            false,
+          ],
+          [
+            "Рост очереди",
+            `${fmt(growth)} /с`,
+            "При длительной постоянной нагрузке",
+            growth > 0,
+          ],
+          [
+            "Нужная конкурентность",
+            `${fmt(required)}`,
+            "Для min(спрос, 300) при этой задержке",
+            required > c,
+          ],
+        ];
+        $("capacity-metrics").innerHTML = values
+          .map(
+            ([l, v, d, bad]) =>
+              `<div class="metric ${bad ? "alert" : ""}"><span class="small">${l}</span>
+    <span class="metric-value">${v}</span><span class="small muted">${d}</span></div>`,
+          )
+          .join("");
+        $("capacity-explanation").classList.toggle("danger", growth > 0);
+        $("capacity-explanation").textContent =
+          growth > 0
+            ? `Очередь неустойчива: за минуту добавится примерно ${fmt(growth * 60)} задач. Одна асинхронность это не исправит. Нужны меньше новых проверок, больше согласованной внешней квоты или другой допустимый режим.`
+            : demand === cap
+              ? "Вход равен расчётному пределу: запаса нет. Любой retry или всплеск создаст очередь."
+              : "По этой упрощённой модели есть запас. Но retries, webhook-проверки и длинный хвост задержек могут его съесть; p99 модель не рассчитывает.";
+      }
+      ["rps", "share", "latency", "concurrency"].forEach((id) =>
+        $(id).addEventListener("input", updateCapacity),
+      );
+
+      const avg = 120000000 / (30 * 86400);
+      const monthly800 = 800 * 30 * 86400;
+      const rawYear = (120000000 * 12 * 1500) / 1e12;
+      const numberChecks = [
+        [
+          "120 млн в месяц ≠ 800 RPS круглосуточно",
+          `При условном месяце 30 дней это ${fmt(avg)} RPS. Постоянные 800 RPS дали бы ${fmt(monthly800 / 1e9)} млрд операций/месяц. Нужен профиль активных часов или уточнение того, что входит в 800 RPS.`,
+        ],
+        [
+          "Квота AML покрывает только 2,5% пика",
+          "300 / 12 000 = 2,5% при одном новом вызове на операцию, без retries и другого трафика. Если проверять все операции, очередь будет расти на 11 700 задач/с. Rate limiter защищает API, но не решает дефицит мощности.",
+        ],
+        [
+          "PostgreSQL: SQL-операции и TPS — разные единицы",
+          "Операция + Outbox могут быть двумя INSERT внутри одной транзакции. Это 12 000 бизнес-транзакций/с и минимум 24 000 записей строк/с, а не автоматически 24 000 TPS. Если лимит 2 500 означает DB transactions/s, разрыв — минимум 4,8× ещё до Inbox, результатов и webhooks.",
+        ],
+        [
+          "Батчинг только Outbox не снимает предел OLTP",
+          "Основную операцию всё ещё нужно сохранить. Откладывание Outbox за отдельный commit возвращает dual write. Проверять нужно весь atomic commit, WAL, индексы, fsync и профиль contention; затем выбирать capacity upgrade, шардирование или иной durable-ingress дизайн.",
+        ],
+        [
+          "24 партиции — без запаса при 500 сообщений/с",
+          "24 × 500 = 12 000. Одна недоступная партиция, перекос ключей или retry уже нарушают оценку. Производительность scoring с внешним AML нельзя приравнивать к скорости дешёвого чтения сообщений.",
+        ],
+        [
+          "Вебхуки добавляют отдельный поток",
+          "В SVG есть до 5 000 webhook RPS сверх 12 000 первичных авторизаций. Если пики совпадают, HTTP-вход — до 17 000 RPS. При размере каждого события 1,5 KB это 25,5 MB/с до накладных расходов, а не 18 MB/с. Реальную событийную кратность нужно измерить.",
+        ],
+        [
+          "Lag 5 000 сообщений — не универсальные 500 мс",
+          "При 12 000 сообщений/с это около 417 мс входного потока, при 800 — 6,25 с. Это не точная end-to-end latency. Следите за возрастом старейшего события, lag каждой partition и очередью Inbox, а не только за числом сообщений.",
+        ],
+        [
+          "64 GB Redis: что именно посчитано?",
+          "Реплики хранят копии и не утраивают уникальную ёмкость. Если 64 GB — доступный dataset primary, после 30% резерва остаётся 44,8 GB. Если 64 GB — суммарная RAM трёх равных узлов, грубо 14,9 GB уникальных данных после резерва, ещё до overhead.",
+        ],
+        [
+          "Один primary и две replicas — не шардированный OSS Cluster",
+          "Нужна явная топология: replication/Sentinel либо Redis Cluster с несколькими primary. В документации Redis для минимального штатного Cluster указаны три master; типичный HA-вариант — три master и три replica.",
+        ],
+        [
+          "2,5 TB за год требует уточнения состава",
+          `Сырые payload: 120 млн × 12 × 1,5 KB ≈ ${fmt(rawYear)} TB в десятичных единицах. Для логов, индексов, Outbox/Inbox и реплик остаётся мало места без компрессии или отдельного retention. Это не доказательство невозможности, а повод раскрыть модель хранения.`,
+        ],
+        [
+          "TTL 24 часа не покрывает все повторы",
+          "Stripe автоматически повторяет webhook-доставку до трёх дней в live-режиме, а ручной resend может прийти ещё позже. Redis TTL 24 ч не является достаточной долговечной защитой. Retention Inbox и бизнес-ключей зависит от окна replay и риска операции.",
+        ],
+        [
+          "Проверки SLO нужно разделить",
+          "Fast Path: latency внутри инфраструктуры. Slow Path: какой момент начала и окончания измеряем? Freshness: от occurred_at/ingested_at до видимости в UI? При внешнем AML 4 с успешный полный scoring <1,5 с недостижим без другого допустимого источника результата.",
+        ],
+      ];
+      $("number-checks").innerHTML = numberChecks
+        .map(
+          ([t, p], i) => `
+  <details><summary>${String(i + 1).padStart(2, "0")} · ${t}</summary>
+  <div class="details-body"><p>${p}</p>
+  ${i === 8 ? refs(["redis"]) : i === 10 ? refs(["webhook"]) : ""}</div></details>`,
+        )
+        .join("");
+
+      const glossary = [
+        [
+          "RPS",
+          "Requests per second: сколько HTTP-запросов приходит за секунду. Один платёж может породить первичный запрос, retries и несколько webhooks.",
+        ],
+        [
+          "TPS",
+          "Transactions per second. Нужно уточнять: бизнес-платежи, DB-транзакции или операции записи. Эти величины нельзя автоматически приравнивать.",
+        ],
+        [
+          "p99",
+          "99-й процентиль: 99% измеренных запросов укладываются в это время. Это не среднее и не обещание, что все запросы будут быстрее.",
+        ],
+        [
+          "SLO / SLA",
+          "SLO — внутренняя измеримая цель качества. SLA — договорное обязательство с определёнными условиями. Граница измерения и исключения должны быть явными.",
+        ],
+        [
+          "Синхронно / асинхронно",
+          "Синхронный путь ждёт результата перед ответом. Асинхронный сохраняет работу и завершает её отдельно. Promise сам по себе не делает работу долговечной.",
+        ],
+        [
+          "ACID-транзакция",
+          "Группа DB-изменений, которую можно зафиксировать целиком или откатить. Она не откатывает автоматически HTTP-действие в чужом банке.",
+        ],
+        [
+          "Connection pool",
+          "Ограниченный набор подключений к БД. Как пул выделенных ресурсов, а не число запросов в секунду. Медленная операция надолго занимает ресурс.",
+        ],
+        [
+          "Row lock / SELECT FOR UPDATE",
+          "Защита выбранной строки от конфликтующих изменений до конца транзакции. Длинное ожидание внутри TX удлиняет блокировку.",
+        ],
+        [
+          "Outbox",
+          "Таблица событий, записываемая атомарно с бизнес-операцией. Закрывает окно «в БД уже есть, а публикации ещё нет».",
+        ],
+        [
+          "CDC / Debezium / WAL",
+          "CDC переносит изменения БД дальше. Debezium — инструмент такого переноса; WAL — журнал PostgreSQL, из которого читаются изменения.",
+        ],
+        [
+          "Inbox",
+          "Долговечная таблица приёма/дедупликации событий и их состояния обработки. Не путать с транспортной очередью и временным SETNX.",
+        ],
+        [
+          "Idempotency-Key",
+          "Идентификатор одной логической команды. Повтор с тем же ключом и тем же содержимым не должен создавать новый эффект.",
+        ],
+        [
+          "At-Least-Once",
+          "Событие может быть доставлено повторно. Гарантия действует в границах корректной конфигурации, сохранности хранилища и retention.",
+        ],
+        [
+          "Exactly-Once",
+          "Нужно указать границу гарантии. Kafka-транзакция не делает произвольный внешний банковский HTTP-вызов ровно однократным.",
+        ],
+        [
+          "Partition / key",
+          "Partition — упорядоченная часть Kafka-журнала. Key определяет маршрутизацию. Случайный salt может разнести события одного аккаунта.",
+        ],
+        [
+          "Consumer group",
+          "Независимая группа читателей. Scoring и аналитика должны иметь разные группы, чтобы каждая получила нужные события.",
+        ],
+        [
+          "Offset / commit",
+          "Offset — позиция сообщения в partition. Committed offset — точка восстановления группы. Нельзя подтвердить далеко вперёд и потерять незавершённый префикс.",
+        ],
+        [
+          "Consumer lag",
+          "Отставание позиции потребителя от журнала. Маленький Kafka lag не доказывает, что внешний эффект выполнен: работа может ждать в Inbox.",
+        ],
+        [
+          "Backpressure / pause / resume",
+          "Не читать бесконечно, когда не успеваешь обрабатывать. Ограничиваем очередь, приостанавливаем fetch нужных partitions, но продолжаем poll.",
+        ],
+        [
+          "Rebalance",
+          "Перераспределение partitions между consumers. Нормальный механизм; storm — слишком частые перераспределения из-за нестабильности.",
+        ],
+        [
+          "DLQ / poison pill",
+          "DLQ — карантин события и контекста ошибки. Poison pill — сообщение, на котором обработчик стабильно ломается.",
+        ],
+        [
+          "Event time / processing time",
+          "Время бизнес-события и время обработки. При сетевой задержке они расходятся. Время устройства нужно валидировать.",
+        ],
+        [
+          "Watermark / late event",
+          "Watermark выражает прогресс времени потока. Позднее событие требует заранее выбранной политики, а не бесконечного ожидания.",
+        ],
+        [
+          "TTL / retention / RTO",
+          "TTL — срок жизни записи; retention — срок хранения данных; RTO — цель по времени восстановления сервиса после сбоя.",
+        ],
+        [
+          "FSM / state machine",
+          "Конечный автомат: допустимые статусы и переходы между ними. Аналог useReducer, но с сохранением и конкурентными обновлениями в БД.",
+        ],
+        [
+          "Lease / fencing token",
+          "Lease — временный захват задачи. Token отличает нового владельца от устаревшего и позволяет отвергнуть его запись в БД.",
+        ],
+        [
+          "UNKNOWN_RESULT / reconciliation",
+          "Мы не знаем, был ли внешний эффект. Reconciliation — процедура сверки со стороной, которая знает фактический результат.",
+        ],
+        [
+          "Rate limit / concurrency limit",
+          "Первое ограничивает запросы за время, второе — число одновременных ожиданий. Для медленного API нужны оба ограничения.",
+        ],
+        [
+          "Circuit breaker",
+          "После серии сбоев временно прекращает бесполезные вызовы и даёт зависимости восстановиться. Не заменяет timeout и квоту.",
+        ],
+        [
+          "Fail-open / fail-closed",
+          "При отказе зависимости разрешить продолжение либо запретить/потребовать дополнительную проверку. Выбор задаёт риск-политика.",
+        ],
+        [
+          "OLTP / OLAP",
+          "OLTP хранит операционные статусы и изменения. OLAP ускоряет аналитические выборки. Экран аналитики может отставать от источника истины.",
+        ],
+        [
+          "Authorize / capture / void / refund",
+          "Авторизовать средства, завершить списание, отменить доступную авторизацию, инициировать возврат. Детали зависят от платёжного провайдера.",
+        ],
+        [
+          "Graceful shutdown",
+          "Перестать брать новую работу, безопасно завершить или надёжно передать принятую, подтвердить только безопасные offsets и закрыть consumer.",
+        ],
+      ];
+      function renderGlossary() {
+        const q = $("glossary-search").value.trim().toLocaleLowerCase("ru");
+        const items = glossary.filter((x) =>
+          x.join(" ").toLocaleLowerCase("ru").includes(q),
+        );
+        $("glossary-items").innerHTML = items.length
+          ? items
+              .map(
+                ([t, p]) =>
+                  `<article class="card"><h3>${esc(t)}</h3><p>${esc(p)}</p></article>`,
+              )
+              .join("")
+          : `<div class="card"><h3>Термин не найден</h3><p>Попробуйте «Kafka», «повтор» или «состояние».</p></div>`;
+      }
+      $("glossary-search").addEventListener("input", renderGlossary);
+
+      function setTab(name, updateHash = true) {
+        if (!$(name) || !$(name).classList.contains("panel")) name = "map";
+        document
+          .querySelectorAll(".panel")
+          .forEach((p) => p.classList.toggle("active", p.id === name));
+        document.querySelectorAll("[data-tab]").forEach((b) => {
+          b.classList.toggle("selected", b.dataset.tab === name);
+          b.setAttribute("aria-pressed", String(b.dataset.tab === name));
+        });
+        if (updateHash) {
+          try {
+            history.replaceState(null, "", "#" + name);
+          } catch (_) {
+            /* local sandbox */
+          }
+        }
+      }
+      document
+        .querySelectorAll("[data-tab]")
+        .forEach((b) =>
+          b.addEventListener("click", () => setTab(b.dataset.tab)),
+        );
+      window.addEventListener("hashchange", () =>
+        setTab(location.hash.slice(1), false),
+      );
+      $("as-is").addEventListener("click", () => setMode("as"));
+      $("to-be").addEventListener("click", () => setMode("to"));
+      $("start-trace").addEventListener("click", () => {
+        traceIndex = 0;
+        renderTrace();
+        $("trace-box").scrollIntoView({ block: "nearest" });
+      });
+      $("next-step").addEventListener("click", () => {
+        if (traceIndex < traces[mode].length - 1) {
+          traceIndex++;
+          renderTrace();
+        }
+      });
+      $("prev-step").addEventListener("click", () => {
+        if (traceIndex > 0) {
+          traceIndex--;
+          renderTrace();
+        }
+      });
+      $("close-trace").addEventListener("click", () => {
+        traceIndex = -1;
+        $("trace-box").classList.add("hidden");
+        drawMap();
+      });
+
+      let dark =
+        window.matchMedia &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches;
+      function applyTheme() {
+        document.documentElement.dataset.theme = dark ? "dark" : "light";
+        $("theme").textContent = dark ? "Светлая тема" : "Тёмная тема";
+      }
+      $("theme").addEventListener("click", () => {
+        dark = !dark;
+        applyTheme();
+      });
+
+      applyTheme();
+      setMode("as");
+      showScenario("aml");
+      renderState();
+      updateCapacity();
+      renderGlossary();
+      setTab(location.hash.slice(1) || "map", false);
+    </script>
+  </body>
+</html>
