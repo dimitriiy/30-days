@@ -1,4 +1,4 @@
-import { dayNumber, habitDay, progress, type Habit } from "./domain";
+import { dayNumber, habitDay, progress, type Habit, type ReadingDose } from "./domain";
 
 export function morningNotification(text: string, firstName?: string): string {
   const name = firstName?.trim().replace(/\s+/g, " ");
@@ -8,6 +8,33 @@ export function morningNotification(text: string, firstName?: string): string {
 
 export function quoteNotification(text: string): string {
   return `💭 Мысль дня\n\n${text}`;
+}
+
+const ROMAN_NUMERALS = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
+
+export function readingDose(dose: ReadingDose, day: number, total: number): string {
+  const range = dose.from === dose.to ? `§${dose.from}` : `§${dose.from}–${dose.to}`;
+  return `📖 «Наедине с собой»\nКнига ${ROMAN_NUMERALS[dose.book - 1]}, ${range} · доза ${day}/${total}\n\n${dose.text}`;
+}
+
+export function readingFinale(total: number): string {
+  return `🏛 «Наедине с собой» дочитана!\n\nВсе ${total} доз пройдены. Стоик в тебе окреп — можно перечитать заново.`;
+}
+
+export function splitLongMessage(text: string, limit = 3900): string[] {
+  if (text.length <= limit) return [text];
+  const parts: string[] = [];
+  let current = "";
+  for (const sentence of text.split(/(?<=[.!?…»])\s+/)) {
+    if (current && current.length + sentence.length + 1 > limit) {
+      parts.push(current);
+      current = sentence;
+    } else {
+      current = current ? `${current} ${sentence}` : sentence;
+    }
+  }
+  if (current) parts.push(current);
+  return parts;
 }
 
 export function habitReminder(habit: Habit): string {

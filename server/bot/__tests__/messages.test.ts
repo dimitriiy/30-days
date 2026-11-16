@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import type { Habit } from "../domain";
-import { habitProgress, habitReminder, habitResult, quoteNotification } from "../messages";
+import type { Habit, ReadingDose } from "../domain";
+import { habitProgress, habitReminder, habitResult, quoteNotification, readingDose, readingFinale, splitLongMessage } from "../messages";
 
 test("habit reminder contains only the title", () => {
   const habit: Habit = { id: "one", title: "Читать", startDate: "2026-06-01", reminderTime: "09:00", checkTime: "21:00", results: {} };
@@ -37,4 +37,30 @@ test("result keeps the habit title and invites correction", () => {
 test("quote notification keeps its source wording unchanged", () => {
   const quote = "Ничего не следует делать зря.";
   assert.equal(quoteNotification(quote), `💭 Мысль дня\n\n${quote}`);
+});
+
+test("reading dose shows the book, paragraph range, and dose counter", () => {
+  const dose: ReadingDose = { book: 2, from: 3, to: 4, text: "3. Первая.\n\n4. Вторая." };
+  assert.equal(
+    readingDose(dose, 7, 128),
+    "📖 «Наедине с собой»\nКнига II, §3–4 · доза 7/128\n\n3. Первая.\n\n4. Вторая.",
+  );
+  const single: ReadingDose = { ...dose, from: 3, to: 3, text: "3. Единственная." };
+  assert.match(readingDose(single, 7, 128), /Книга II, §3 · доза 7\/128/);
+});
+
+test("reading finale names the total doses", () => {
+  assert.match(readingFinale(128), /Все 128 доз пройдены/);
+});
+
+test("splitLongMessage keeps sentences intact and respects the limit", () => {
+  const short = "Короткая мысль.";
+  assert.deepEqual(splitLongMessage(short), [short]);
+  const sentence = "Стоическая мысль о том, что всё проходит. ".repeat(200).trim();
+  const parts = splitLongMessage(sentence, 3900);
+  assert.ok(parts.length > 1);
+  assert.ok(parts.every((part) => part.length <= 3900));
+  for (const part of parts) {
+    assert.ok(part.endsWith("."));
+  }
 });

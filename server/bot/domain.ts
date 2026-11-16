@@ -12,6 +12,13 @@ export interface Habit {
   lastCheckDate?: string;
 }
 
+export interface ReadingDose {
+  book: number;
+  from: number;
+  to: number;
+  text: string;
+}
+
 export interface Subscriber {
   chatId: number;
   active: boolean;
@@ -22,6 +29,7 @@ export interface Subscriber {
   draft?: { title: string; reminderTime?: string };
   pendingHabitDeletion?: { ids: string[]; requestedAt: string; token: string };
   habits: Habit[];
+  readDoses?: number;
   lastMorningDate?: string;
   lastQuoteDate?: string;
 }

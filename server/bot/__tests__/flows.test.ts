@@ -12,54 +12,7 @@ import { deliverDue, type SchedulerServices } from "../scheduler";
 import { createSubscriberStore } from "../store";
 import { BOT_COMMANDS, configureBotMenu, registerBotHandlers, type BotServices } from "../telegram";
 
-type Sent = { chatId: number; text: string; options?: unknown };
-
-class FakeBot {
-  handlers = new Map<string, (value: never) => Promise<unknown>>();
-  sent: Sent[] = [];
-  edited: Array<{ text: string; options: unknown }> = [];
-  answers: string[] = [];
-  failText?: string;
-  profileName = "Дмитрий";
-
-  on(event: string, handler: (value: never) => Promise<unknown>): this {
-    this.handlers.set(event, handler);
-    return this;
-  }
-
-  async sendMessage(chatId: number, text: string, options?: unknown): Promise<object> {
-    if (this.failText && text.includes(this.failText)) throw new Error("Telegram unavailable");
-    this.sent.push({ chatId, text, options });
-    return {};
-  }
-
-  async answerCallbackQuery(id: string): Promise<boolean> {
-    this.answers.push(id);
-    return true;
-  }
-
-  async editMessageText(text: string, options: unknown): Promise<object> {
-    this.edited.push({ text, options });
-    return {};
-  }
-
-  async getChat(): Promise<{ first_name: string }> {
-    return { first_name: this.profileName };
-  }
-
-  async message(text: string, chatId = 1, firstName?: string): Promise<void> {
-    const handler = this.handlers.get("message");
-    assert.ok(handler);
-    await handler({ text, chat: { id: chatId, type: "private" }, from: firstName ? { first_name: firstName } : undefined } as never);
-  }
-
-  async callback(data: string, chatId = 1): Promise<void> {
-    const handler = this.handlers.get("callback_query");
-    assert.ok(handler);
-    await handler({ id: "callback-id", data, message: { chat: { id: chatId, type: "private" }, message_id: 7 } } as never);
-  }
-}
-
+import { FakeBot } from "./fake-bot";
 async function setup(t: { after: (fn: () => Promise<void>) => void }) {
   const folder = await mkdtemp(path.join(tmpdir(), "mark-bot-test-"));
   t.after(() => rm(folder, { recursive: true, force: true }));
@@ -68,7 +21,7 @@ async function setup(t: { after: (fn: () => Promise<void>) => void }) {
   const bot = new FakeBot();
   let now = new Date("2026-06-01T05:00:00Z");
   let idCounter = 0;
-  const services: BotServices = { ...store, now: () => now, newId: () => (++idCounter).toString(16).padStart(6, "0") };
+  const services: BotServices = { ...store, now: () => now, newId: () => (++idCounter).toString(16).padStart(6, "0"), readingDoses: async () => [] };
   registerBotHandlers(bot as unknown as TelegramBot, services);
   const scheduler: SchedulerServices = {
     ...store,
@@ -134,7 +87,7 @@ test("native Telegram menu exposes the bot commands in private chats", async () 
   } as unknown as TelegramBot;
   await configureBotMenu(bot);
   assert.deepEqual(commands, BOT_COMMANDS);
-  assert.deepEqual(commands.map(({ command }) => command), ["start", "quote", "habit", "progress", "habits", "time", "timezone", "stop", "help"]);
+  assert.deepEqual(commands.map(({ command }) => command), ["start", "read", "quote", "habit", "progress", "habits", "time", "timezone", "stop", "help"]);
   assert.ok(commands.every(({ description }) => !/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/u.test(description)));
   assert.deepEqual(scope, { scope: { type: "all_private_chats" } });
   assert.deepEqual(menuButton, { menu_button: { type: "commands" } });

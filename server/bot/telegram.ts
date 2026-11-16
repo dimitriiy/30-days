@@ -1,7 +1,7 @@
 import { randomInt, randomUUID } from "node:crypto";
 import TelegramBot from "node-telegram-bot-api";
 
-import { dailyQuotes } from "./content";
+import { dailyQuotes, readingDoses as defaultReadingDoses } from "./content";
 import {
   DEFAULT_TIME_ZONE,
   isActiveHabit,
@@ -10,12 +10,13 @@ import {
   parseTime,
   parseTimeZone,
 } from "./domain";
-import { habitProgress, habitResult, quoteNotification } from "./messages";
+import { habitProgress, habitResult, quoteNotification, readingDose, readingFinale, splitLongMessage } from "./messages";
 import { readSubscribers as defaultReadSubscribers, updateSubscriber as defaultUpdateSubscriber } from "./store";
 
 export interface BotServices {
   readSubscribers: typeof defaultReadSubscribers;
   updateSubscriber: typeof defaultUpdateSubscriber;
+  readingDoses: typeof defaultReadingDoses;
   now: () => Date;
   newId: () => string;
 }
@@ -23,6 +24,7 @@ export interface BotServices {
 const defaultServices: BotServices = {
   readSubscribers: defaultReadSubscribers,
   updateSubscriber: defaultUpdateSubscriber,
+  readingDoses: defaultReadingDoses,
   now: () => new Date(),
   newId: randomUUID,
 };
@@ -30,6 +32,7 @@ const defaultServices: BotServices = {
 const HELP = [
   "🤖 Что умеет бот",
   "",
+  "📖 /read — следующая доза «Наедине с собой»",
   "🌅 /start — настроить утреннее сообщение",
   "💭 /quote — получить случайную цитату сейчас",
   "🎯 /habit — создать привычку на 30 дней",
@@ -44,8 +47,44 @@ const HELP = [
 
 const MAX_HABIT_TITLE_LENGTH = 180;
 
+function readingKeyboard(day: number): { inline_keyboard: Array<Array<{ text: string; callback_data: string }>> } {
+  return { inline_keyboard: [[
+    { text: "⏮ Назад", callback_data: `read:prev:${day}` },
+    { text: "💊 Доза", callback_data: "read:dose" },
+    { text: "⏭ Вперёд", callback_data: `read:next:${day}` },
+  ]] };
+}
+
+const READING_RESTART_KEYBOARD = {
+  inline_keyboard: [[{ text: "📖 Начать заново", callback_data: "read:restart" }]],
+};
+
+async function sendReadingDose(
+  bot: TelegramBot,
+  chatId: number,
+  doses: Awaited<ReturnType<BotServices["readingDoses"]>>,
+  day: number,
+): Promise<void> {
+  const parts = splitLongMessage(readingDose(doses[day - 1], day, doses.length));
+  for (const [index, part] of parts.entries()) {
+    const options = index === parts.length - 1 ? { reply_markup: readingKeyboard(day) } : undefined;
+    await bot.sendMessage(chatId, part, options);
+  }
+}
+
+async function markReadingProgress(
+  chatId: number,
+  updateSubscriber: BotServices["updateSubscriber"],
+  day: number,
+): Promise<void> {
+  await updateSubscriber(chatId, (user) => {
+    if (day > (user.readDoses ?? 0)) user.readDoses = day;
+  });
+}
+
 export const BOT_COMMANDS: Array<{ command: string; description: string }> = [
   { command: "start", description: "Настроить утренний настрой" },
+  { command: "read", description: "Читать «Наедине с собой» дозами" },
   { command: "quote", description: "Получить случайную цитату" },
   { command: "habit", description: "Создать привычку" },
   { command: "progress", description: "Посмотреть прогресс" },
@@ -103,7 +142,7 @@ async function saveTimeZone(
 }
 
 export function registerBotHandlers(bot: TelegramBot, services: BotServices = defaultServices): void {
-  const { readSubscribers, updateSubscriber, now, newId } = services;
+  const { readSubscribers, updateSubscriber, readingDoses, now, newId } = services;
 
   bot.on("message", (message) => {
     if (!message.text || message.chat.type !== "private") return;
@@ -166,6 +205,23 @@ export function registerBotHandlers(bot: TelegramBot, services: BotServices = de
       }
       if (text === "/help") {
         await bot.sendMessage(chatId, HELP);
+        return;
+      }
+      if (text === "/read") {
+        const doses = await readingDoses();
+        if (!doses.length) {
+          await bot.sendMessage(chatId, "⚠️ Книга пока недоступна. Попробуй позже.");
+          return;
+        }
+        const user = (await readSubscribers()).find((item) => item.chatId === chatId);
+        const read = user?.readDoses ?? 0;
+        if (read >= doses.length) {
+          await bot.sendMessage(chatId, readingFinale(doses.length), { reply_markup: READING_RESTART_KEYBOARD });
+          return;
+        }
+        const day = read + 1;
+        await sendReadingDose(bot, chatId, doses, day);
+        await markReadingProgress(chatId, updateSubscriber, day);
         return;
       }
       if (text === "/quote") {
@@ -413,6 +469,57 @@ export function registerBotHandlers(bot: TelegramBot, services: BotServices = de
         await bot.answerCallbackQuery(query.id);
         await saveTimeZone(bot, chatId, timeZone, updateSubscriber);
         return;
+      }
+      if (query.data?.startsWith("read:") && chatId) {
+        const [, action, argument] = query.data.split(":");
+        const doses = await readingDoses();
+        if (!doses.length) {
+          await bot.answerCallbackQuery(query.id, { text: "⚠️ Книга недоступна." });
+          return;
+        }
+        const total = doses.length;
+        const user = (await readSubscribers()).find((item) => item.chatId === chatId);
+        const read = user?.readDoses ?? 0;
+        if (action === "restart") {
+          await sendReadingDose(bot, chatId, doses, 1);
+          await updateSubscriber(chatId, (user) => { user.readDoses = 1; });
+          await bot.answerCallbackQuery(query.id, { text: "📖 Доза 1" });
+          return;
+        }
+        if (action === "dose") {
+          if (read >= total) {
+            await bot.answerCallbackQuery(query.id, { text: "🏛 Книга уже дочитана." });
+            return;
+          }
+          const day = read + 1;
+          await sendReadingDose(bot, chatId, doses, day);
+          await markReadingProgress(chatId, updateSubscriber, day);
+          await bot.answerCallbackQuery(query.id, { text: `💊 Доза ${day}` });
+          return;
+        }
+        if (action === "prev" || action === "next") {
+          const day = Number(argument);
+          if (!Number.isInteger(day) || day < 1 || day > total) return;
+          if (action === "prev") {
+            if (day <= 1) {
+              await bot.answerCallbackQuery(query.id, { text: "🏛 Это уже начало книги." });
+              return;
+            }
+            await sendReadingDose(bot, chatId, doses, day - 1);
+            await bot.answerCallbackQuery(query.id, { text: `⏮ Доза ${day - 1}` });
+            return;
+          }
+          if (day >= total) {
+            await bot.sendMessage(chatId, readingFinale(total), { reply_markup: READING_RESTART_KEYBOARD });
+            await bot.answerCallbackQuery(query.id, { text: "🏛 Финал книги." });
+            return;
+          }
+          const next = day + 1;
+          await sendReadingDose(bot, chatId, doses, next);
+          await markReadingProgress(chatId, updateSubscriber, next);
+          await bot.answerCallbackQuery(query.id, { text: `⏭ Доза ${next}` });
+          return;
+        }
       }
       const match = /^habit:([a-f0-9-]+):(\d{4}-\d{2}-\d{2}):(yes|no)$/.exec(
         query.data ?? "",
