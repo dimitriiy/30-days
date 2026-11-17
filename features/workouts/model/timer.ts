@@ -10,9 +10,9 @@ export type TimerPhase = {
 // Exact phase boundaries for workouts whose formats change mid-session.
 const mixed: Record<number, TimerPhase[]> = {
   1: [
-    { label: "EMOM · подводка", seconds: 480, interval: 60 },
-    { label: "Отдых", seconds: 120 },
     { label: "AMRAP · тест DT", seconds: 600 },
+    { label: "Отдых", seconds: 120 },
+    { label: "EMOM · добивка", seconds: 480, interval: 60 },
   ],
   3: [
     { label: "E2MOM · сила", seconds: 480, interval: 120 },
@@ -57,9 +57,9 @@ const mixed: Record<number, TimerPhase[]> = {
     { label: "EMOM · стабилизация", seconds: 240, interval: 60 },
   ],
   29: [
-    { label: "EMOM · подводка", seconds: 480, interval: 60 },
-    { label: "Отдых", seconds: 120 },
     { label: "AMRAP · тест DT", seconds: 600 },
+    { label: "Отдых", seconds: 120 },
+    { label: "EMOM · добивка", seconds: 480, interval: 60 },
   ],
 };
 

@@ -43,14 +43,14 @@ test("timer phases cover each WOD and switch at exact boundaries", () => {
     assert.equal(phases.reduce((seconds, phase) => seconds + phase.seconds, 0), workout.duration * 60, `workout ${workout.id}`);
   }
   const phases = timerPhases(getWorkouts()[0]);
-  assert.equal(timerPosition(phases, 479).round, 8);
-  assert.equal(timerPosition(phases, 50).roundRemaining, 10);
-  assert.equal(timerPosition(phases, 60).roundRemaining, 60);
-  assert.equal(timerPosition(phases, 480).phase.label, "Отдых");
-  assert.equal(timerPosition(phases, 600).phase.label, "AMRAP · тест DT");
+  assert.equal(timerPosition(phases, 479).phase.label, "AMRAP · тест DT");
+  assert.equal(timerPosition(phases, 600).phase.label, "Отдых");
+  assert.equal(timerPosition(phases, 720).phase.label, "EMOM · добивка");
+  assert.equal(timerPosition(phases, 720).round, 1);
+  assert.equal(timerPosition(phases, 770).roundRemaining, 10);
   assert.equal(timerPosition(phases, 1200).remaining, 0);
   assert.equal(timerPosition(phases, 1200).roundRemaining, 0);
-  assert.deepEqual(warningTimes(phases).slice(0, 2), [50, 110]);
+  assert.deepEqual(warningTimes(phases).slice(0, 2), [590, 770]);
   assert.equal(warningTimes(phases).at(-1), 1190);
   const tabata = timerPhases(getWorkouts()[4]);
   assert.equal(timerPosition(tabata, 19).segment, "Работа");
