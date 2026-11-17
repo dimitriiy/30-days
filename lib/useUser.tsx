@@ -1,7 +1,6 @@
 "use client";
 
 import { computed, withAsyncData } from "@reatom/core";
-import { reatomComponent } from "@reatom/react";
 import { httpGet, HttpError } from "./api";
 
 

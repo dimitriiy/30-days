@@ -56,15 +56,14 @@ const GlassSkeleton = React.forwardRef<HTMLDivElement, GlassSkeletonProps>(
       )
     }
 
+    const { onDrag, onDragStart, onDragEnd, onAnimationStart, ...motionProps } = props
+    void [onDrag, onDragStart, onDragEnd, onAnimationStart]
+
     return (
       <motion.div
         ref={ref}
         className={cn(baseClasses, variantClasses[variant], className)}
-        // Ensure onDrag prop is not forwarded to motion.div
-        {...(() => {
-          const { onDrag, ...rest } = props as any // eslint-disable-line @typescript-eslint/no-explicit-any
-          return rest
-        })()}
+        {...motionProps}
         style={{
           width,
           height,
@@ -81,7 +80,6 @@ const GlassSkeleton = React.forwardRef<HTMLDivElement, GlassSkeletonProps>(
         aria-hidden="true"
         role="status"
         aria-label="Loading..."
-        {...props}
       />
     )
   },

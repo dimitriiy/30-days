@@ -131,13 +131,13 @@ export function categorySpendingBuckets(outflows: Transaction[], buckets: { labe
   const hasTransfers = outflows.some((item) => item.isTransfer);
   const names = [...topCategories, ...(hasOther ? ["Остальное"] : []), ...(hasTransfers ? ["Переводы"] : [])];
   const data = buckets.map((bucket) => {
-    const values: Record<string, number> = {};
+    const values: Partial<Record<`category${number}`, number>> = {};
     for (const item of expensesForBucket(outflows, bucket)) {
       const index = item.isTransfer ? names.length - 1 : topCategories.includes(item.category) ? topCategories.indexOf(item.category) : topCategories.length;
-      const key = `category${index}`;
+      const key = `category${index}` as const;
       values[key] = (values[key] ?? 0) - item.amount;
     }
-    return { ...bucket, ...values };
+    return { ...bucket, ...values } as typeof bucket & typeof values;
   });
   return { names, data };
 }

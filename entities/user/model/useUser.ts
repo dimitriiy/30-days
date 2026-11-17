@@ -4,7 +4,6 @@ import { computed, withAsyncData } from "@reatom/core";
 import { useAtom } from "@reatom/react";
 import { httpGet } from "@/lib/api";
 import type { User } from "./types";
-import { isError } from "util";
 
 type UserResponse = { data: User };
 type ErrorResponse = { error: string };

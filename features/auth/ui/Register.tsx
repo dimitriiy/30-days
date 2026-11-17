@@ -1,45 +1,21 @@
 "use client";
 
-import { GlassButton as Button } from "@/components/ui/glass-button";
-import { GlassInput as Input } from "@/components/ui/glass-input";
 import Link from "next/link";
-import React, { useState } from "react";
+import { useState } from "react";
+import { Activity, ArrowRight, Dumbbell } from "lucide-react";
 
-interface RegisterData {
-  email: string;
-  password: string;
-  username: string;
-}
+type RegisterData = { email: string; password: string; username: string };
 
-interface RegisterResponse {
-  message: string;
-  user: {
-    id: number;
-    email: string;
-    username: string;
-  };
-}
-
-interface RegisterError {
-  error: string;
-}
-
-// Отдельная функция для регистрации
-async function registerUser(data: RegisterData): Promise<RegisterResponse> {
+async function registerUser(data: RegisterData): Promise<void> {
   const response = await fetch("/api/auth/register", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
-
   if (!response.ok) {
-    const errorData: RegisterError = await response.json();
-    throw new Error(errorData.error || "Ошибка регистрации");
+    const errorData = await response.json();
+    throw new Error(errorData.message || errorData.error || "Ошибка регистрации");
   }
-
-  return response.json();
 }
 
 export function Register() {
@@ -50,134 +26,37 @@ export function Register() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setError("");
-    setSuccess(false);
-
     setIsLoading(true);
-
     try {
-      const result = await registerUser({ email, password, username });
+      await registerUser({ email, password, username });
       setSuccess(true);
-      console.log("Регистрация успешна:", result.user);
-
-      // Очищаем форму после успешной регистрации
-      setEmail("");
-      setPassword("");
-      setUsername("");
-
-      // Редирект или показываем сообщение о успехе
-      // Например: window.location.href = '/login';
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Неизвестная ошибка");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Неизвестная ошибка");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="glass-bg flex items-center justify-center min-h-screen">
-      <div className="flex flex-1 flex-col justify-center px-4 py-10 lg:px-6">
-        <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-          <h2 className="text-center text-2xl font-bold text-white mb-2">
-            Создать аккаунт
-          </h2>
-          <p className="text-center text-sm text-white/60">
-            Введите свои данные для регистрации
-          </p>
-
-          {success && (
-            <div className="mt-6 p-4 bg-emerald-500/20 backdrop-blur-xl border border-emerald-400/30 rounded-lg">
-              <p className="text-sm font-bold text-white text-emerald-100">
-                ✓ Регистрация успешна! Вы можете войти в аккаунт.
-              </p>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="mt-6 space-y-5">
-            <div>
-              <label
-                htmlFor="email"
-                className="text-sm font-bold text-white text-white"
-              >
-                Email
-              </label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value.trim())}
-                autoComplete="email"
-                placeholder="вы@example.com"
-                disabled={isLoading}
-                className="mt-2"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="username"
-                className="text-sm font-bold text-white text-white"
-              >
-                Никнейм
-              </label>
-              <Input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value.trim())}
-                placeholder="Ваш никнейм"
-                disabled={isLoading}
-                className="mt-2"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="password"
-                className="text-sm font-bold text-white text-white"
-              >
-                Пароль
-              </label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="new-password"
-                placeholder="Минимум 6 символов"
-                disabled={isLoading}
-                className="mt-2"
-              />
-            </div>
-
-            {error && (
-              <div className="p-3 bg-red-500/20 backdrop-blur-xl border border-red-400/30 rounded-lg">
-                <p className="text-sm text-red-100">⚠️ {error}</p>
-              </div>
-            )}
-
-            <Button
-              type="submit"
-              className="mt-4 w-full py-2 font-medium"
-              disabled={isLoading || !email || !password || !username}
-            >
-              {isLoading ? "Создание аккаунта..." : "Зарегистрироваться"}
-            </Button>
-          </form>
-
-          <p className="mt-6 text-sm text-white/60 text-center">
-            Уже есть аккаунт?{" "}
-            <Link
-              href="/login"
-              className="font-medium text-cyan-300 hover:text-cyan-300/90 transition-colors"
-            >
-              Войти
-            </Link>
-          </p>
-        </div>
+    <main className="workouts-theme flex min-h-dvh items-center justify-center bg-[var(--workout-bg)] px-5 py-10 text-[var(--workout-text)]">
+      <div className="w-full max-w-md">
+        <Link href="/" className="inline-flex items-center gap-3 text-base font-bold"><span className="grid size-11 place-items-center rounded-2xl bg-[var(--workout-accent)] text-[var(--workout-on-accent)]"><Activity size={24} strokeWidth={2.5} /></span>30 DAYS <span className="text-[var(--workout-accent)]">/</span> WOD</Link>
+        <div className="mt-10 grid size-16 place-items-center rounded-[20px] bg-[var(--workout-accent)] text-[var(--workout-on-accent)]"><Dumbbell size={30} /></div>
+        <p className="mt-7 text-xs font-bold uppercase tracking-[0.22em] text-[var(--workout-accent)]">Начни движение</p>
+        <h1 className="mt-3 text-4xl font-extrabold tracking-tight">Твой первый шаг.</h1>
+        <p className="mt-3 text-sm text-[var(--workout-muted)]">Создай аккаунт и сохраняй свой прогресс.</p>
+        {success ? <div role="status" className="mt-8 rounded-[28px] border border-[var(--workout-accent-border)] bg-[var(--workout-surface)] p-6"><p className="font-semibold">Аккаунт создан!</p><Link href="/login" className="mt-4 inline-flex items-center gap-2 text-[var(--workout-accent)]">Войти <ArrowRight size={18} /></Link></div> : <form onSubmit={handleSubmit} className="mt-8 space-y-5 rounded-[28px] border border-[var(--workout-border)] bg-[var(--workout-surface)] p-6">
+          <div><label htmlFor="email" className="text-sm font-semibold">Электронная почта</label><input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value.trim())} autoComplete="email" placeholder="you@example.com" required disabled={isLoading} className="mt-2 h-14 w-full rounded-2xl border border-[var(--workout-border)] bg-[var(--workout-card)] px-4 text-base outline-none placeholder:text-[var(--workout-muted)] focus:border-[var(--workout-accent)]" /></div>
+          <div><label htmlFor="username" className="text-sm font-semibold">Имя</label><input id="username" type="text" value={username} onChange={(event) => setUsername(event.target.value.trim())} placeholder="Как к вам обращаться?" required disabled={isLoading} className="mt-2 h-14 w-full rounded-2xl border border-[var(--workout-border)] bg-[var(--workout-card)] px-4 text-base outline-none placeholder:text-[var(--workout-muted)] focus:border-[var(--workout-accent)]" /></div>
+          <div><label htmlFor="password" className="text-sm font-semibold">Пароль</label><input id="password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="new-password" placeholder="Минимум 6 символов" minLength={6} required disabled={isLoading} className="mt-2 h-14 w-full rounded-2xl border border-[var(--workout-border)] bg-[var(--workout-card)] px-4 text-base outline-none placeholder:text-[var(--workout-muted)] focus:border-[var(--workout-accent)]" /></div>
+          {error && <p role="alert" className="rounded-xl bg-[var(--workout-error-bg)] p-3 text-sm text-[var(--workout-error)]">{error}</p>}
+          <button type="submit" disabled={isLoading} className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[var(--workout-accent)] font-bold text-[var(--workout-on-accent)] disabled:opacity-50">{isLoading ? "Создаём…" : "Зарегистрироваться"}<ArrowRight size={19} /></button>
+        </form>}
+        <p className="mt-7 text-center text-sm text-[var(--workout-muted)]">Уже есть аккаунт? <Link href="/login" className="font-semibold text-[var(--workout-accent)]">Войти</Link></p>
       </div>
-    </div>
+    </main>
   );
 }

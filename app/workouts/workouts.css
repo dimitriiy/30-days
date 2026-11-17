@@ -1,0 +1,43 @@
+:root {
+  --workout-bg: #0b0909;
+  --workout-surface: #242424;
+  --workout-sheet: #171717;
+  --workout-card: #292929;
+  --workout-handle: #52525b;
+  --workout-chip: #383838;
+  --workout-hover: #313131;
+  --workout-nav: #111111ed;
+  --workout-accent: #c7f500;
+  --workout-accent-border: #c7f50033;
+  --workout-on-accent: #090909;
+  --workout-text: #ffffff;
+  --workout-muted: #a1a1aa;
+  --workout-detail: #d4d4d8;
+  --workout-border: #ffffff1a;
+  --workout-ring: #414141;
+  --workout-overlay: #000000bf;
+  --workout-error: #fda4af;
+  --workout-error-bg: #88133766;
+}
+
+[data-vaul-drawer] [data-vaul-handle] {
+  background: var(--workout-handle);
+  width: 3rem;
+  height: .375rem;
+  margin-top: .75rem;
+}
+
+/* Vaul disables desktop selection while dragging; only the handle should drag. */
+[data-vaul-drawer] .workout-selectable,
+[data-vaul-drawer] .workout-markdown,
+[data-vaul-drawer] .workout-markdown * { user-select: text; }
+
+.workout-markdown p { margin: 0.75rem 0; }
+.workout-markdown ul, .workout-markdown ol { padding-left: 1.4rem; margin: 0.75rem 0; }
+.workout-markdown ul { list-style: disc; }
+.workout-markdown ol { list-style: decimal; }
+.workout-markdown li { margin: 0.3rem 0; padding-left: 0.2rem; }
+.workout-markdown strong { color: var(--workout-text); }
+.workout-markdown a { color: var(--workout-accent); text-decoration: underline; overflow-wrap: anywhere; }
+.workout-markdown table { display: block; max-width: 100%; overflow-x: auto; }
+.workout-markdown th, .workout-markdown td { border: 1px solid var(--workout-border); padding: 0.5rem; }

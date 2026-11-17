@@ -154,33 +154,3 @@
 .capitalize {
   text-transform: capitalize;
 }
-
-/* Ein UI liquid-glass components render white text/borders, they need a
-   colorful backdrop (not a plain white/black page bg) to be visible. */
-.glass-bg {
-  background: linear-gradient(
-    135deg,
-    #6d4fe0 0%,
-    #4c3bc9 30%,
-    #2f3ba8 60%,
-    #16204f 100%
-  );
-}
-
-
-.sprite-animation {
-  width: 150px;
-  height: 300px;
-  object-fit: cover;
-  animation: sprite 1.4s steps(4, jump-none) infinite;
-}
-
-@keyframes sprite {
-  from {
-    object-position: 0% 0%;
-  }
-
-  to {
-    object-position: 100% 0%;
-  }
-}

@@ -1,13 +1,10 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-//@ts-nocheck
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
+import type { Session } from "@/entities/user/model/types";
 import { validateSession } from "./login/session";
-
-type SessionData = { userId: string; name: string; [key: string]: unknown };
 
 type AuthedHandler = (
   req: NextRequest,
-  session: SessionData,
+  session: Session,
 ) => Promise<NextResponse> | NextResponse;
 
 export function withAuth(handler: AuthedHandler) {
@@ -15,10 +12,9 @@ export function withAuth(handler: AuthedHandler) {
     const result = await validateSession();
 
     if (!result) {
-      return NextResponse.json({ error: result }, { status: 401 });
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    // Вызываем оригинальный handler, пробрасывая session
     return handler(req, result);
   };
 }

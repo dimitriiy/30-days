@@ -49,8 +49,6 @@ export default function TextPage() {
     });
   };
 
-  const activePage = pages.find((p) => String(p.id) === activePageId);
-
   if (pages.length === 0) {
     return (
       <main className="dark flex min-h-screen items-center justify-center bg-background text-foreground">

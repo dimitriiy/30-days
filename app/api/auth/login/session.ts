@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 
+import { isSessionActive } from "@/server/application/user/sessionFactory";
 import { ensureJsonStore } from "@/server/infrastructure/persistence/json/json-store";
 import { jsonSessionRepository } from "@/server/infrastructure/repositories/user/JsonSessionRepository";
 
@@ -17,5 +18,6 @@ export async function validateSession() {
   if (!token) return null;
 
   await ensureJsonStore();
-  return jsonSessionRepository.findByToken(token);
+  const session = await jsonSessionRepository.findByToken(token);
+  return isSessionActive(session) ? session : null;
 }
