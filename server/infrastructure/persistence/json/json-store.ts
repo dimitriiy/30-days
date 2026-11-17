@@ -2,20 +2,18 @@ import path from "path";
 
 import { JSONFilePreset } from "lowdb/node";
 
-import type { Session, User } from "@/entities/user/model/types";
+import type { User } from "@/entities/user/model/types";
 
 export const DB_PATH = path.join(process.cwd(), "db.json");
 
 interface Data {
   users: Record<string, User>;
-  sessions: Record<string, Session>;
   subscribers: number[];
   workoutProgress?: Record<string, Record<string, { done: boolean; comment: string }>>;
 }
 
 const defaultData: Data = {
   users: {},
-  sessions: {},
   subscribers: [],
   workoutProgress: {},
 };

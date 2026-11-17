@@ -1,4 +1,4 @@
-import type { Workout, WorkoutFormat } from "@/server/workouts/program";
+import type { WorkoutFormat } from "@/server/workouts/program";
 
 export type TimerPhase = {
   label: string;
@@ -6,95 +6,6 @@ export type TimerPhase = {
   interval?: number;
   workSeconds?: number;
 };
-
-// Exact phase boundaries for workouts whose formats change mid-session.
-const mixed: Record<number, TimerPhase[]> = {
-  1: [
-    { label: "AMRAP · тест DT", seconds: 600 },
-    { label: "Отдых", seconds: 120 },
-    { label: "EMOM · добивка", seconds: 480, interval: 60 },
-  ],
-  3: [
-    { label: "E2MOM · сила", seconds: 480, interval: 120 },
-    { label: "Отдых", seconds: 120 },
-    { label: "For Time · Элизабет", seconds: 480 },
-    { label: "EMOM · кор", seconds: 180, interval: 60 },
-  ],
-  8: [
-    { label: "For Time · жим и тяга", seconds: 540 },
-    { label: "Отдых", seconds: 120 },
-    { label: "AMRAP · финиш", seconds: 540 },
-  ],
-  13: [
-    { label: "AMRAP · лестница", seconds: 900 },
-    { label: "Отдых", seconds: 60 },
-    { label: "EMOM · кор", seconds: 240, interval: 60 },
-  ],
-  15: [
-    { label: "For Time · Диана", seconds: 480 },
-    { label: "Отдых", seconds: 120 },
-    { label: "AMRAP · пляж", seconds: 600 },
-  ],
-  16: [
-    { label: "EMOM · тяги", seconds: 720, interval: 60 },
-    { label: "AMRAP · жим", seconds: 240 },
-    { label: "Отдых", seconds: 60 },
-    { label: "EMOM · кор", seconds: 180, interval: 60 },
-  ],
-  18: [
-    { label: "For Time · Open 24.1", seconds: 900 },
-    { label: "Отдых", seconds: 120 },
-    { label: "EMOM · кор", seconds: 240, interval: 60 },
-  ],
-  23: [
-    { label: "For Time · Тамилсон", seconds: 960 },
-    { label: "Отдых", seconds: 60 },
-    { label: "EMOM · марш", seconds: 180, interval: 60 },
-  ],
-  25: [
-    { label: "For Time · Нэнси", seconds: 900 },
-    { label: "Отдых", seconds: 60 },
-    { label: "EMOM · стабилизация", seconds: 240, interval: 60 },
-  ],
-  29: [
-    { label: "AMRAP · тест DT", seconds: 600 },
-    { label: "Отдых", seconds: 120 },
-    { label: "EMOM · добивка", seconds: 480, interval: 60 },
-  ],
-};
-
-export function timerPhases(workout: Workout): TimerPhase[] {
-  if (mixed[workout.id]) return mixed[workout.id];
-  if (workout.id === 11)
-    return [{ label: "Push / Pull · 4 круга", seconds: 1200, interval: 300, workSeconds: 240 }];
-  if (workout.id === 5)
-    return [
-      ...Array.from({ length: 4 }, (_, index) => [
-        {
-          label: `Табата · блок ${index + 1}`,
-          seconds: 240,
-          interval: 30,
-          workSeconds: 20,
-        },
-        ...(index < 3 ? [{ label: "Отдых", seconds: 60 }] : []),
-      ]).flat(),
-      { label: "Ягодичный мост", seconds: 60 },
-    ];
-  const intervals: Partial<Record<WorkoutFormat, number>> = {
-    EMOM: 60,
-    E2MOM: 120,
-    E3MOM: 180,
-  };
-  return [
-    {
-      label:
-        workout.format === "FOR TIME" ? "Время выполнения" : workout.format,
-      seconds: workout.duration * 60,
-      interval: workout.id === 21 ? 60 : intervals[workout.format],
-      workSeconds: workout.id === 21 ? 40 : undefined,
-    },
-  ];
-}
 
 export function warningTimes(phases: TimerPhase[]): number[] {
   const times: number[] = [];
@@ -109,6 +20,29 @@ export function warningTimes(phases: TimerPhase[]): number[] {
     offset += phase.seconds;
   }
   return times;
+}
+
+export function audioCueTimes(warnings: number[], total: number, from: number) {
+  return [
+    { finish: false, delay: 0.05 }, // Audible confirmation that sound is enabled.
+    ...warnings.filter((warning) => warning > from).map((warning) => ({ finish: false, delay: warning - from })),
+    { finish: true, delay: total - from },
+  ];
+}
+
+export function elapsedSeconds(startedAt: number, now: number, total: number): number {
+  return Math.min(total, Math.max(0, Math.floor((now - startedAt) / 1000)));
+}
+
+export function timerReadout(phases: TimerPhase[], elapsed: number, format: WorkoutFormat) {
+  const position = timerPosition(phases, elapsed);
+  const { phase, remaining, roundRemaining } = position;
+  const total = phases.reduce((sum, item) => sum + item.seconds, 0);
+  const countUp = format === "FOR TIME" || phase.label.startsWith("For Time");
+  const display = phase.interval ? roundRemaining
+    : phases.length > 1 ? countUp ? phase.seconds - remaining : remaining
+    : countUp ? elapsed : total - elapsed;
+  return { ...position, countUp, display };
 }
 
 export function timerPosition(phases: TimerPhase[], elapsed: number) {

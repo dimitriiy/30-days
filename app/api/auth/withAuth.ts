@@ -1,20 +1,26 @@
 import { type NextRequest, NextResponse } from "next/server";
-import type { Session } from "@/entities/user/model/types";
-import { validateSession } from "./login/session";
+import { cookies } from "next/headers";
+import { verifyToken } from "@/server/application/user/token";
+import { AUTH_TOKEN_KEY } from "./consts";
+
+export async function validateAuth(): Promise<number | null> {
+  const token = (await cookies()).get(AUTH_TOKEN_KEY)?.value;
+  return token ? verifyToken(token) : null;
+}
 
 type AuthedHandler = (
   req: NextRequest,
-  session: Session,
+  userId: number,
 ) => Promise<NextResponse> | NextResponse;
 
 export function withAuth(handler: AuthedHandler) {
   return async (req: NextRequest) => {
-    const result = await validateSession();
+    const userId = await validateAuth();
 
-    if (!result) {
+    if (userId === null) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    return handler(req, result);
+    return handler(req, userId);
   };
 }

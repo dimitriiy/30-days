@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { Activity, ArrowRight, Check, ChevronRight, Clock3, Infinity as InfinityIcon, Layers3, ListChecks, LogOut, Repeat2, Timer } from "lucide-react";
@@ -8,6 +8,7 @@ import { Activity, ArrowRight, Check, ChevronRight, Clock3, Infinity as Infinity
 import { httpGet, httpPut } from "@/lib/api";
 import { useAuth } from "@/features/auth/model/useAuth";
 import type { Workout, WorkoutFormat } from "@/server/workouts/program";
+import { enqueueSave } from "../model/save-queue";
 const WorkoutSheet = dynamic(() => import("./workout-sheet").then((module) => module.WorkoutSheet));
 
 type Progress = { done: boolean; comment: string };
@@ -33,6 +34,7 @@ export function WorkoutsDashboard({ workouts }: { workouts: Workout[] }) {
   const [loading, setLoading] = useState(true);
   const [loadFailed, setLoadFailed] = useState(false);
   const [saving, setSaving] = useState(false);
+  const pendingSave = useRef<Promise<unknown>>(Promise.resolve());
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -42,21 +44,25 @@ export function WorkoutsDashboard({ workouts }: { workouts: Workout[] }) {
       .finally(() => setLoading(false));
   }, []);
 
-  const save = async (value: Progress): Promise<boolean> => {
-    if (!selected || saving || loadFailed) return false;
+  const save = (value: Progress): Promise<boolean> => {
+    if (!selected || loadFailed) return Promise.resolve(false);
     const id = selected.id;
-    setSaving(true);
-    setError("");
-    try {
-      const saved = await httpPut<Progress>("/api/workouts/progress", { id, ...value });
-      setProgress((previous) => ({ ...previous, [id]: saved }));
-      return true;
-    } catch {
-      setError("Не удалось сохранить. Попробуйте ещё раз.");
-      return false;
-    } finally {
-      setSaving(false);
-    }
+    const queued = enqueueSave(pendingSave.current, async () => {
+      setSaving(true);
+      setError("");
+      try {
+        const saved = await httpPut<Progress>("/api/workouts/progress", { id, ...value });
+        setProgress((previous) => ({ ...previous, [id]: saved }));
+        return true;
+      } catch {
+        setError("Не удалось сохранить. Попробуйте ещё раз.");
+        return false;
+      } finally {
+        setSaving(false);
+      }
+    });
+    pendingSave.current = queued;
+    return queued;
   };
 
   const done = workouts.filter((workout) => progress[workout.id]?.done).length;

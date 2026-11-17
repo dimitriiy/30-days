@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
-import { SESSION_TOKEN_KEY } from "./app/api/auth/consts";
+import { AUTH_TOKEN_KEY } from "./app/api/auth/consts";
 
 const publicPaths = ["/api/"];
 
@@ -23,10 +23,10 @@ export async function proxy(request: NextRequest) {
   }
 
   const store = await cookies();
-  const cooka = store.get(SESSION_TOKEN_KEY);
+  const cooka = store.get(AUTH_TOKEN_KEY);
 
   if (!cooka?.value) {
-    store.delete(SESSION_TOKEN_KEY);
+    store.delete(AUTH_TOKEN_KEY);
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 

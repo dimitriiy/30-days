@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Pause, Play, RotateCcw, Timer, Volume2, VolumeX } from "lucide-react";
+import { memo } from "react";
+import { Minimize2, Maximize2, Pause, Play, RotateCcw, Timer, Volume2, VolumeX } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 import type { Workout } from "@/server/workouts/program";
-import { timerPhases, timerPosition, warningTimes } from "../model/timer";
+import { useWorkoutTimer } from "./use-workout-timer";
 
 const clock = (seconds: number) =>
   `${Math.floor(seconds / 60)
@@ -13,119 +15,40 @@ const clock = (seconds: number) =>
     .toString()
     .padStart(2, "0")}`;
 
-function scheduleSignal(context: AudioContext, finish: boolean, at: number): OscillatorNode[] {
-  return (finish ? [660, 990] : [880]).map((frequency, index) => {
-    const start = at + index * 0.2;
-    const oscillator = context.createOscillator();
-    const gain = context.createGain();
-    oscillator.type = "sine";
-    oscillator.frequency.value = frequency;
-    gain.gain.setValueAtTime(0.08, start);
-    gain.gain.exponentialRampToValueAtTime(0.001, start + 0.16);
-    oscillator.connect(gain);
-    gain.connect(context.destination);
-    oscillator.start(start);
-    oscillator.stop(start + 0.16);
-    return oscillator;
-  });
-}
+const PhaseContent = memo(function PhaseContent({ label, content }: { label: string; content: string }) {
+  return <><h3 className="text-lg font-semibold text-[var(--workout-text)]">{label}</h3><ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown></>;
+});
 
-export function WorkoutTimer({ workout }: { workout: Workout }) {
-  const phases = useMemo(() => timerPhases(workout), [workout]);
-  const warnings = useMemo(() => warningTimes(phases), [phases]);
-  const total = phases.reduce((sum, phase) => sum + phase.seconds, 0);
-  const [elapsed, setElapsed] = useState(0);
-  const [running, setRunning] = useState(false);
-  const [startedAt, setStartedAt] = useState<number | null>(null);
-  const [soundOn, setSoundOn] = useState(true);
-  const audio = useRef<AudioContext | null>(null);
-  const scheduled = useRef<OscillatorNode[]>([]);
-
-  const stopAudio = () => {
-    for (const oscillator of scheduled.current) {
-      try { oscillator.stop(); } catch { /* Already finished. */ }
-    }
-    scheduled.current = [];
-  };
-
-  // Scheduling on the audio clock keeps the cues accurate if JS timers are throttled.
-  const startAudio = (from: number) => {
-    try {
-      audio.current ??= new AudioContext();
-      void audio.current.resume().catch(() => {});
-      stopAudio();
-      const context = audio.current;
-      for (const warning of warnings) {
-        if (warning > from) scheduled.current.push(...scheduleSignal(context, false, context.currentTime + warning - from));
-      }
-      scheduled.current.push(...scheduleSignal(context, true, context.currentTime + total - from));
-    } catch {
-      // Timer continues silently if sound is unavailable.
-    }
-  };
-
-  useEffect(() => () => {
-    for (const oscillator of scheduled.current) {
-      try { oscillator.stop(); } catch { /* Already finished. */ }
-    }
-    void audio.current?.close();
-  }, []);
-
-  useEffect(() => {
-    if (!running || startedAt === null) return;
-    const tick = () => {
-      const next = Math.min(total, Math.floor((Date.now() - startedAt) / 1000));
-      setElapsed(next);
-      if (next >= total) setRunning(false);
-    };
-    const id = window.setInterval(tick, 250);
-    tick();
-    return () => window.clearInterval(id);
-  }, [running, startedAt, total]);
-
-  const toggle = () => {
-    if (running) {
-      stopAudio();
-      setRunning(false);
-    } else if (elapsed < total) {
-      if (soundOn) startAudio(elapsed);
-      setStartedAt(Date.now() - elapsed * 1000);
-      setRunning(true);
-    }
-  };
-  const reset = () => {
-    stopAudio();
-    setRunning(false);
-    setStartedAt(null);
-    setElapsed(0);
-  };
-  const { phase, index, remaining, round, roundRemaining, segment, segmentRemaining } =
-    timerPosition(phases, elapsed);
-  const countUp = workout.format === "FOR TIME" || phase.label.startsWith("For Time");
-  const display = phase.interval ? roundRemaining
-    : phases.length > 1 ? countUp ? phase.seconds - remaining : remaining
-    : countUp ? elapsed : total - elapsed;
+export function WorkoutTimer({ workout, fullScreen, onFullScreenChange }: {
+  workout: Workout;
+  fullScreen: boolean;
+  onFullScreenChange: (value: boolean) => void;
+}) {
+  const { elapsed, running, soundOn, phases, total, readout, toggle, reset, toggleSound } = useWorkoutTimer(workout);
+  const { phase, index, remaining, round, segment, segmentRemaining, countUp, display } = readout;
 
   return (
     <section
-      className="rounded-[28px] border border-[var(--workout-accent-border)] bg-[var(--workout-surface)] p-5 text-center"
+      className={fullScreen ? "flex min-h-0 flex-1 flex-col overflow-hidden bg-[var(--workout-sheet)] text-center sm:flex-row" : "rounded-[28px] border border-[var(--workout-accent-border)] bg-[var(--workout-surface)] p-5 text-center"}
       aria-label="Таймер тренировки"
     >
+      <div className={fullScreen ? "flex h-[55%] shrink-0 flex-col justify-center px-3 pt-[env(safe-area-inset-top)] sm:h-full sm:w-1/2 sm:px-6" : ""}>
       <div className="flex items-center justify-center gap-2 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--workout-accent)]">
         <Timer size={17} /> Таймер WOD
+        <button type="button" onClick={() => onFullScreenChange(!fullScreen)} aria-label={fullScreen ? "Свернуть таймер" : "Развернуть таймер на весь экран"} className="ml-2 grid size-10 place-items-center rounded-xl bg-[var(--workout-chip)] text-[var(--workout-text)]">
+          {fullScreen ? <Minimize2 size={19} /> : <Maximize2 size={19} />}
+        </button>
       </div>
       <div
-        className="mx-auto my-5 grid size-52 place-items-center rounded-full p-2"
-        style={{
-          background: `conic-gradient(var(--workout-accent) ${(elapsed / total) * 100}%, var(--workout-ring) 0)`,
-        }}
+        className={fullScreen ? "mx-auto my-1 grid size-[min(29dvh,15rem)] place-items-center rounded-full p-2 sm:size-[min(40dvh,calc(50vw-3rem),22rem)]" : "mx-auto my-5 grid size-52 place-items-center rounded-full p-2"}
+        style={{ background: `conic-gradient(var(--workout-accent) ${(elapsed / total) * 100}%, var(--workout-ring) 0)` }}
       >
         <div className="flex size-full flex-col items-center justify-center rounded-full bg-[var(--workout-surface)]">
           <span className="text-xs uppercase tracking-widest text-[var(--workout-muted)]">
             {elapsed >= total ? "Готово" : phase.label}
           </span>
           <span
-            className="mt-1 font-mono text-5xl font-bold tabular-nums tracking-tight text-[var(--workout-text)]"
+            className={`mt-1 font-mono text-5xl font-bold tabular-nums tracking-tight text-[var(--workout-text)] ${fullScreen ? "sm:text-6xl" : ""}`}
             role="timer"
             aria-label={`${countUp ? "Прошло" : "Осталось"} ${clock(display)}`}
           >
@@ -155,26 +78,22 @@ export function WorkoutTimer({ workout }: { workout: Workout }) {
           </span>
         )}
       </div>
-      <div className="mt-3 flex gap-3">
+      <div className={fullScreen ? "mx-auto mt-1 flex w-full max-w-xl gap-2" : "mt-3 flex gap-3"}>
         <button
           type="button"
           onClick={toggle}
           disabled={elapsed >= total}
-          className="flex h-14 flex-1 items-center justify-center gap-2 rounded-2xl bg-[var(--workout-accent)] font-bold text-[var(--workout-on-accent)] disabled:opacity-50"
+          className={`${fullScreen ? "h-12" : "h-14"} flex flex-1 items-center justify-center gap-2 rounded-2xl bg-[var(--workout-accent)] font-bold text-[var(--workout-on-accent)] disabled:opacity-50`}
         >
-          {running ? (
-            <Pause size={21} />
-          ) : (
-            <Play size={21} fill="currentColor" />
-          )}
+          {running ? <Pause size={21} /> : <Play size={21} fill="currentColor" />}
           {running ? "Пауза" : "Старт"}
         </button>
         <button
           type="button"
-          onClick={() => { if (soundOn) stopAudio(); else if (running) startAudio(elapsed); setSoundOn(!soundOn); }}
+          onClick={toggleSound}
           aria-label={soundOn ? "Выключить звук" : "Включить звук"}
           aria-pressed={soundOn}
-          className="grid size-14 place-items-center rounded-2xl bg-[var(--workout-chip)] text-[var(--workout-text)]"
+          className={`${fullScreen ? "size-12" : "size-14"} grid place-items-center rounded-2xl bg-[var(--workout-chip)] text-[var(--workout-text)]`}
         >
           {soundOn ? <Volume2 size={20} /> : <VolumeX size={20} />}
         </button>
@@ -182,11 +101,15 @@ export function WorkoutTimer({ workout }: { workout: Workout }) {
           type="button"
           onClick={reset}
           aria-label="Сбросить таймер"
-          className="grid size-14 place-items-center rounded-2xl bg-[var(--workout-chip)] text-[var(--workout-text)]"
+          className={`${fullScreen ? "size-12" : "size-14"} grid place-items-center rounded-2xl bg-[var(--workout-chip)] text-[var(--workout-text)]`}
         >
           <RotateCcw size={20} />
         </button>
       </div>
+      </div>
+      {fullScreen && <div className="workout-markdown min-h-0 flex-1 overflow-y-auto overscroll-contain border-t border-[var(--workout-border)] px-5 pb-[calc(16px+env(safe-area-inset-bottom))] pt-4 text-left text-base leading-relaxed text-[var(--workout-detail)] sm:h-full sm:w-1/2 sm:border-l sm:border-t-0 sm:px-8 sm:pt-8" key={index}>
+        <PhaseContent label={phase.label} content={workout.parts[index].content} />
+      </div>}
     </section>
   );
 }

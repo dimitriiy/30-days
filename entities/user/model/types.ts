@@ -7,10 +7,3 @@ export type User = {
   username: string;
   role?:UserRole
 };
-
-export type Session = {
-  token: string;
-  userId: number;
-  expiresAt: number;
-  data?: Record<string, unknown>;
-};

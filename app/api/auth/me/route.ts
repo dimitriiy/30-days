@@ -5,9 +5,9 @@ import { ensureJsonStore } from "@/server/infrastructure/persistence/json/json-s
 import { jsonUserRepository } from "@/server/infrastructure/repositories/user/JsonUserRepository";
 import { withAuth } from "../withAuth";
 
-export const GET = withAuth(async (_req, session) => {
+export const GET = withAuth(async (_req, userId) => {
   await ensureJsonStore();
-  const user = await getUserById(jsonUserRepository, +session.userId);
+  const user = await getUserById(jsonUserRepository, userId);
 
   if (!user) {
     return NextResponse.json(

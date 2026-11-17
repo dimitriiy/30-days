@@ -1,11 +1,11 @@
 import { NextResponse, NextRequest } from "next/server";
 import { cookies } from "next/headers";
 
+import { signToken } from "@/server/application/user/token";
 import { loginUser } from "@/server/application/use-cases/user/loginUser";
 import { ensureJsonStore } from "@/server/infrastructure/persistence/json/json-store";
-import { jsonSessionRepository } from "@/server/infrastructure/repositories/user/JsonSessionRepository";
 import { jsonUserRepository } from "@/server/infrastructure/repositories/user/JsonUserRepository";
-import { SESSION_TOKEN_KEY } from "../consts";
+import { AUTH_TOKEN_KEY } from "../consts";
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,10 +13,7 @@ export async function POST(request: NextRequest) {
     const { email, password } = body;
 
     await ensureJsonStore();
-    const result = await loginUser(jsonUserRepository, jsonSessionRepository, {
-      email,
-      password,
-    });
+    const result = await loginUser(jsonUserRepository, { email, password });
 
     if (!result.ok) {
       if (result.reason === "user_not_found") {
@@ -34,9 +31,9 @@ export async function POST(request: NextRequest) {
 
     const store = await cookies();
 
-    store.set(SESSION_TOKEN_KEY, result.session.token, {
+    store.set(AUTH_TOKEN_KEY, signToken(result.userId), {
       httpOnly: true,
-      maxAge: 60 * 60 * 24 * 7, // Same lifetime as the server session.
+      maxAge: 60 * 60 * 24 * 7,
       path: "/",
       sameSite: "lax",
     });
